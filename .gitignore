@@ -1,0 +1,6 @@
+# Ignore powerpoint presentations
+*.ppt*
+
+# OS junk files
+Thumbs.db
+*.DS_Store
