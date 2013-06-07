@@ -4,3 +4,7 @@
 # OS junk files
 Thumbs.db
 *.DS_Store
+
+# Directory in watershed aggregation
+Slope_Issue
+Slope_Issue/*
