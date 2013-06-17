@@ -1,4 +1,4 @@
-#####################################################
+#----------------------------------------------------#
 #
 #  createShapefileOfClimateStationsInWisconsin_tool.py
 #
@@ -6,7 +6,7 @@
 #  Sarah Kempen, WI DNR and
 #  Aaron Ruesch, WI DNR
 #
-######################################################
+#----------------------------------------------------#
 
 import arcpy, ftplib, time, os, traceback
 import numpy as np
@@ -39,6 +39,7 @@ def getStations(clipShapefile, bufferSize, noaaDatabase, outputShapefile):
 	cleanedFile = tempDir + '/stationInfo_cleaned.txt'
 	globalStations = tempDir + '/globalStations.shp'
 	buffer50Mile = tempDir + '/buffer50Mile.shp'
+	localOutput = tempDir + '/stationLocations.shp'
 	arcpy.AddMessage("Retrieve station text file (may take awhile depending on server)...")
 	tries = 0
 	while tries != 1000:
@@ -118,13 +119,30 @@ def getStations(clipShapefile, bufferSize, noaaDatabase, outputShapefile):
 	f.write(','.join(stationData.dtype.names) + '\n')
 	np.savetxt(f, stationData, fmt = fmt)
 	f.close()
+	arcpy.AddMessage("Creating shapefile and clipping...")
 	arcpy.MakeXYEventLayer_management(cleanedFile, "LON", "LAT", "latLongPoints", wgs84file)
 	arcpy.CopyFeatures_management("latLongPoints", globalStations)
 	bufferSize = str(bufferSize) + " Miles"
 	arcpy.Buffer_analysis(clipShapefile, buffer50Mile, "50 miles")
 	env.outputCoordinateSystem = clipShapefile
-	arcpy.Clip_analysis(globalStations, buffer50Mile, outputShapefile)
+	arcpy.Clip_analysis(globalStations, buffer50Mile, localOutput)
+	arcpy.AddField_management(localOutput, 'X', 'FLOAT')
+	arcpy.AddField_management(localOutput, 'Y', 'FLOAT')
+	desc = arcpy.Describe(localOutput)
+	shapefieldname = desc.ShapeFieldName
+	rows = arcpy.UpdateCursor(localOutput)
+	for row in rows:
+		feat = row.getValue(shapefieldname)
+		pnt = feat.getPart()
+		row.X = pnt.X
+		row.Y = pnt.Y
+		rows.updateRow(row)
+	del row, rows
+	arcpy.DeleteField_management(localOutput, ['LAT', 'LON'])
+	arcpy.CopyFeatures_management(localOutput, outputShapefile)
+	#---------------#
 	# Create metadata
+	#---------------#
 	metadataFile = os.path.dirname(outputShapefile) + '/README.txt'
 	outputShapefile = os.path.basename(outputShapefile)
 	timeNow = time.strftime("%a, %d %b %Y %H:%M:%S", time.gmtime())

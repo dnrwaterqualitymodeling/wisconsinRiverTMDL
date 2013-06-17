@@ -34,33 +34,17 @@ referenceCrop = function (x, cropCodes, legend, collapse=T) {
     return(crop=as.character(crop))
 }
 lumpCropTypes = function (crosstab,cropCodes,legend, veggiesLumped) {
+    legend = legend[c("VALUE", "CLASS_NAME")]
     corn = c(1,12,13)
-    alfalfa = 36
-    forage = c(37,58,62,181)
-    grain = c(4,21:25,27:30,205)
+    forage = c(36,37,58,62,181,4,21:25,27:30,205)
     soybeans = 5
     potatoes = 43
     dryBeans = 42
-    if (veggiesLumped) {
-        veggies = c(49,50,53,206,216)
-        mainCrops = c(corn,alfalfa,forage,grain,soybeans,potatoes,dryBeans,veggies)
-        other = cropCodes[-which(cropCodes %in% mainCrops)]
-        cropLbl = c("Corn", "Forage", "Grain", "Other", "Veggies")
-        crops = list(corn,forage,grain,other,veggies)
-    } else {
-        dryBeans = 42
-        potatoes = 43
-        onions = 49
-        cucumbers = 50
-        peas = 53
-        carrots = 206
-        peppers = 216
-        mainCrops = c(corn,forage,grain,soybeans,dryBeans,potatoes
-                      ,onions,cucumbers,peas,carrots,peppers)
-        other = cropCodes[-which(cropCodes %in% mainCrops)]
-        cropLbl = c("Corn", "Forage", "Grain", "Other")
-        list(corn,forage,grain,other)
-    }   
+    veggies = c(49,50,53,206,216)
+    mainCrops = c(corn,forage,soybeans,potatoes,dryBeans,veggies)
+    other = cropCodes[-which(cropCodes %in% mainCrops)]
+    cropLbl = c("Corn", "Forage", "Other", "Veggies")
+    crops = list(corn,forage,other,veggies)   
     i = 0
     for (crop in crops) {
         i = i + 1
@@ -101,9 +85,9 @@ if (writeDomCropTable) {
         domCropsAllYrs = cbind(domCropsAllYrs, domCrops)
     }
     if (veggiesLumped) {
-        mainCrops = c("Corn","Alfalfa","Forage","Grain","Soybeans","Potatoes"
+        mainCrops = c("Corn","Forage","Soybeans","Potatoes"
                       ,"Dry Beans", "Veggies", "Other")
-        mainAbbr = c("Co","Al","Fo","Gr","So","Po","Db","Vg","Ot")
+        mainAbbr = c("Co","Fo","So","Po","Db","Vg","Ot")
     } else {
         mainCrops = c("Corn","Forage","Grain","Soybeans","Dry Beans"
                       , "Potatoes", "Onions", "Cucumbers", "Peas"
@@ -138,7 +122,7 @@ if (dominantCropsFigure) {
         crosstab = read.csv(crosstabFile)
         crosstabMeta = crosstab[,c(1,2,ncol(crosstab))]
         crosstab = crosstab[,-c(1,2,ncol(crosstab))]
-        cropCodes = gsub("W_[0-9]*_[0-9]*m_cdls_", "", names(crosstab))
+        cropCodes = gsub("W_wrb_cdl_[0-9]*_", "", names(crosstab))
         if (length(which(cropCodes == "NoData"))) {
             cropCodes[which(cropCodes == "NoData")] = "255"
         }
@@ -167,7 +151,7 @@ if (countUniqueRotations) {
         crosstab = read.csv(crosstabFile)
         crosstabMeta = crosstab[,c(1,2,ncol(crosstab))]
         crosstab = crosstab[,-c(1,2,ncol(crosstab))]
-        cropCodes = gsub("W_[0-9]*_[0-9]*m_cdls_", "", names(crosstab))
+        cropCodes = gsub("W_wrb_cdl_[0-9]*_", "", names(crosstab))
         if (length(which(cropCodes == "NoData"))) {
             cropCodes[which(cropCodes == "NoData")] = "255"
         }
@@ -186,16 +170,8 @@ if (countUniqueRotations) {
         print(length(domCrops))
         domCropsAllYrs = cbind(domCropsAllYrs, domCrops)
     }
-    if (veggiesLumped) {
-        mainCrops = c("Corn","Alfalfa","Forage","Grain","Soybeans","Potatoes"
-                      ,"Dry Beans","Veggies", "Other")
-        mainAbbr = c("Co","Al","Fo","Gr","So","Po","Db","Vg","Ot")
-    } else {
-        mainCrops = c("Corn","Forage","Grain","Soybeans","Dry Beans"
-                      , "Potatoes", "Onions", "Cucumbers", "Peas"
-                      , "Carrots", "Peppers", "Other")
-        mainAbbr = c("Co","Fo","Gr","So","Db","Po","On","Cu","Pe","Ca","Pp","Ot")
-    }
+    mainCrops = c("Corn","Forage","Soybeans","Potatoes","Dry Beans","Veggies", "Other")
+    mainAbbr = c("Co","Fo","So","Po","Db","Vg","Ot")
     i = 0
     for (crop in mainCrops) {
         i = i + 1
