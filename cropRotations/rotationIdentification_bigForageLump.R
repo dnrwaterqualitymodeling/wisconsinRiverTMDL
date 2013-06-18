@@ -9,13 +9,13 @@ crosstabFiles = c("D:/NASS/cropRotation/crosstab_dtrsq/wrb_cdl_2008.csv"
                   , "D:/NASS/cropRotation/crosstab_dtrsq/wrb_cdl_2011.csv"
                   , "D:/NASS/cropRotation/crosstab_dtrsq/wrb_cdl_2012.csv")
 rotationTableFile = "D:/NASS/cropRotation/rotationByQuarterSection_relumped.csv"
-domCropsFigureFile = "D:/NASS/cropRotation/dominantCrops_relumped.pdf"
-unqSortRotFile = "D:/NASS/cropRotation/uniquefiveYrRotations_relumped.csv"
-rotationFrequencyFile = "D:/NASS/cropRotation/rotationFrequencies_relumped.csv"
 legendFile = "D:/NASS/cropRotation/cdlAttributeTable.csv"
 legend = read.csv(legendFile)
 legend$CLASS_NAME = as.character(legend$CLASS_NAME)
 nonRotCropVals = c(0, 63:180, 182:203)
+
+
+
 referenceCrop = function (x, cropCodes, legend, collapse=T) {
     if (length(which(x == max(x,na.rm=T))) > 1) {
         if (max(x,na.rm=T) > 5) {
@@ -33,6 +33,9 @@ referenceCrop = function (x, cropCodes, legend, collapse=T) {
     }
     return(crop=as.character(crop))
 }
+
+
+
 lumpCropTypes = function (crosstab,cropCodes,legend, veggiesLumped) {
     legend = legend[c("VALUE", "CLASS_NAME")]
     corn = c(1,12,13)
@@ -57,6 +60,9 @@ lumpCropTypes = function (crosstab,cropCodes,legend, veggiesLumped) {
     }
     return(list(crosstab=crosstab,cropCodes=cropCodes,legend=legend))
 }
+
+
+
 ##  Output a table of crop rotations
 domCropsAllYrs = NULL
 if (writeDomCropTable) {
@@ -84,16 +90,9 @@ if (writeDomCropTable) {
         print(length(domCrops))
         domCropsAllYrs = cbind(domCropsAllYrs, domCrops)
     }
-    if (veggiesLumped) {
-        mainCrops = c("Corn","Forage","Soybeans","Potatoes"
-                      ,"Dry Beans", "Veggies", "Other")
-        mainAbbr = c("Co","Fo","So","Po","Db","Vg","Ot")
-    } else {
-        mainCrops = c("Corn","Forage","Grain","Soybeans","Dry Beans"
-                      , "Potatoes", "Onions", "Cucumbers", "Peas"
-                      , "Carrots", "Peppers", "Other")
-        mainAbbr = c("Co","Fo","Gr","So","Db","Po","On","Cu","Pe","Ca","Pp","Ot")
-    }
+    mainCrops = c("Corn","Forage","Soybeans","Potatoes"
+                  ,"Dry Beans", "Veggies", "Other")
+    mainAbbr = c("Co","Fo","So","Po","Db","Vg","Ot")
     i = 0
     for (crop in mainCrops) {
         i = i + 1
@@ -101,15 +100,16 @@ if (writeDomCropTable) {
     }
     domCropsAllYrs = cbind(crosstabMeta, domCropsAllYrs)
     names(domCropsAllYrs) = c("ID", "cellCount", "naCells", paste("yr", 2008:2012, sep=""))
-    if (fiveYrRotBool) {
-        rotStr = apply(domCropsAllYrs[paste("yr", 2008:2012, sep="")]
-                       , 1, function (x) {paste(x, collapse="-")})
-        pat = "^[A-Z][a-z]-[A-Z][a-z]-[A-Z][a-z]-[A-Z][a-z]-[A-Z][a-z]$"
-        fiveYrRot = grep(pat,rotStr)
-        domCropsAllYrs = domCropsAllYrs[fiveYrRot,]
-    }
     write.csv(domCropsAllYrs, file=rotationTableFile, row.names=F)
 }
+
+
+
+
+
+
+
+
 ##  Output a frequency table of crops per year
 if (dominantCropsFigure) {
     pdf(file=domCropsFigureFile,width=8.5,height=11)
