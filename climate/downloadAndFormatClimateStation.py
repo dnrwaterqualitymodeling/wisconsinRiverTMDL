@@ -190,7 +190,7 @@ def mainFunction(noaaFtpSite, stationLocations, startYr, endYr, climateDataLink,
 	stationInfo = readStationInfo(stationLocations)
 	dates = createTimeSeries(startYr, endYr)
 	for stationId in stationInfo['ID']:
-		arcpy.AddMessage("Downloading and formatting station ID " + stationId + '...'
+		arcpy.AddMessage("Downloading and formatting station ID " + stationId + '...')
 		dailyFile = climateDataLink + '/' + stationId + '.dly'
 		stationData = retrieveStationData(ftp, dailyFile, charWidth, ghcndVars, startYr, endYr)
 		if len(stationData) == 0:

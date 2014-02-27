@@ -123,7 +123,7 @@ def getStations(clipShapefile, bufferSize, noaaDatabase, outputShapefile):
 	arcpy.MakeXYEventLayer_management(cleanedFile, "LON", "LAT", "latLongPoints", wgs84file)
 	arcpy.CopyFeatures_management("latLongPoints", globalStations)
 	bufferSize = str(bufferSize) + " Miles"
-	arcpy.Buffer_analysis(clipShapefile, buffer50Mile, "50 miles")
+	arcpy.Buffer_analysis(clipShapefile, buffer50Mile, bufferSize)
 	env.outputCoordinateSystem = clipShapefile
 	arcpy.Clip_analysis(globalStations, buffer50Mile, localOutput)
 	arcpy.AddField_management(localOutput, 'X', 'FLOAT')

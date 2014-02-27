@@ -1,4 +1,4 @@
-import  arcgisscripting, numpy, os, sys
+import arcgisscripting, numpy, os, sys
 from numpy import *
 
 gp = arcgisscripting.create()
@@ -59,7 +59,6 @@ def findUpstream(subshedLayer, breakCatchids, breakIds, topologyTable, unsortedA
 		if strFields.Next() <> None:
 			upstreamCatchids = map(int, upstreamCatchids)
 			if len(upstreamCatchids) == 1:
-				# expr = '"CATCHID" = \'' + str(upstreamCatchids[0]) + "'"
 				expr = '"CATCHID" = ' + str(upstreamCatchids[0])
 			else:
 				expr = '"CATCHID" IN ' + str(tuple(upstreamCatchids))
@@ -104,7 +103,7 @@ def buildAggTopology(outAggSubshed, hydroLineFile, unsortedAggLine, breakCatchid
 			row.GRID_CODE = int(from_[0])
 			row.FROM_NODE = int(from_[0])
 			row.Subbasin = int(from_[0])
-			if to_[0] == '':
+			if len(to_) == 0 or to_[0] == '':
 				row.TO_NODE = 0
 				row.SubbasinR = 0
 			else:
