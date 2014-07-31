@@ -31,10 +31,10 @@ def createTimeSeries(startYr, endYr):
 	startDate = datetime.date(startYr, 1, 1)
 	endDate = datetime.date(endYr, 12, 31)
 	nDays = (endDate - startDate).days
-	dates = np.empty([nDays,3], int)
+	dates = np.empty([nDays+1,3], int)
 	delta = datetime.timedelta(days=1)
 	day = copy.deepcopy(startDate)
-	for row in range(0,nDays):
+	for row in range(0,nDays + 1):
 		dates[row,0] = day.year
 		dates[row,1] = day.month
 		dates[row,2] = day.day

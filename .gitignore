@@ -8,3 +8,7 @@ Thumbs.db
 # Directory in watershed aggregation
 Slope_Issue
 Slope_Issue/*
+
+# arcswat version backups
+arcswat
+arcswat/*

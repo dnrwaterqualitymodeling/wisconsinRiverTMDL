@@ -28,6 +28,7 @@ fdrFile = demDir + '/WRB_fdr'
 cnFile = tmdlRoot + '/GIS/Statewide_Coverages/Runoff/cn2006_10mWTM.tif'
 prcpFile = wiRiverTmdlDir + '/GIS_Datasets/Climatological/prcpFreq/prcp_10yr24hr.tif'
 boundaryFC = wiRiverTmdlDir + '/GIS_Datasets/Watersheds/WRB_Basin_2mile_Buffer.shp'
+# PUFC is the processing unit
 puFC = wiRiverTmdlDir + '/GIS_Datasets/Watersheds/HUC_Subwatersheds/WRB_HUC10.shp'
 flowlineFile = wiRiverTmdlDir + '/GIS_Datasets/Hydrology/Spatial24k03142013_WRB.gdb/flowlines'
 llTableFile = wiRiverTmdlDir + '/GIS_Datasets/Hydrology/Hydro24k03052013.mdb/BaseAttributes_24k'
