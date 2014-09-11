@@ -4,8 +4,8 @@ library(rgdal)
 options(warn=2)
 overwrite = T
 
-netdir = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/climate/adding_1231"
-wd = 'K:/temp/climate'
+netdir = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/climate"
+wd = 'C:/TEMP/climate'
 filenames = dir(netdir)
 sapply(filenames, function(x) {
     file.copy(from=paste(netdir, x, sep="/"),
@@ -21,7 +21,7 @@ stations = read.dbf(stationFile)
 prjTemplateFile = 'ClimateStationLocations_WRB_2mileBuffer'
 prjTemplate = readOGR(wd, prjTemplateFile)
 
-demFile = "T:/GIS/Statewide_Coverages/DEM/10_meter/raw_prj.img"
+demFile = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/DEM/30m_dem_wrb_2milebuffer.img"
 dem = raster(demFile)
 
 spinupStartDate = '19900101'
@@ -59,6 +59,7 @@ for (var in c("pcp", "tmp")) {
                 print(paste("   ", neighbor))
                 neighborClim = read.dbf(neighborFile)
                 if (var == "pcp") {
+				
                     clim[clim$PCP == -99, "PCP"] = neighborClim[clim$PCP == -99, "PCP"]
                     if (length(which(clim$PCP == -99)) == 0) {
                         end = T
@@ -106,7 +107,7 @@ for (var in c("pcp", "tmp")) {
         NAME = varSpecificStationList
     )
     stationTable = merge(stationTable, stations[c("NAME","XPR","YPR")])
-    names(stationTable)[3:4] = c("LAT", "LONG")
+    names(stationTable)[3:4] = c("LONG", "LAT")
     stationTableSp = stationTable
     coordinates(stationTableSp) = ~ LONG + LAT
     elev = extract(dem, stationTableSp)

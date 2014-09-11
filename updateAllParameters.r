@@ -1,17 +1,93 @@
 library(RODBC)
-options(warn=2)
-#project directories 
 
-#CHANGE TO PROJECT DATABASE
-prjDir = "C:/SWAT/Reservoirs_2"
+# CHANGE THESE ACCORDING TO SWAT PROJECT
+projectDir = "C:/SWAT/Burnt_rollways"
+wetland_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands/wetland_geometry.csv"
+pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
+reservoir_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/hydrology/dams_parameters.csv"
+
+#UPDATE SWAT RESERVOIR PARAMETERS 
+
+reservoir_parameters = read.csv(reservoir_parameter_file)
+
+inDb = paste(projectDir, "Burnt_Rollways.mdb", sep="/")
+con = odbcConnectAccess(inDb)
+
+resData = sqlQuery(con, "SELECT * FROM res")
+
+for (row in 1:nrow(reservoir_parameters)) {
+	query = paste(
+		"UPDATE res ",
+		"SET RES_ESA = ", reservoir_parameters$MaxStorage[row], ",",
+		"RES_EVOL = ", reservoir_parameters$MaxS_10to4[row], ",",
+		"RES_PSA = ", reservoir_parameters$NormalStor[row], ",",
+		"RES_PVOL = ", reservoir_parameters$NormS_10to[row], ",",
+		"RES_VOL = ", reservoir_parameters$NormS_10to[row], " ",
+		"WHERE SUBBASIN = ", reservoir_parameters$Subbasin[row], ";",
+		sep = ""
+	)
+    stdout = sqlQuery(con, query)
+}
+
+close(con)
+
+#UPDATE SWAT POND PARAMETERS
+
+pond_geometry = read.csv(pond_geometry_file)
+
+inDb = paste(projectDir, "Burnt_Rollways.mdb", sep="/")
+con = odbcConnectAccess(inDb)
+
+pndData = sqlQuery(con, "SELECT * FROM pnd")
+
+for (row in 1:nrow(pond_geometry)) {
+	query = paste(
+		"UPDATE pnd ",
+		"SET PND_FR = ", pond_geometry$PND_FR[row], ",",
+		"PND_PSA = ", pond_geometry$PND_PSA[row], ",",
+		"PND_PVOL = ", pond_geometry$PND_PVOL[row], ",",
+		"PND_ESA = ", pond_geometry$PND_ESA[row], ",",
+		"PND_EVOL = ", pond_geometry$PND_EVOL[row], ",",
+		"NDTARG = 15, IFLOD1 = 4, IFLOD2 = 6 ",
+		"WHERE SUBBASIN = ", pond_geometry$subbasin[row], ";",
+		sep = ""
+	)
+    stdout = sqlQuery(con, query)
+}
+
+close(con)
+
+#UPDATE SWAT WETLAND PARAMETERS
+
+wetland_geometry = read.csv(wetland_geometry_file)
+
+inDb = paste(projectDir, "Burnt_Rollways.mdb", sep="/")
+con = odbcConnectAccess(inDb)
+
+wetlandData = sqlQuery(con, "SELECT * FROM pnd")
+
+for (row in 1:nrow(wetland_geometry)) {
+	query = paste(
+		"UPDATE pnd ",
+		"SET WET_FR = ", wetland_geometry$WET_FR[row], ",",
+		"WET_NSA = ", wetland_geometry$WET_NSA[row], ",",
+		"WET_NVOL = ", wetland_geometry$WET_NVOL[row], ",",
+		"WET_VOL = ", wetland_geometry$WET_VOL[row], ",",
+		"WET_MXSA = ", wetland_geometry$WET_MXSA[row],
+		" WHERE SUBBASIN = ", wetland_geometry$subbasin[row], ";",
+		sep = ""
+	)
+    stdout = sqlQuery(con, query)
+}
+close(con)
+
+#UPDATE MANAGEMENT OPERATIONS
+
 insert_fert = TRUE
 
-#DONT TOUCH
-prjDb = paste(prjDir, "/", basename(prjDir), ".mdb", sep="")
-swatDb = paste(prjDir, "SWAT2012.mdb", sep="/")
+prjDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
+swatDb = paste(projectDir, "SWAT2012.mdb", sep="/")
 netDir = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement"
-
-#DONT TOUCH
 crosswalk_file = paste(netDir, "Landuse_Lookup.csv", sep="/")
 
 # Read in all necessary tables
@@ -96,3 +172,4 @@ for (row in 1:nrow(mgt1)) {
         con_mgt2 = odbcConnectAccess(prjDb) 
     }
 }
+

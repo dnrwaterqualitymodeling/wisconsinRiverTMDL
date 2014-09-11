@@ -12,6 +12,15 @@ subshedFile = gp.GetParameterAsText(2)
 hydroLineFile = gp.GetParameterAsText(3)
 outAggSubshed = gp.GetParameterAsText(4)
 outAggHydroline = gp.GetParameterAsText(5)
+outLookupTable = gp.GetParameterAsText(6)
+
+# breakFile = r"T:\Projects\Wisconsin_River\GIS_Datasets\Watersheds\firstDraftSubbasinDelineation\Subwatershed_breaks_v5.shp"
+# breakField = 'OBJECTID'
+# subshedFile = r'K:\temp\temp.gdb\WRB_HUC16_WTM'
+# hydroLineFile = r"T:\Projects\Wisconsin_River\Model_Inputs\SWAT_Inputs\hydro\aggregate_hydro.shp"
+# outAggSubshed = r'K:\temp\test_new_aggregate_network_subshed.shp'
+# outAggHydroline = r'K:\temp\test_new_aggregate_network_hydro.shp'
+# outLookupTable = r'K:\temp\test_new_aggregate_network_lookupTable.txt'
 
 npVersion = float(numpy.version.version[0:3])
 if npVersion < 1.7:
@@ -137,6 +146,18 @@ def aggregateByBreaks(breakFile, breakField, subshedFile, outAggSubshed):
 	unsortedAggLine = tempDir + "/unsortedAggLine.shp"
 	################################################################
 	topologyTable = findUpstream("subsheds", breakCatchids, breakIds, topologyTable, unsortedAggShed)
+	nonNas = where(topologyTable['AGGID'] != '')
+	outTopologyTable = topologyTable[nonNas]
+	outTopologyTable = outTopologyTable[['CATCHID','AGGID']]
+	outTopologyTable = outTopologyTable.astype([('CATCHID', 'S20'), ('AGGID', 'S20')])
+	outTopologyTable = asarray([
+		outTopologyTable['CATCHID'],
+		outTopologyTable['AGGID']
+	
+	])
+	outTopologyTable = transpose(outTopologyTable)
+	# savetxt(outLookupTable, asarray([[1,2],[3,4]]), delimiter=',')
+	savetxt(outLookupTable, outTopologyTable, fmt='%-9s,%-4s', header='CATCHID,SUBBASIN', comments='')
 	################################################################
 	gp.AddMessage("Building topology for aggregated watersheds")
 	buildAggTopology(unsortedAggShed, hydroLineFile, unsortedAggLine, breakCatchids, topologyTable)

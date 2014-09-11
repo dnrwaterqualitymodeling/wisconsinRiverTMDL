@@ -5,17 +5,28 @@ library(raster)
 
 wd = "T:/Projects/Wisconsin_River/GIS_Datasets"
 setwd(wd)
-
-# lake_volume_data = read.xlsx("ponds/WRT_07_19_13.xlsx", sheetName="data")
 lake_volume_data = read.csv("ponds/WRT_07_19_13.csv")
-lake_volume_data$Volume..acre.ft.[lake_volume_data$Volume..acre.ft. == 0] = NA
-lake_volume_data$Max.Depth..ft.[lake_volume_data$Max.Depth..ft.] = NA
 wb = readOGR("ponds/waterbodies.gdb", "lake_pond")
 watersheds = readOGR("Watersheds/HUC_Subwatersheds", "WRB_HUC16_WTM")
 subbasins = readOGR("T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro",
-    "aggregate_subsheds_V6")
+                    "subbasins_minus_urban_boundaries")
 dem = raster("DEM/raw_prj_10_m.img")
 demFill = raster("DEM/wrb_fill")
+
+# Erase urban boundaries from waterbody and watershed layers and convert back to
+# spatialPolygonsDataFrame (otherwise saved in spatialPolygons)
+subbasins_dissolve = gUnionCascaded(subbasins)
+wb_df = wb@data
+watersheds_df = watersheds@data
+wb = gIntersection(wb, subbasins_dissolve, drop_not_poly=T, byid=T)
+watersheds = gIntersection(watersheds, subbasins_dissolve, drop_not_poly=T, byid=T)
+watersheds = SpatialPolygonsDataFrame(watersheds,
+    data=data.frame(watersheds_df, row.names=row.names(watersheds)))
+wb = SpatialPolygonsDataFrame(wb, data=data.frame(wb_df, row.names=row.names(wb)))
+
+# lake_volume_data = read.xlsx("ponds/WRT_07_19_13.xlsx", sheetName="data")
+lake_volume_data$Volume..acre.ft.[lake_volume_data$Volume..acre.ft. == 0] = NA
+lake_volume_data$Max.Depth..ft.[lake_volume_data$Max.Depth..ft.] = NA
 proj4string(watersheds) = proj4string(wb)
 proj4string(subbasins) = proj4string(wb)
 
@@ -59,6 +70,9 @@ while (!end) {
     }
 }
 watersheds_ll = subset(watersheds, CATCHID %in% catchids_ll)
+dissolve_subbasins = gUnionCascaded(subbasins)
+watersheds_ll = subset(watersheds_ll, gContains(dissolve_subbasins, watersheds_ll, byid=T)[,1])
+writeOGR(watersheds_ll, "ponds", "landlocked_watersheds", driver = "ESRI Shapefile")
 
 geometry_table = data.frame()
 for (s in subbasins@data$Subbasin) {
@@ -105,4 +119,5 @@ for (s in subbasins@data$Subbasin) {
     )
     geometry_table = rbind(geometry_table, row)
 }
-write.csv(geometry_table, file="ponds/pond_geometry.csv", row.names=F)
+
+write.csv(geometry_table, file="ponds/pond_geometry_20140908.csv", row.names=F)

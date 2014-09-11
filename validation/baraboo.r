@@ -2,14 +2,14 @@ library(RODBC)
 
 # CHANGE THESE ###########
 # SWAT project
-projectDir = "C:/SWAT/Reservoirs_2"
+projectDir = "C:/SWAT/Wetlands_2"
 # Subbasin ID
 subbasinID = 137
 # Raw USGS data
 obsDataFile = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/baraboo/dv.txt"
 monthly = T
-run = "added_castle_rock"
-# DON'T CHNAGE ANYTHING BELOW HERE #####
+run = "wetlands update"
+# DON'T CHANGE ANYTHING BELOW HERE #####
 
 
 
@@ -27,9 +27,10 @@ if (monthly) {
 	months = as.POSIXlt(obsData$DATE)$mo + 1
 	years = as.POSIXlt(obsData$DATE)$year + 1900
 	date = paste(years, months, "01", sep="-")
-	obsMonthly = aggregate(obsData$FLOW_OBSERVED, list(date), mean) 
-	obsData = data.frame(DATE=as.Date(unique(date)),
+	obsMonthly = aggregate(obsData$FLOW_OBSERVED, list(date), mean)
+	obsData = data.frame(DATE=as.Date(obsMonthly[,1]),
 		FLOW_OBSERVED=obsMonthly[,2])
+    obsData = obsData[order(obsData$DATE),]
 }
 
 
