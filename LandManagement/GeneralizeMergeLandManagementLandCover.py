@@ -15,7 +15,7 @@ env.workspace = "T:/Projects/Wisconsin_River/GIS_Datasets/Land_Management/Finali
 # Set local variables
 
 #inFeatures is the 1/4 section land management shapefile as defined by the counties. As such, it's county specific but only includes information for counties with a significant agricultural presence in the WRB
-inFeatures = "LandManagement_CountyCodes040214.shp"
+inFeatures = "CropCodes_CountyApproved.shp"
 valField = "Crp_Code_2"
 CropCodeRaster = "CountyRotationsRaster.img"
 assignmentType = "MAXIMUM_AREA"
@@ -337,7 +337,7 @@ outRandomizedRasterReclass = Reclassify("T:/Projects/Wisconsin_River/Model_Input
 
 # Save the output to the Overlay Process folder. 
 
-outReclassRV.save("LandCoverLandManagement_RandomizationComplete_55Categories.img")
+outReclassRV.save("T:/Projects/Wisconsin_River/GIS_Datasets/Land_Management/Finalizing_Land_Management/LandCoverLandManagement_FinalProduct.img")
 
 
 

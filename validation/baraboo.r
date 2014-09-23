@@ -2,13 +2,13 @@ library(RODBC)
 
 # CHANGE THESE ###########
 # SWAT project
-projectDir = "C:/SWAT/Wetlands_2"
+projectDir = "H:/WRB"
 # Subbasin ID
 subbasinID = 137
 # Raw USGS data
 obsDataFile = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/baraboo/dv.txt"
 monthly = T
-run = "wetlands update"
+run = "whatever"
 # DON'T CHANGE ANYTHING BELOW HERE #####
 
 

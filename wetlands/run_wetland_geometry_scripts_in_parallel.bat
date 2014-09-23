@@ -9,5 +9,5 @@ start "wetland_2" %r_exe% %r_script% 86 170 %out_raster_dir% %out_geometry_file%
 start "wetland_3" %r_exe% %r_script% 171 255 %out_raster_dir% %out_geometry_file%3.csv
 start "wetland_4" %r_exe% %r_script% 256 338 %out_raster_dir% %out_geometry_file%4.csv
 
-start "wetland_3" %r_exe% %r_script% 251 251 %out_raster_dir% %out_geometry_file%3.csv
-start "wetland_4" %r_exe% %r_script% 284 284 %out_raster_dir% %out_geometry_file%4.csv
+REM start "wetland_3" %r_exe% %r_script% 251 251 %out_raster_dir% %out_geometry_file%3.csv
+REM start "wetland_4" %r_exe% %r_script% 284 284 %out_raster_dir% %out_geometry_file%4.csv

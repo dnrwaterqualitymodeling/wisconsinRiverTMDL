@@ -12,12 +12,13 @@ library(maptools)
 library(classInt)
 library(RColorBrewer)
 # # # # # # # # # # # # # # # # # 
-wd = "C:/evans/bflow/wi_dailyValues/"
+wd = "C:/Users/evansdm/Documents/bflow/wi_dailyValues/"
 setwd(wd)
 # reach ids were manually added to each flow site, by taking the reachid of the closest
 #   stream. This was done in ArcGIS with reachids grabbed from the WD_HYDRO_FLWLN_NTWRK_LN_24K feature class
 # contains reachIDS
-stream_data <- readShapePoints("streamFlowSites_v2")
+#stream_data <- readShapePoints("streamFlowSites_v2")
+stream_data <- readShapePoints("data_files/Shapefiles/streamFlowSites_v3")
 
 # these databases were exported from file geodatabases
 #   vaData contains all the data from the WD_HYDRO_VA_WATERSHED_TR_REF table
@@ -70,7 +71,7 @@ stream_data <- merge(stream_data, vaData[,fieldsToJoin], by = 'REACHID')
 stream_data <- merge(stream_data, ecoregionData, by = 'REACHID')
 # removing Dry Run, with alpha base flow > 1
 stream_data = subset(stream_data, siteName != "DRY RUN AT 190TH STREET NEAR JEWETT, WI")
-#writePointShape(stream_data, "streamFlowSites_v3")
+writePointShape(stream_data, "streamFlowSites_v3")
 # 
 huc16 <- readOGR('D:/hydro_va/wd_hydro_va.gdb', 'WD_HYDRO_VA_CATCHMENT_AR_24K')
 huc16@data$REACHID <- huc16@data$CATCHID
@@ -171,6 +172,9 @@ valid <- stream_data[-trnIndx,]   #n = 28
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #   #   #   #   # Model 1 #   #   #   #   # #   #   #   #   # #   #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+lims <- c(-2.5,-0.5)
+
+##
 bflw.lm.1 <- lm(log10(siteWeight) ~ log(TRW_SLOPE) + 
                     TRW_CN06 + log(abs(TRW_DARCY)+1), data = training@data)
 pdf('Model_1_cn_slope_darcy.pdf')
@@ -179,8 +183,8 @@ plot(bflw.lm.1$residuals~bflw.lm.1$fitted,
      sub = 'Training data')
 abline(h=0, col='red')
 
-plot(bflw.lm.1$fitted~log10(training@data$siteWeight[-75]), 
-     main = "Model 1: obs vs pred",
+plot(bflw.lm.1$fitted~bflw.lm.1$model[['log10(siteWeight)']], 
+     main = "Model 1: obs vs pred",ylim = lims, xlim = lims,
      sub = 'Training data')
 abline(a=0,b=1, col='red')
 #text(training@data$siteWeight[-75]~backTrnsfmFits, 
@@ -219,7 +223,7 @@ plot(bflw.lm.2$residuals~bflw.lm.2$fitted,
      sub = 'Training data')
 abline(h=0, col='red')
 
-plot(bflw.lm.2$fitted ~ log10(training@data$siteWeight[-75]), 
+plot(bflw.lm.2$fitted ~ bflw.lm.2$model[['log10(siteWeight)']], ylim = lims, xlim = lims,, 
      main = "Model 2: obs vs pred, for model with slope and perm and darcy",
      sub = 'Training data')
 abline(a=0,b=1, col='red')
@@ -252,18 +256,21 @@ valRMSE.2 <- sqrt(valMSE.2)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 stream_data@data$C_ECO[stream_data@data$C_ECO == 47] = 51
 stream_data@data$C_ECO[stream_data@data$C_ECO == 54] = 53
-bflw.lm.3 <- lm(log10(siteWeight) ~ log(TRW_SLOPE):factor(C_ECO) + log(TRW_APERM0),
-                data = training@data)
+bflw.lm.3 <- lm(log10(siteWeight) ~ log(TRW_SLOPE):factor(C_ECO) + log(TRW_APERM0), data = training@data)
 pdf('Model_3_perm_slopexEcoregion.pdf')
 plot(bflw.lm.3$residuals~bflw.lm.3$fitted, 
      main = "Model 3: Residual plot, for model with slope and perm, with ecoregions",
      sub = 'Training data')
 abline(h=0, col='red')
 
-plot(bflw.lm.3$fitted ~ log10(training@data$siteWeight[-75]), 
-     main = "Model 3: obs vs pred, for model with slope and perm, with ecoregions",
-     sub = 'Training data')
+png("T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/obs_v_pred.png",
+    width=3, height=3, units="in", res=600)
+plot(bflw.lm.3$fitted ~ bflw.lm.3$model[['log10(siteWeight)']], ylim = lims, xlim = lims, 
+     main = "ALPHA_BF Model\nPerformance",
+     ylab = 'Predicted log(ALPHA_BF)', xlab='Observed log(ALPHA_BF)',
+     pch=20)
 abline(a=0,b=1, col='red')
+dev.off()
 #text(training@data$siteWeight[-75]~backTrnsfmFits, 
 #     labels=training@data$siteNumber[-75], cex = 0.75)
 hist(bflw.lm.3$residuals, main = "Hist of residuals", 
@@ -273,7 +280,7 @@ hist(bflw.lm.3$residuals, main = "Hist of residuals",
 validPreds.3 <- predict(bflw.lm.3, newdata = valid@data)
 plot(validPreds.3~log10(valid@data$siteWeight), xlab = "Observed",
      ylab = "Predicted", main = "Model 3, Observed vs Predicted", 
-     sub = 'validation data')
+     sub = 'validation data',  ylim = lims, xlim = lims)
 abline(a=0, b=1, col ='red')
 dev.off()
 #plot(10^validPreds.3~valid@data$siteWeight, xlab = "Observed",
@@ -290,6 +297,14 @@ valMSE.3 <- mean(valResids.3^2)
 valRMSE.3 <- sqrt(valMSE.3)
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+png('Observed_Vs_Predicted.png',units = 'in', res = 750, height = 7, width = 7)
+plot(bflw.lm.3$fitted ~ bflw.lm.3$model[['log10(siteWeight)']], ylim = lims, xlim = lims,
+     xlab = 'Observed', ylab = 'Predicted')
+     #main = "Model 3: obs vs pred, for model with slope and perm, with ecoregions",
+     #sub = 'Training data')
+abline(a=0,b=1, col='red')
+
+dev.off()
 #huc16 <- shapefile('data_files/shapefiles/huc16_4_Sept')
 huc16@data$mod_1_Pred <- predict(bflw.lm.1, newdata = huc16@data)
 huc16@data$mod_1_SE <- predict(bflw.lm.1, newdata = huc16@data, se.fit = T)$se.fit
@@ -297,21 +312,24 @@ huc16@data$mod_2_Pred <- predict(bflw.lm.2, newdata = huc16@data)
 huc16@data$mod_2_SE <- predict(bflw.lm.2, newdata = huc16@data, se.fit = T)$se.fit
 huc16@data$mod_3_Pred <- predict(bflw.lm.3, newdata = huc16@data)
 huc16@data$mod_3_SE <- predict(bflw.lm.3, newdata = huc16@data, se.fit = T)$se.fit
-# for exporting, removing 'Inf' from preds, setting to NA
+# 
 #   exporting all info from shp file. able to append this table back to the
 #   shape file
 write.table(huc16@data, "data_files/alpha_baseflow_model_huc16Preds.csv",
             na = "",row.names = F, sep =",")
+huc16data <- read.csv("data_files/alpha_baseflow_model_huc16Preds.csv")
+huc16 <- merge(huc16, huc16data, by ='CATCHID')
 ## ## ## ## ## For plotting # ## ## ## ## ## ## 
 #huc16 <- readShapePoly('data_files/shapefiles/huc16_4_Sept_wPreds')
 pal = brewer.pal(9, "YlGnBu")
 predNames <- c('Model 1 Prediction', "Model 1 Std Error",
                'Model 2 Prediction', "Model 2 Std Error",
-               'Model 3 Prediction', "Model 3 Std Error")
-for (pred in 11:16){
+               'Predicted Alpha Bflow', "Model 3 Std Error")
+#for (pred in 11:16){
+    pred <- 15
     png(paste(predNames[pred-10],'.png',sep =''), width = 24,
-        height = 30,units='in', bg="white", res = 300)
-    varClass <- classIntervals(10^(huc16@data[,pred]), 9, na.rm=T)
+        height = 30,units='in', bg="white", res = 500)
+    varClass <- classIntervals(huc16@data[,pred], 9, na.rm=T)
     varColr <- findColours(varClass, pal)
     legTxt <- attr(attr(varColr,'table'),'dimnames')[[1]]
     newTxt <- NULL
@@ -325,13 +343,84 @@ for (pred in 11:16){
             cls <- as.numeric(strsplit(splt[2],')')[[1]][1])
         }
         print(paste(opn,cls))
-        opn <- round(opn, 3)
-        cls <- round(cls, 3)
+        opn <- round(opn, 2)
+        cls <- round(cls, 2)
         nw <- paste('[',opn,',',cls,')',sep='')
         newTxt <- c(newTxt, nw)
     }
     plot(huc16, col = varColr, add=F, pch=21, border = NA)
     legend('bottomright', legend =newTxt, bg = 'white',
            fill = pal, cex=2, title = paste(predNames[pred-10]))
+    scalebar(100000, label = c('0','50','100 km'), lwd = 1.5,
+                       div = 4, type = 'bar', cex = 3)
     dev.off()
 }
+
+#################
+trningPts <- stream_data[trnIndx,]
+# removing an NA in permeability
+trningPts <- trningPts[-which(is.na(trningPts$TRW_APERM0)),]
+trningPts@data$resids <- bflw.lm.3$residuals
+trningPts@data$observd <- 10^bflw.lm.3$model[['log10(siteWeight)']]
+
+# trningPts@data <- cbind(trningPts@data, bflw.lm.3$residuals)
+
+counties = readOGR("T:/GIS/Statewide_Coverages/Political_Boundaries", "WI_Counties")
+pal = brewer.pal(9, "YlGnBu")
+alpha_bf_class = classIntervals(trningPts@data$resids,9)
+alpha_bf_col = findColours(alpha_bf_class, pal)
+# pdf('Streamflow Data Sites resids v2.pdf')
+png('Streamflow Data Sites resids v3.png', width = 8, height = 10, units = 'in', res = 500)
+plot(counties, axes=F)
+plot(trningPts, bg=alpha_bf_col, add=T, pch=21, cex =2)# 5*abs(trningPts@data$resids))
+# for legend
+legTxt <- attr(attr(alpha_bf_col,'table'),'dimnames')[[1]]
+newTxt <- NULL
+for (rw in 1:length(legTxt)){
+    r <- legTxt[rw]
+    splt <- strsplit(r, split=',')[[1]]
+    opn <- as.numeric(strsplit(splt[1],'[',fixed=T)[[1]][2])
+    if (rw == length(legTxt)){
+        cls <- as.numeric(strsplit(splt[2],']')[[1]][1])
+    } else {
+        cls <- as.numeric(strsplit(splt[2],')')[[1]][1])
+    }
+    print(paste(opn,cls))
+    opn <- round(opn, 3)
+    cls <- round(cls, 3)
+    nw <- paste('[',opn,',',cls,')',sep='')
+    newTxt <- c(newTxt, nw)
+}
+legBrks <- alpha_bf_class$brks
+legBrks[9] <- legBrks[9] +0.2
+legBrks[1] <- legBrks[1] +0.2
+legend('bottomright', legend =newTxt, bg = 'white', bty = 'n', pch = 21,
+       pt.bg = pal, cex=0.75, pt.cex = 2,#5*abs(legBrks),
+       title = paste("Model Residuals"))
+dev.off()
+
+
+trningPts <- merge(trningPts, bflw.lm.3$residuals, by = )
+
+
+png('Model_3_perm_slopexEcoregion_v2.png', width = 7, height = 7, units = 'in', res = 500)
+modDF <- bflw.lm.3$model$log10(siteWeight)
+lims <- c(-2.5,-0.5)
+plot(bflw.lm.3$fitted ~ bflw.lm.3$model[['log10(siteWeight)']], ylim = lims, xlim = lims, 
+     main = "Observed vs. Predicted", ylab = 'Predicted',
+    xlab = 'Observed')     #sub = 'Training data'
+
+
+abline(a=0,b=1, col='red')
+dev.off()
+
+
+png('Model_3_perm_slopexEcoregion_BackTrans.png', width = 8.5, height = 11, units = 'in', res = 500)
+plot(10^bflw.lm.3$fitted ~ training@data$siteWeight[-75], 
+     main = "Observed vs. Predicted", ylab = 'Predicted',
+     xlab = 'Observed',
+     #sub = 'Training data'
+)
+
+abline(a=0,b=1, col='red')
+dev.off()

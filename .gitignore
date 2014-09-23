@@ -1,6 +1,10 @@
 # Ignore powerpoint presentations
 *.ppt*
 
+*.RData
+*.Rhistory
+*.pdf
+
 # OS junk files
 Thumbs.db
 *.DS_Store

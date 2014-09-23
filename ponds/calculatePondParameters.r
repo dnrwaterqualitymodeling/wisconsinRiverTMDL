@@ -13,6 +13,9 @@ subbasins = readOGR("T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro"
 dem = raster("DEM/raw_prj_10_m.img")
 demFill = raster("DEM/wrb_fill")
 
+proj4string(watersheds) = proj4string(wb)
+proj4string(subbasins) = proj4string(wb)
+
 # Erase urban boundaries from waterbody and watershed layers and convert back to
 # spatialPolygonsDataFrame (otherwise saved in spatialPolygons)
 subbasins_dissolve = gUnionCascaded(subbasins)
@@ -22,13 +25,12 @@ wb = gIntersection(wb, subbasins_dissolve, drop_not_poly=T, byid=T)
 watersheds = gIntersection(watersheds, subbasins_dissolve, drop_not_poly=T, byid=T)
 watersheds = SpatialPolygonsDataFrame(watersheds,
     data=data.frame(watersheds_df, row.names=row.names(watersheds)))
+wb_df = wb_df[row.names(wb_df) %in% row.names(wb),]
 wb = SpatialPolygonsDataFrame(wb, data=data.frame(wb_df, row.names=row.names(wb)))
 
 # lake_volume_data = read.xlsx("ponds/WRT_07_19_13.xlsx", sheetName="data")
 lake_volume_data$Volume..acre.ft.[lake_volume_data$Volume..acre.ft. == 0] = NA
 lake_volume_data$Max.Depth..ft.[lake_volume_data$Max.Depth..ft.] = NA
-proj4string(watersheds) = proj4string(wb)
-proj4string(subbasins) = proj4string(wb)
 
 wb_vol = merge(wb@data,
     lake_volume_data,

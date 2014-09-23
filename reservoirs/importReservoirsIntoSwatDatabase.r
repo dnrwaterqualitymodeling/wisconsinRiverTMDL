@@ -17,7 +17,7 @@ for (row in 1:nrow(reservoir_parameters)) {
 		"UPDATE res ",
 		"SET RES_ESA = ", reservoir_parameters$MaxStorage[row], ",",
 		"RES_EVOL = ", reservoir_parameters$MaxS_10to4[row], ",",
-		"RES_PSA = ", reservoir_parameters$NormalStor[row], ",",
+		"RES_PSA = ", reservoir_parameters$res_psa[row], ",",
 		"RES_PVOL = ", reservoir_parameters$NormS_10to[row], ",",
 		"RES_VOL = ", reservoir_parameters$NormS_10to[row], " ",
 		"WHERE SUBBASIN = ", reservoir_parameters$Subbasin[row], ";",

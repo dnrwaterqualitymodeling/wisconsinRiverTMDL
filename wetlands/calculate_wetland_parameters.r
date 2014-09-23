@@ -3,7 +3,7 @@ start_i = args[1]
 end_i = args[2]
 out_raster_dir = args[3]
 out_geometry_file = args[4]
-# 
+  
 # start_i = 2
 # end_i = 2
 # out_raster_dir = "K:/temp/wetlands_rasters"
@@ -97,8 +97,7 @@ for (s in subbasins@data$Subbasin[start_i:end_i]) {
         c(-Inf,6.5,NA),
         c(6.5,9.5,1),
         c(9.5,Inf,NA)
-    )
-    )    
+    ))    
     # write dem to ASCII file
     writeRaster(mask_dem, dem_asc, format="ascii", overwrite=T)
     writeRaster(mask_dem, dem_tif, format="GTiff", options=c("COMPRESS=NONE"), overwrite=T)
@@ -194,14 +193,17 @@ for (s in subbasins@data$Subbasin[start_i:end_i]) {
     wet_mxsa = wet_nsa + gArea(fill_poly) * 0.0001
     fill_intersect = rasterize(fill_poly, mask_lc_lm, "layer")
     fill_intersect = mask(fill_intersect, subbasin)
+    wetland_mxsa_subbasin = sum(fill_intersect, mask_lc_lm, na.rm=T)
+    wetland_mxsa_subbasin[wetland_mxsa_subbasin > 1] = 1
+    wetland_mxsa_subbasin[wetland_mxsa_subbasin == 0] = NA
     lost_pixels = is.na(getValues(watershed)) & getValues(fill_intersect) == 1
     watershed[lost_pixels] = 1
     wet_fr = (length(which(!is.na(getValues(watershed)))) * 900) / gArea(subbasin)
     if (any(gContains(subbasin, watersheds_ll, byid=T)[,1])) {
         fill_intersect[!is.na(contained_watersheds_ll_rast)] = NA
     }
-    diff = mask(crop(diff, e), fill_intersect)
-    depths = getValues(diff)[!is.na(getValues(fill_intersect))]
+    diff = mask(crop(diff, e), wetland_mxsa_subbasin)
+    depths = getValues(diff)[!is.na(getValues(wetland_mxsa_subbasin))]
     vols = depths * 0.09
     wet_mxvol = sum(vols) + wet_nvol
     row = data.frame(
@@ -214,9 +216,6 @@ for (s in subbasins@data$Subbasin[start_i:end_i]) {
         WET_MXVOL = wet_mxvol
     )
     writeRaster(watershed, wetland_ca_file, format="GTiff")
-    wetland_mxsa_subbasin = sum(fill_intersect, mask_lc_lm, na.rm=T)
-    wetland_mxsa_subbasin[wetland_mxsa_subbasin > 1] = 1
-    wetland_mxsa_subbasin[wetland_mxsa_subbasin == 0] = NA
     writeRaster(wetland_mxsa_subbasin, wetland_mxsa_file, format="GTiff")
     if (!file.exists(out_geometry_file)) {
         write.csv(row, file=out_geometry_file, row.names=F)
