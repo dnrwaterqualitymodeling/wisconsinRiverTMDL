@@ -1,7 +1,7 @@
 library(RColorBrewer)
 library(classInt)
 library(ggplot2)
-dst <- "c:/evans/waterQplots/"
+dst <- "C:/Users/evansdm/Documents/waterQplots/"
 setwd("T:/Projects/Wisconsin_River/GIS_Datasets/Water_Chemistry/Pat_BJames_SWIMS_ReservoirData")
 
 sites <- c("013016.csv", "283132.csv", "373135.csv", "373136.csv", "373137.csv", "373445.csv", 
@@ -19,6 +19,7 @@ dateFunc = function(X) {
     }
 }
 #site <- sites[1]
+# site <- "10031173.csv"
 count = 0
 
 for(site in sites){
@@ -36,7 +37,8 @@ for(site in sites){
 	pd <- pd[!is.na(pd$DEPTH) & !is.na(pd$VALUE) & pd$DEPTH != "NULL",]
 # data processing and conversions.
 	if (nrow(pd) == 0) {next}
-	
+# 	fourDigYears <- which(nchar(as.character(pd$DATE)) == 10)
+#     pd$DATE[fourDigYears] <- 
 	nonMetric = grep("Meters", pd$DEPTH, ignore.case=T, invert=T)
 	valsRegex = regexpr("[-+]?[0-9]*\\.?[0-9]+", pd$DEPTH)
 	depthVals = substr(
@@ -53,17 +55,19 @@ for(site in sites){
 	nonMetric = grep("DEGREES F", pd$UNITS, ignore.case=T)
 	pd$VALUE[nonMetric] = (pd$VALUE[nonMetric] - 32) / 1.8
 	
-	daytes <- unique(pd[,"DATE"])
+	daytes <- unique(pd[,"DATEpsx"])
 	# separating by dates
 	pdf(paste(dst, sitename, '.pdf',sep = ''))
 	for (dayte in daytes){
+        dayte = as.Date(dayte/86400, origin=as.POSIXct("1970-01-01"))
 		#if (count > 15) {break}
 		#dayte <- daytes[1]
+        #dayte <- "08/08/2012"
 		count = count + 1
 		mainTitle <- paste('Site: ', sitename,', Date: ', dayte, sep = '')
 		#dayte <- daytes[1]
 		print(paste("Working on",dayte))
-		t_pd <- pd[pd$"DATE"==dayte,]
+		t_pd <- pd[pd$DATEpsx == as.POSIXct(dayte),]
 		# maybe just call temp and DO explicitly
 		temp <- t_pd[t_pd$PARAMETER=="TEMPERATURE FIELD",]
 		DO <- t_pd[t_pd$PARAMETER=="DISSOLVED OXYGEN FIELD",]
@@ -77,14 +81,16 @@ for(site in sites){
 				xaxt = 'n', col = 'red', lwd = 2,
 				main=mainTitle, ylab="Depth, meters")
 			axis(side = 1, col = 'red')
-			par(new = TRUE) 
 		} 
 		if (nrow(DO) >0) {
+            par(new = TRUE) 
+            if (nrow(temp) > 0) { axes=F } 
 			plot(DEPTH ~ VALUE, data = DO,
 				type = 'l', xlab = '', xlim = c(0, 12),
-				axes = F, col = 'blue', lwd = 2, ylab = '')
-			axis(side = 1, line = 3, col = 'blue')
-		}
+				axes = axes, col = 'blue', lwd = 2, ylab = '')
+			if (!axes) { axis(side = 1, line = 3, col = 'blue') }
+            }
+		
 		legend('bottomright', legend = c(expression(paste("Temperature ",degree,"C")), 'Dissolved Oxygen, mg/L'),
 			fill = c('red','blue'), bty = 'n')
 		#dev.off()

@@ -2,7 +2,7 @@ library(RODBC)
 
 # CHANGE THESE ACCORDING TO SWAT PROJECT
 projectDir = "H:/WRB"
-wetland_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands/wetland_geometry.csv"
+wetland_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands/wetland_geometry_v3.csv"
 pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
 reservoir_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/hydrology/dams_parameters.csv"
 gw_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/alphaBflowSubbasin_lookup.csv"
@@ -114,9 +114,9 @@ crosswalk_file = paste(netDir, "landuse_operation_crosswalk.csv", sep="/")
 
 # Read in all necessary tables
 
-crosswalk = read.csv(crosswalk_file)
-
-con_updates = odbcConnectAccess(paste(netDir, "OpSchedules_fert.mdb", sep="/"))
+crosswalk = read.csv(crosswalk_file)             # for defaults:
+                                                # OpSchedules_fert.mbd
+con_updates = odbcConnectAccess(paste(netDir, "OpSchedules_fert_3Cuts_later.mdb", sep="/"))
 opSched = sqlFetch(con_updates, "OpSchedules")
 fert = sqlFetch(con_updates, "fert")
 close(con_updates)
@@ -187,16 +187,26 @@ for (row in 1:nrow(mgt1)) {
         sqlQuery(con_mgt2, insertQuery)
     }                                       # testing to see if nrot = 1 is better than 6
     
-    if (!(opCode %in% c('BARR','FRSD', 'WATR', 'URML', 'RNGB','RNGE','WETF', 'WETN','CRRT'))){ 
-        husc_query = paste("UPDATE mgt1 SET HUSC = 1, NROT = 6 WHERE SUBBASIN = ",
+    if (!(opCode %in% c('BARR','FRSD', 'WATR', 'URML', 'RNGB','RNGE','WETF', 'WETN','HAY'))){ 
+        husc_query = paste("UPDATE mgt1 SET HUSC = 1, NROT = 6, ISCROP = 1 WHERE SUBBASIN = ",
             as.character(row_data$SUBBASIN),
             " AND HRU = ",
             as.character(row_data$HRU),
             ";",
             sep=""
         )
+        sqlQuery(con_mgt2, husc_query)
+    } else {
+        husc_query = paste("UPDATE mgt1 SET HUSC = 0, ISCROP = 0 WHERE SUBBASIN = ",
+            as.character(row_data$SUBBASIN),
+            " AND HRU = ",
+            as.character(row_data$HRU),
+            ";",
+            sep=""
+        )
+        sqlQuery(con_mgt2, husc_query)
     }
-    sqlQuery(con_mgt2, husc_query)
+
     if (row %% 1000 == 0) {
         close(con_mgt2)
         print("Compacting database. Please wait...")
@@ -204,4 +214,4 @@ for (row in 1:nrow(mgt1)) {
         con_mgt2 = odbcConnectAccess(prjDb) 
     }
 }
-
+odbcCloseAll()

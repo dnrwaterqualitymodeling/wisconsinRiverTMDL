@@ -1,26 +1,39 @@
 # CHANGE THESE ###########
 # SWAT project
-projectDir = "C:/SWAT/Wetlands_2/Sufi_Test1.Sufi2.SwatCup"
-simCount = 5
-subbasinCount = 337
+projectDir = "H:/newWetlands_15_oct.Sufi2.SwatCup"
+simCount = 175
+subbasinCount = 338
 startYr = 2002
 endYr = 2013
-objFuncCode = 9
+objFuncCode = 5
 # Observations -- variable name, column index in output.rch, subbasin ID, observed data
-observed_table = rbind(
-    c("FLOW_OUT", 7, 137, "T:/Projects/Wisconsin_River/GIS_Datasets/observed/baraboo/dv.txt")
-)
-monthly = T
+obsDir = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw"
+gage_subbasin_lu = read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
+    colClasses=c("character", "character", "integer", "integer", "character"))
+monthly = F
+
 parameterization = rbind(
-    c("r__ALPHA_BF.gw",-1,10),
-    c("r__CN2.mgt",-0.2,0.2)
+    c("r__ALPHA_BF.gw", -0.99, -0.5),
+    c("r__CN2.mgt", -0.6, 0.2),
+    c("a__SOL_AWC().sol", -0.05, 0.05),
+    c("v__ESCO.hru", 0.9, 1)#,
+#     c("v__GWQMN.gw", 500, 3000),
+#     c("v__GW_REVAP.gw", 0.02, 0.2),
+#     c("v__REVAPMN.gw", 0, 500)
 )
-
-
-
-
 
 # Don't change these
+source("T:/Projects/Wisconsin_River/Code/validation/functions_query_output.r")
+
+gage_subbasin_lu = subset(gage_subbasin_lu, Keep == 1)
+gage_subbasin_lu = gage_subbasin_lu[c("USGS_ID", "WRB_SubbasinID")]
+observed_table = cbind(rep("FLOW_OUT", nrow(gage_subbasin_lu)),
+    rep(7, nrow(gage_subbasin_lu)),
+    gage_subbasin_lu$WRB_SubbasinID,
+    paste(obsDir, "/", gage_subbasin_lu$USGS_ID, ".txt", sep="")
+)
+observed_table = observed_table[order(as.integer(observed_table[,3])),]
+
 inDir = paste(projectDir,
     "/",
     toupper(strsplit(basename(projectDir), "\\.")[[1]][2]),
@@ -51,6 +64,19 @@ var_file_name = paste(inDir,
 var_file_rch = paste(inDir,
     "/Var_file_rch.txt",
     sep="")
+if (monthly) {
+    time_series = data.frame(DATE = seq(
+        as.Date(paste(startYr, "-01-01", sep="")),
+        as.Date(paste(endYr, "-12-31", sep="")),
+        "1 months"))
+    time_series = cbind(data.frame(i = 1:nrow(time_series)), time_series)
+} else {
+    time_series = data.frame(DATE = seq(
+        as.Date(paste(startYr, "-01-01", sep="")),
+        as.Date(paste(endYr, "-12-31", sep="")),
+        1))
+    time_series = cbind(data.frame(i = 1:nrow(time_series)), time_series)
+}
 
 # Write par_inf file
 l1 = paste(nrow(parameterization), "  : Number of Parameters (the program only reads the first 4 parameters or any number indicated here)", sep="")
@@ -64,37 +90,57 @@ writeLines(paste(l1, "\n", l2, sep=""), swEdit_file)
 ########################
 # Write observed_rch and observed.txt file
 ########################
-l1 = paste(length(unique(observed_table[,1])), ": number of observed variables", sep="\t")
+l1 = paste(nrow(observed_table), ": number of observed variables", sep="\t")
 write(l1, observed_rch_file)
-write('\n', observed_rch_file, append=T)
+# write('\n', observed_rch_file, append=T)
 write(paste(nrow(observed_table), ": number of observed variables", sep="\t"), observed_file)
 write(paste(objFuncCode, ": Objective function type, 1=mult,2=sum,3=r2,4=chi2,5=NS,6=br2,7=ssqr,8=PBIAS,9=RSR", sep="\t"),
       observed_file, append=T)
 write("0.5\t: min value of objective function threshold for the behavioral solutions", observed_file, append=T)
-for (observed in 1:nrow(observed_table)) {
-    obsData = read.table(observed_table[observed,4], skip=2, sep="\t", header=T)
+write("\n", observed_file, append=T)
+
+for (obs_i in 1:nrow(observed_table)) {
+    obsData = read.table(observed_table[obs_i,4], skip=2, sep="\t", header=T)
     obsData = obsData[-1,]
+    obsData = obsData[obsData[,5] == "A",]
     obsData = data.frame(DATE = as.Date(as.character(obsData[,3])),
-    	FLOW_OBSERVED=as.numeric(as.character(obsData[,4])))
+        FLOW_OBSERVED=as.numeric(as.character(obsData[,4])))
     if (monthly) {
-    	months = as.POSIXlt(obsData$DATE)$mo + 1
-    	years = as.POSIXlt(obsData$DATE)$year + 1900
-    	date = paste(years, months, "01", sep="-")
-    	obsMonthly = aggregate(obsData$FLOW_OBSERVED, list(date), mean) 
-    	obsData = data.frame(ID = 1:length(unique(date)),
-            DATE=paste("FLOW_OUT", as.integer(format(as.Date(unique(date)), "%m")),
-                as.integer(format(as.Date(unique(date)), "%Y")), sep="_"),
-    		FLOW_OBSERVED=obsMonthly[,2]*0.0283168466) 
+        months = as.POSIXlt(obsData$DATE)$mo + 1
+        years = as.POSIXlt(obsData$DATE)$year + 1900
+        date = paste(years, months, "01", sep="-")
+        obsMonthly = aggregate(FLOW_OBSERVED ~ date, data=obsData, mean)
+        obsData = data.frame(DATE=as.Date(obsMonthly[,1]),
+            FLOW_OBSERVED=obsMonthly[,2])
+        obsData = merge(time_series, obsData, all.y=T, all.x=F)
+        obsData = obsData[order(obsData$i),]
+        obsData$FLOW_OBSERVED = paste(
+            observed_table[obs_i, 1],
+            format(obsData$DATE, "%m"),
+            format(obsData$DATE, "%Y"),
+            sep="_")
+    } else {
+        obsData = data.frame(DATE=as.Date(obsData[,1]),
+            FLOW_OBSERVED=obsData[,2])
+        obsData = merge(time_series, obsData, all.y=T, all.x=F)
+        obsData = obsData[order(obsData$i),]
+        obsData$VARNAME_DATE = paste(
+            observed_table[obs_i, 1],
+            format(obsData$DATE, "%d"),
+            format(obsData$DATE, "%m"),
+            format(obsData$DATE, "%Y"),
+            sep="_")
     }
-    
-    
-    
-    l1 = paste(observed_table[observed,1], "_", observed_table[observed,3],
+    obsData = obsData[c("i","VARNAME_DATE", "FLOW_OBSERVED")]
+    #converting from cf/s to cm/s
+    obsData$FLOW_OBSERVED <- obsData$FLOW_OBSERVED * 0.0283168466
+    l1 = paste(observed_table[obs_i,1], "_", observed_table[obs_i,3],
         "   : this is the name of the variable and the subbasin number to be included in the objective function",
         sep="")
     l2 = paste(nrow(obsData), "   : number of data points for this variable as it follows below. First column is a sequential number from beginning", sep="")
     l3 = "      : of the simulation, second column is variable name and date (format arbitrary), third column is variable value."
     
+    write("\n", observed_rch_file, append=T)
     write(l1, observed_rch_file, append=T)
     write(l2, observed_rch_file, append=T)
     write(l3, observed_rch_file, append=T)
@@ -102,7 +148,7 @@ for (observed in 1:nrow(observed_table)) {
     
     write.table(obsData, observed_rch_file, sep="\t", row.names=F, col.names=F, append=T, quote=F)
     # Observed.txt
-    write(paste(observed_table[observed,1], "_", observed_table[observed,3],
+    write(paste(observed_table[obs_i,1], "_", observed_table[obs_i,3],
                 "\t: this is the name of the variable and the subbasin number to be included in the objective function",
                 sep=""),
           observed_file, append=T)
@@ -113,8 +159,9 @@ for (observed in 1:nrow(observed_table)) {
         observed_file, append=T)
     write("      : of the simulation, second column is variable name and date (format arbitrary), third column is variable value.",
         observed_file, append=T)
+    write("\n", observed_file, append=T)
     write.table(obsData, observed_file, sep="\t", row.names=F, col.names=F, append=T, quote=F)
-        
+    write("\n", observed_file, append=T)   
 }
 # write extract_rch table
 write("output.rch     : swat output file name", extract_rch_file)
@@ -142,7 +189,7 @@ for (variable in unique(observed_table[,2])) {
         , sep="\t"),
         extract_rch_file,
         append=T)
-    write(paste(paste(reaches, sep=" "),
+    write(paste(paste(reaches, collapse=" "),
         ": reach (subbasin) numbers for variable (ordered)",
         sep="\t"),
         extract_rch_file,
@@ -156,29 +203,15 @@ write(paste(endYr, ": end year of simulation", sep="\t"),
       extract_rch_file,
       append=T)
 write("", extract_rch_file, append=T)
-write(paste(2, ": time step (1=daily, 2=monthly, 3=yearly)", sep="\t"),
-      extract_rch_file,
-      append=T)
-# 
-# output.rch     : swat output file name
-# 2              : number of variables to get
-# 7  18          : variable column number(s) in the swat output file (as many as the above number)
-# 
-# 20              : total number of reaches (subbasins) in the project
-# 
-# 3              : number of reaches (subbasins) to get for the first variable
-# 1  3  7        : reach (subbasin) numbers for the first variable (ordered)
-# 
-# 1              : number of reaches (subbasins) to get for the second variable (if no second variable delete this and next lines)
-# 7              : reach (subbasin) numbers for the second variable (ordered)
-# 
-# 
-# 1990           : beginning year of simulation not including the warm up period
-# 2001           : end year of simulation
-# 
-# 2              : time step (1=daily, 2=monthly, 3=yearly)
-
-# Write Var_file_name
+if (monthly) {
+    write(paste(2, ": time step (1=daily, 2=monthly, 3=yearly)", sep="\t"),
+          extract_rch_file,
+          append=T)
+} else {
+    write(paste(1, ": time step (1=daily, 2=monthly, 3=yearly)", sep="\t"),
+          extract_rch_file,
+          append=T)
+}
 filenames = paste(observed_table[,1], "_", observed_table[,3], ".txt", sep="")
 write(filenames, var_file_name)
 write(filenames, var_file_rch)

@@ -1,7 +1,7 @@
 # The first step in processing usgs daily value streamflow data
 # Downloads daily flows of streams in wisconsin
 options(warn=0)
-wd = "C:/evans/bflow/wi_dailyValues"
+wd = "T:/Projects/Wisconsin_River/Code/groudWater/baseflow"
 setwd(wd)
     # data retrieved 2014-08-22
         # re retrieved 2014-08-27 to grab more sites after filtering fixed.
