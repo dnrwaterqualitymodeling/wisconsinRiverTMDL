@@ -6,7 +6,6 @@ wetland_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands/wetla
 pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
 reservoir_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/hydrology/dams_parameters.csv"
 gw_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/alphaBflowSubbasin_lookup.csv"
-
 #UPDATE SWAT RESERVOIR PARAMETERS 
 
 reservoir_parameters = read.csv(reservoir_parameter_file)
@@ -149,7 +148,7 @@ con_mgt2 = odbcConnectAccess(prjDb)
 oidStart = 1
 for (row in 1:nrow(mgt1)) {
     row_data = mgt1[row,]
-    print(paste(as.character(row_data$SUBBASIN), as.character(row_data$HRU)))
+    print(paste('Subbasin:',as.character(row_data$SUBBASIN),'hru:', as.character(row_data$HRU)))
     lu = as.character(row_data$LANDUSE)
     opCode = unique(as.character(crosswalk$OPCODE[crosswalk$LANDUSE == lu]))
     if (substr(opCode, 1, 1) == "3" & substr(opCode, 4, 4) == "c") {

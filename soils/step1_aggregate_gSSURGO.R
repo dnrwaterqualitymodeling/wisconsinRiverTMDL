@@ -1,34 +1,34 @@
 library(reshape2)
 library(aqp)
-library(soilDB)
-library(RCurl)
-library(SSOAP)
+# library(soilDB)
+# library(RCurl)
+# library(SSOAP)
 library(plyr)
-options(stringsAsFactors = F, warn = 2)
+options(stringsAsFactors = F, warn = 1)
 
 # Inputs
 net_soil_dir = "T:/Projects/Wisconsin_River/GIS_Datasets/Soils"
 aggregated_to_mapunit_file = paste(net_soil_dir, 'aggregated_soils_to_mapunit.txt', sep="/")
 tmplate = paste(net_soil_dir, "SWAT_US_SSURGO_Soils_wrb.txt", sep="/")
 wrb_mukeys_file = paste(net_soil_dir, "wrb_mukeys.txt", sep="/")
+drained_mukeys_file <- paste(net_soil_dir, "drained_mukeys.txt", sep="/")
 comp_file = paste(net_soil_dir, "SSURGO_wi_mi_2014/component.txt", sep="/")
 hrzn_file = paste(net_soil_dir, "SSURGO_wi_mi_2014/chorizon.txt", sep="/")
 chfr_file = paste(net_soil_dir, "SSURGO_wi_mi_2014/chfrags.txt", sep="/")
 check_on_these_file = paste(net_soil_dir, 'check_on_these.txt',sep = '/')
-no_hydgrp_file = paste(net_soil_dir, 'no_hydgrp.txt',sep = '/')
-check_on_these_file = paste(net_soil_dir, 'check_on_these.txt',sep = '/')
-#########
 
+#########
 # template output table
 agg_mky_tbl = read.table(tmplate, nrows=1, header=T)
 # mukeys only within the WRB
 wrb_mukeys = unique(read.table(wrb_mukeys_file, header=T, sep=',')[["MUKEY"]])
 wrb_mukeys = wrb_mukeys[!is.na(wrb_mukeys)]
+drained_mukeys <- na.omit(read.table(drained_mukeys_file, header = T))
 # read in gSSURGO tables and process
 ##############
 dat_cols = c(
     "dbovendry_r",
-    "awc_r", 
+    "awc_r",
     "ksat_r",
     "cbn",
     "claytotal_r",
@@ -86,16 +86,19 @@ comp = merge(comp, hrzn, by="cokey", all.x=T, all.y=T) # Join component with cho
 chfr = aggregate(fragvol_r ~ chkey, chfr, sum, na.rm=T) # Sum rock volumes by hrzn
 comp = merge(comp, chfr, by="chkey", all.x=T) # Join component/horizon with chfrags
 comp$fragvol_r[is.na(comp$fragvol_r)] = 0 # Force NA rock fragments to zero
-# All dual type hydrologic soil groups are by majority non-agricultural in WI.
-# Therefore, we can safely assume dual-type HSGs are all D type.
-comp$hydgrp = with(comp, substr(hydgrp, nchar(hydgrp), nchar(hydgrp)))
+# 115 mukeys have greater than 50% ag
+drained_ind <- with(comp, mukey %in% drained_mukeys[,1] & nchar(hydgrp) > 2)
+
+comp$hydgrp[drained_ind] = with(comp[drained_ind,], substr(hydgrp, nchar(hydgrp), nchar(hydgrp))) 
+comp$hydgrp[!drained_ind] = with(comp[!drained_ind,], substr(hydgrp, 1, 1))
 comp$hydgrp[comp$hydgrp == "A"] = 1
 comp$hydgrp[comp$hydgrp == "B"] = 2
 comp$hydgrp[comp$hydgrp == "C"] = 3
 comp$hydgrp[comp$hydgrp == "D"] = 4
+comp$hydgrp[comp$hydgrp == ""] = NA
 comp$hydgrp = as.integer(comp$hydgrp)
 # ASSUMING here that 50% of organic matter is Carbon
-comp$cbn = comp$om_r * 0.50 # Brady and Wiel, 
+comp$cbn = comp$om_r * 0.50 # Brady and Weil, 
 comp$comppct_r = comp$comppct_r / 100
 ##############
 
@@ -122,7 +125,7 @@ pb = txtProgressBar(0,1)
 for (m in wrb_mukeys){
     rw = rw + 1
     setTxtProgressBar(pb, rw/length(wrb_mukeys))
-    agg_mky_tbl[] = 0
+    agg_mky_tbl[] = NA
     print("-----------------------------------")
     print(paste('Working on ', m,'...',sep = ''))
     print(paste(round(rw / length(unique(wrb_mukeys))*100, 2), "% complete", sep=""))
@@ -132,7 +135,7 @@ for (m in wrb_mukeys){
     SNAM = mc$compname[which.max(mc$comppct_r)][1]
     if (length(unique(mc$cokey))==1 | all(is.na(mc$hzdept_r))) {
         print("One component or non-slabbable...")
-        mc = mc[c('mukey',
+        mc = mc[,c('mukey',
             'chkey',
             "comppct_r",
             "hzdept_r", 
