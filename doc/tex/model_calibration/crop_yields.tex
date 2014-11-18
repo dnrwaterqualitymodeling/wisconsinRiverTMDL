@@ -1,0 +1,28 @@
+\subsection{Crop Yields}
+Crop yield calibrations were not carried out with SWAT-CUP because there are no routines to aggregate HRU-level yield output. 
+	\subsubsection{County Survey}
+	Observed data consisted of crop yield data acquired from the National Agriculture Statistics Serivice, from the county survey data, (\href{http://quickstats.nass.usda.gov/results/CD8890FD-566F-3F66-8C8A-CB932E358991}{from the quick stats utility}), retrieved on 30 September, 2014. For more information on county surveys \href{http://www.nass.usda.gov/Surveys/Guide_to_NASS_Surveys/County_Agricultural_Production/index.asp}{click here}. The stats used were corn grain- yield, bu/acre, soybean - yield, bu/acre, and Hay/Haylage, Alfalfa - Yield tons/acre, dry basis. The first two are self-evident, but the third was chosen over ``Hay, Alfalfa'' because it was thought that ``Hay \& Haylage, Alfalfa'' encompasses the former, and so would be a better estimate of total alfalfa yield.
+	
+	From James Johanson(?) the Alfalfa Specialist at NASS, it was learned that NASS alfalfa yields  are annual totals, not average cutting yield. For comparison with SWAT, it is necessary to make sure that annual alfalfa yield is found. We found that merely summing all months yield (with monthly output) did not give accurate values of average annual yield. Use the row corresponding to HRU average annual. 
+	
+	Note: Do not use HRU average yield over the entire modeling period, as SWAT averages the yield over the modeling period ACROSS crops. Instead, select average annual HRU yield. 
+
+	\subsubsection{Unit Conversions}
+	County surveys conducted by NASS consist of surveying farm operators about aspects of the operation and farm. This means that yield moisture weights are not necessarily standard. NASS assumes that corn, soybean and hay/haylage are 15\% 12.5\% and 13\% moisture, respectively. 
+	Currently (1 October) we are assuming that SWAT reports yield and biomass in 0\% moisture dry weight, as do \citet{almendinger_contructingsunrise_2010} though other sources \citep{srinivasan_swatungauged_2010} say that SWAT reports in 20\% moisture. 
+
+	\subsubsection{Calibration}
+	The calibration efforts were directed at alfalfa, corn grain, and soybeans. Corn silage was initially considered for calibration, but there was too much uncertainty in the way that the NASS silage weight was reported. As of 1 October 2014, crop yield calibration focused on adjusted the BIO\_ E parameter, following other workers in the region \citep{baumgart_lowerfox_2005, almendinger_contructingsunrise_2010}. This is found in the plant.dat input file. This parameter can be a range from 10 to 90. SWAT was run with a BIO\_E of 10 through 90, by increments of 5. After every run, the output.hru file was analyzed and basin-wide average yields were calculated. From this a calibration curve was derived, and a model fit. The mean, basin-wide observed average was then used to obtain a fitted BIO\_E. Associated images can be found in the validation folder ``T:/Projects/Wisconsin \_ River/Model \_ Documents/TMDL \_ report/figures''. Calibrated BIO E values are given in the following table.
+	\begin{table}[h!]
+	\centering
+		\begin{tabular}{l c c}
+			Crop & Default BIO E & Fitted BIO E \\[0.25ex]
+			\hline \hline
+			Corn & 39 & 31.32 \\
+			Soybean & 25 & 54.65 \\
+			Alfalfa & 20 & 9.72 \\
+			\hline
+
+		\end{tabular}
+	\end{table}	
+\pagebreak

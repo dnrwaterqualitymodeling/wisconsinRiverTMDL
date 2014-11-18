@@ -6,6 +6,8 @@ wetland_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands/wetla
 pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
 reservoir_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/hydrology/dams_parameters.csv"
 gw_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/alphaBflowSubbasin_lookup.csv"
+op_db_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/OpSchedules_fert_3Cuts_later.mdb"
+lu_op_xwalk_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/landuse_operation_crosswalk.csv"
 #UPDATE SWAT RESERVOIR PARAMETERS 
 
 reservoir_parameters = read.csv(reservoir_parameter_file)
@@ -108,14 +110,12 @@ insert_fert = TRUE
 
 prjDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 swatDb = paste(projectDir, "SWAT2012.mdb", sep="/")
-netDir = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement"
-crosswalk_file = paste(netDir, "landuse_operation_crosswalk.csv", sep="/")
 
 # Read in all necessary tables
 
-crosswalk = read.csv(crosswalk_file)             # for defaults:
+crosswalk = read.csv(lu_op_xwalk_file)             # for defaults:
                                                 # OpSchedules_fert.mbd
-con_updates = odbcConnectAccess(paste(netDir, "OpSchedules_fert_3Cuts_later.mdb", sep="/"))
+con_updates = odbcConnectAccess(op_db_file)
 opSched = sqlFetch(con_updates, "OpSchedules")
 fert = sqlFetch(con_updates, "fert")
 close(con_updates)
