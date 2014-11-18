@@ -19,6 +19,11 @@ mupolygon = readOGR(
 wrb_mukeys = read.csv(paste(net_soil_dir, "wrb_mukeys.txt",sep = ''))
 mupolygon = subset(mupolygon, MUKEY %in% wrb_mukeys$MUKEY)
 
+# wtm CRS
+wtm = "+proj=tmerc +lat_0=0 +lon_0=-90 +k=0.9996 +x_0=520000 +y_0=-4480000 +ellps=GRS80 +units=m +no_defs"
+
+# for updating swat soils db
+f_swat_soils_db = "C:/SWAT/ArcSWAT/Databases/SWAT_US_SSURGO_Soils.mdb"
 # These will need to be changed to reflect the new trash baskets.
 excld = c(
     "Aquents",
@@ -114,8 +119,8 @@ for (hsg in LETTERS[1:4]) {
 	clus_d = agg_tbl[ind,]
 	clus_d_scld = scale(clus_d)
 	# For each HSG, find clusters
-	# clusters = kmeans(clus_d, centers = 3)
-	clusters = Mclust(clus_d_scld, G=3)
+	# using default cluster settings: 1 to 9.
+	clusters = Mclust(clus_d_scld) #, G=3
 	print(table(clusters$classification))
 	soil_tbl[ind, "hru_grp"] = paste(hsg, clusters$classification, sep="")
 }
@@ -228,13 +233,22 @@ close(pb)
 agg_profs$variable = as.character(agg_profs$variable)
 write.table(agg_profs, agg_prof_tbl, sep = '\t', row.names = F)
 
-# hrucode look up table. probably necessary for 
-hru_grp_code_lu <- data.frame(
-    hru_grp =
-        c('A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3', 'D1', 'D2', 'D3', 'X', 'W'),
-    hru_code =
-        c(11, 12, 13, 21, 22, 23, 31, 32, 33, 41, 42, 43, 99, 001)
-    )
+# hrucode look up table. probably necessary for arcswat
+# ADD W and 1
+hru_grp_code_lu = data.frame()
+for (i in unique(agg_profs$hru_grp)){
+    if (i == 'X'){
+        hru_grp_code_lu = rbind(hru_grp_code_lu, c(i, "99"))
+        next
+    }
+    indx = which(LETTERS == strsplit(i, split = '')[[1]][1])
+    cde = gsub("[A-Z]", indx, i)
+    rw = c(i, cde)
+    hru_grp_code_lu = rbind(hru_grp_code_lu, rw)
+}
+hru_grp_code_lu = rbind(hru_grp_code_lu, c("W", "1"))
+names(hru_grp_code_lu) = c("hru_grp", "hru_code")
+
 agg_profs = read.table(agg_prof_tbl, sep="\t", header=T)
 agg_soil_data = data.frame(soil_tbl[1,])
 agg_soil_data[1,] = 0
@@ -299,18 +313,18 @@ agg_soil_data[agg_soil_data$SNAM == "W", update_num_cols] <- c(1, 100, 0.23, 0.5
 agg_soil_data$HYDGRP[agg_soil_data$SNAM == "W"] <- "D"
 
 # converting from SSURGO's ksat units of um/sec to SWAT's mm/hr (3.6)
-agg_soil_data[,k_cols] * 3.
+agg_soil_data[,k_cols] = agg_soil_data[,k_cols] * 3
 
 agg_soil_data$OBJECTID = 1:nrow(agg_soil_data)
 agg_soil_data$CMPPCT = 100
-# Is this necessary anymore?
-# agg_soil_data = agg_soil_data[,1:(ncol(agg_soil_data)-2)]
+
 agg_soil_data[is.na(agg_soil_data)] = 0
 
 agg_soil_data$MUID = as.integer(agg_soil_data$MUID)
 # agg_soil_data$MUID = as.character(agg_soil_data$MUID)
 
 x_hydgrps = subset(soil_tbl, hru_grp == "X")$HYDGRP
+
 # Average the HSGs together for MUID = X
 x_hydgrp = LETTERS[round(mean(unlist(lapply(x_hydgrps, function (x) {which(LETTERS == x)}))))]
 agg_soil_data$HYDGRP[agg_soil_data$SNAM == "X"] = x_hydgrp
@@ -326,7 +340,14 @@ for (grp in 1:nrow(hru_grp_code_lu)){
 agg_soil_data <- subset(agg_soil_data, select = -hru_grp)
 write.table(agg_soil_data, agg_soil_unit_tbl, sep="\t", row.names = F)
 
-mupolygon_remap_mukey = merge(mupolygon, soil_tbl[,c("MUID", "hru_grp","hru_code")], by.x="MUKEY", by.y="MUID")
+#----
+mupolygon = spTransform(mupolygon, CRS(wtm))
+        
+mupolygon_remap_mukey = merge(mupolygon, 
+    soil_tbl[,c("MUID", "hru_grp","hru_code")], 
+    by.x="MUKEY", 
+    by.y="MUID")
+
 # I (DE) don't believe its necessary to have a numeric id for mukey,
 #   in fact I think it makes it more difficult as it gets read as long type and cannot be
 #   joined to the shapefile

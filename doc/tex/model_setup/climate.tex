@@ -7,3 +7,11 @@ The text files contain largely the same data as the database files, however, the
 The format of the database files is the Date, the daily maximum and the daily minimum, in Celsius for temperature and millimeters for precipitation. The value -99 means that there was no data for that day. The text files were formatted specifically for ArcSWAT. The first line contains the starting date of the model simulation, in the format yyyymmdd (19900101 or 1 January, 1990). Each row after this contains minimum and maximum daily temperature or precipitation. All the dates in the warm-up period until the beginning of the model period (1 January, 2002) are given the value of -99, thus the first 12 years do not have climate data, but are represented in the text files for SWAT input. 
 
 The climate data used in the SWAT model was provided for the US EPA contractors (Limnotech). This data was retrieved on 13 August, 2014 from the National Climate Data Center - Global Historic Climate Data Network.
+
+We chose an evapotranspiration method by evaluating percent bias and Nash-Sutcliffe coefficients when comparing modeled water yield to observed water yield at 20 sites acroos the basin. The three methods compared were Hargreaves, Penman-Monteith, and Preistley-Taylor. Without calibrating the initial model, Penman-Monteith outperformed the other 2 methods in both Nash-Sutcliffe coefficient and percent bias. 
+
+     pbias_harg    pbias_penman pbias_priestley 
+        204.730          30.645          42.090 
+
+     nashsut_harg    nashsut_penman nashsut_priestley 
+        17.873419          4.592568          5.179347 

@@ -2,6 +2,21 @@ library(rgdal)
 library(RColorBrewer)
 library(classInt)
 library(spdep)
+
+wd <- "H:/sim_flow"
+dir_doc = "C:/Users/evansdm/Documents"
+file_wrb_flow_sites = "WRB_FlowSites_2"
+dir_water_bud = "T:/Projects/Wisconsin_River/GIS_Datasets/Water_Budget"
+file_wrb_regions = "WRB_Budget_Divisions"
+file_flow_err = "ET_uncertainty.csv"
+file_map_plot = paste(wd, "spatial_dist_flow_error.pdf",sep = '/')
+
+dat_cols <- c("pbias_harg",
+    "pbias_penman",
+    "pbias_priestley",
+    "nashsut_harg",      
+    "nashsut_penman",    
+    "nashsut_priestley")
 #### for proper legend #####
 # returns proper legend text for intervals created from classInterval-color object
 properLegend <- function(prop_colr){
@@ -25,22 +40,7 @@ properLegend <- function(prop_colr){
     return(newTxt)
 }
 ################################
-
-wd <- "H:/sim_flow"
-file_wrb_flow_sites = "WRB_FlowSites_2"
-dir_water_bud = "T:/Projects/Wisconsin_River/GIS_Datasets/Water_Budget"
-file_wrb_regions = "WRB_Budget_Divisions"
-file_flow_err = "ET_uncertainty.csv"
-file_map_plot = paste(wd, "spatial_dist_flow_error.pdf",sep = '/')
-
-dat_cols <- c("pbias_harg",
-    "pbias_penman",
-    "pbias_priestley",
-    "nashsut_harg",      
-    "nashsut_penman",    
-    "nashsut_priestley")
-
-flow_sites <- readOGR(wd, file_wrb_flow_sites)
+flow_sites <- readOGR(dir_doc, file_wrb_flow_sites)
 names(flow_sites@data)[2] <- 'USGS_ID' 
 wrb_regions = readOGR(dir_water_bud, file_wrb_regions)
 
@@ -53,7 +53,7 @@ dats <- !is.na(flow_sites@data$pbias_harg)
 pal = rev(brewer.pal(9, "RdYlBu"))
 pdf(file_map_plot, height = 11, width = 8.5)
 
-# par(mfcol=c(3,2))
+par(mfcol=c(3,2))
 par(mar=c(0,0,0,0))
 for (met in c("pbias", "nashsut")){
     met_cols <- grep(met, dat_cols)

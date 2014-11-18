@@ -3,7 +3,7 @@ proj_dir <- "H:/"
 wd = "H:\\WRB\\Scenarios\\Default\\TxtInOut"
 setwd(wd)
 file_basin <- "basins.bsn"
-source("T:/Projects/Wisconsin_River/Code/validation/functions_query_output.r")
+source("C:/Users/evansdm/Documents/Code/validation/functions_query_output.r")
 
 file.copy("C:/SWAT/ArcSWAT/SWAT_64rel.exe", paste(wd, "SWAT_64rel.exe", sep="\\"))
 rch_runs_dir <- "sim_flow"

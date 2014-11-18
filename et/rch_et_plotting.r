@@ -1,7 +1,7 @@
 library(hydroGOF)
 options(warn = 1,
     stringsAsFactors = F)
-source("T:/Projects/Wisconsin_River/Code/validation/format_usgs_flow_function.R")
+source("C:/Users/evansdm/Documents/Code/validation/format_usgs_flow_function.R")
 # SWAT project
 projectDir = "H:/WRB"
 # Scenario
