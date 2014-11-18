@@ -5,6 +5,7 @@ library(soiltexture)
 library(stringr)
 library(mclust)
 library(gridExtra)
+library(ggplot2)
 # library(RODBC)
 options(stringsAsFactors = F)
 net_soil_dir = "T:/Projects/Wisconsin_River/GIS_Datasets/Soils/"
@@ -12,14 +13,14 @@ soil_tbl = read.table(paste(net_soil_dir, "aggregated_soils_to_mapunit.txt",sep=
 agg_prof_tbl = paste(net_soil_dir, 'aggregated_profiles.txt', sep = '')
 agg_soil_unit_tbl = paste(net_soil_dir, "aggregated_soil_units.txt", sep = '')
 agg_unit_mukey_lu_tbl = paste(net_soil_dir, "agg_unit_mukey_lu.txt", sep = '')
-cluster_variability = paste(net_soil_dir, "cluster_variability.png", sep = '')
+cluster_variability = "cluster_variability.png"
 # mupolygon = readOGR(paste(net_soil_dir, "WRB_Soils_2mile_Buffer_gSSURGO.gdb", sep=""),
 # 	"MUPOLYGON__2mile_buffer_wMich_2014")
-mupolygon = readOGR(
-    gsub('/$','',net_soil_dir), 
-    "MUPOLYGON__2mile_buffer_wMich_2014")
+# mupolygon = readOGR(
+#     gsub('/$','',net_soil_dir), 
+#     "MUPOLYGON__2mile_buffer_wMich_2014")
 wrb_mukeys = read.csv(paste(net_soil_dir, "wrb_mukeys.txt",sep = ''))
-mupolygon = subset(mupolygon, MUKEY %in% wrb_mukeys$MUKEY)
+# mupolygon = subset(mupolygon, MUKEY %in% wrb_mukeys$MUKEY)
 
 # These will need to be changed to reflect the new trash baskets.
 excld = c(
@@ -118,7 +119,7 @@ for (hsg in LETTERS[1:4]) {
 	clus_d_scld = scale(clus_d)
 	# For each HSG, find clusters
 	# clusters = kmeans(clus_d, centers = 3)
-	clusters = Mclust(clus_d_scld, G=4)
+	clusters = hc("VVV", clus_d_scld) #
     clus_d_scld = cbind(clusters$classification, clus_d_scld)
     clus_d_scld = data.frame(clus_d_scld)
     names(clus_d_scld) = c(
@@ -157,7 +158,8 @@ q = soil_tbl$SNAM %in% excld[!(excld %in% c("Water", "Water greater than 40 acre
 soil_tbl$hru_grp[q] = "X"
 soil_tbl$MUID = as.character(soil_tbl$MUID)
 write.table(soil_tbl[,c("MUID", "hru_grp", "SNAM")], agg_unit_mukey_lu_tbl, sep="\t", row.names=F)
-# Hell yeah.
+
+
 water_mus <- subset(soil_tbl, hru_grp == 'W')
 soil_tbl <- subset(soil_tbl, hru_grp != "W")
 

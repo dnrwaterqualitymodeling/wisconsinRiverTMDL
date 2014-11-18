@@ -117,7 +117,7 @@ for (hsg in LETTERS[1:4]) {
 	# clusters = kmeans(clus_d, centers = 3)
 	clusters = Mclust(clus_d_scld, G=3)
 	print(table(clusters$classification))
-	soil_tbl[ind, "hru_grp"] = paste(hsg,clusters$classification, sep="")
+	soil_tbl[ind, "hru_grp"] = paste(hsg, clusters$classification, sep="")
 }
 q = soil_tbl$SNAM %in% c("Water", "Water greater than 40 acres")
 soil_tbl$hru_grp[q] = "W"
