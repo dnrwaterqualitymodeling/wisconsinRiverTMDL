@@ -10,8 +10,10 @@ The climate data used in the SWAT model was provided for the US EPA contractors 
 
 We chose an evapotranspiration method by evaluating percent bias and Nash-Sutcliffe coefficients when comparing modeled water yield to observed water yield at 20 sites acroos the basin. The three methods compared were Hargreaves, Penman-Monteith, and Preistley-Taylor. Without calibrating the initial model, Penman-Monteith outperformed the other 2 methods in both Nash-Sutcliffe coefficient and percent bias. 
 
-     pbias_harg    pbias_penman pbias_priestley 
-        204.730          30.645          42.090 
-
-     nashsut_harg    nashsut_penman nashsut_priestley 
-        17.873419          4.592568          5.179347 
+\begin{tabular}{ l c r }
+ET Method         &	Percent bias & Nash-Sutcliffe \\
+\hline	\hline
+Hargreaves        &	204.730	& 	17.873	\\
+Penman-Monteith	  &	30.645	&	4.593 	\\
+Preistley-Taylor  &	42.090	&	5.179 	\\
+\end{tabular}
