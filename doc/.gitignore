@@ -3,7 +3,6 @@ Thumbs.db
 *.bbl
 *.blg
 *.log
-*.tex
 *.docx
 *.dvi
 *.html
@@ -13,3 +12,4 @@ Thumbs.db
 *.toc
 *.lot
 *.bib
+*.synctex.gz
