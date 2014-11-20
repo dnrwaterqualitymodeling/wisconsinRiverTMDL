@@ -297,6 +297,8 @@ for (rw in 1:length(unique(soil_tbl$hru_grp))){
 		}
 	}
 }
+# converting from SSURGO's ksat units of um/sec to SWAT's mm/hr (3.6)
+agg_soil_data[,k_cols] = agg_soil_data[,k_cols] * 3
 # water's MUID/MUKEY is now 1
 agg_soil_data[nrow(agg_soil_data) + 1, c('SNAM','SEQN', 'S5ID',"TEXTURE")] <- 'W'
 update_num_cols = c('MUID',
@@ -311,9 +313,6 @@ update_num_cols = c('MUID',
 agg_soil_data[agg_soil_data$SNAM == "W", update_num_cols] <- c(1, 100, 0.23, 0.5, 0.5, 25, 25, 1, 600)
 # givin' water a D
 agg_soil_data$HYDGRP[agg_soil_data$SNAM == "W"] <- "D"
-
-# converting from SSURGO's ksat units of um/sec to SWAT's mm/hr (3.6)
-agg_soil_data[,k_cols] = agg_soil_data[,k_cols] * 3
 
 agg_soil_data$OBJECTID = 1:nrow(agg_soil_data)
 agg_soil_data$CMPPCT = 100
