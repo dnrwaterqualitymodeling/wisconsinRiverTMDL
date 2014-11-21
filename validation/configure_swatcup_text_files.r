@@ -1,14 +1,14 @@
 # CHANGE THESE ###########
 # SWAT project
-projectDir = "H:/newWetlands_15_oct.Sufi2.SwatCup"
+projectDir = "D:/WRB.Sufi2.SwatCup"
 simCount = 175
 subbasinCount = 338
 startYr = 2002
 endYr = 2013
 objFuncCode = 5
 # Observations -- variable name, column index in output.rch, subbasin ID, observed data
-obsDir = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw"
-gage_subbasin_lu = read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
+obsDir = "D:/usgs_raw"
+gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
     colClasses=c("character", "character", "integer", "integer", "character"))
 monthly = F
 
@@ -17,13 +17,13 @@ parameterization = rbind(
     c("r__CN2.mgt", -0.6, 0.2),
     c("a__SOL_AWC().sol", -0.05, 0.05),
     c("v__ESCO.hru", 0.9, 1)#,
-#     c("v__GWQMN.gw", 500, 3000),
-#     c("v__GW_REVAP.gw", 0.02, 0.2),
-#     c("v__REVAPMN.gw", 0, 500)
+    c("v__GWQMN.gw", 500, 3000),
+    c("v__GW_REVAP.gw", 0.02, 0.2),
+    c("v__REVAPMN.gw", 0, 500)
 )
 
 # Don't change these
-source("T:/Projects/Wisconsin_River/Code/validation/functions_query_output.r")
+source("D:/wisconsinRiverTMDL/validation/functions_query_output.r")
 
 gage_subbasin_lu = subset(gage_subbasin_lu, Keep == 1)
 gage_subbasin_lu = gage_subbasin_lu[c("USGS_ID", "WRB_SubbasinID")]
