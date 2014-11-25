@@ -1,7 +1,7 @@
 # CHANGE THESE ###########
 # SWAT project
-projectDir = "H:/newWetlands_15_oct.Sufi2.SwatCup"
-simCount = 175
+projectDir = "H:/swat_cup_projs/wrb_desk.Sufi2.SwatCup"
+simCount = 2
 subbasinCount = 338
 startYr = 2002
 endYr = 2013
@@ -23,7 +23,7 @@ parameterization = rbind(
 )
 
 # Don't change these
-source("T:/Projects/Wisconsin_River/Code/validation/functions_query_output.r")
+source("C:/Users/evansdm/Documents/Code/validation/functions_query_output.r")
 
 gage_subbasin_lu = subset(gage_subbasin_lu, Keep == 1)
 gage_subbasin_lu = gage_subbasin_lu[c("USGS_ID", "WRB_SubbasinID")]

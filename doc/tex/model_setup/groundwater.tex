@@ -1,2 +1,10 @@
 \subsection{Groundwater Inflow (Baseflow)}
-\subsection{Groundwater Phosphorus}
+	The SWAT parameter ALPHA_BF controls the proportion baseflow to each subbasin reach. In order to regionalize (get a more local value for) this parameter, we retrieved daily stream flow data from the USGS \href{NWIS}{http://nwis.waterdata.usgs.gov/nwis/dv} site. We selected all streams in Wisconsin larger than 19.3 $m^3$ and smaller than 386 $m^3$. This was done following WHO? Sites were also filtered so that they had at least a minimum of one year of contiguous flow data. 
+
+\subsection{Reference Phosphorus Levels}
+	Reference phosphorus, also known as background phosphorus or potential phosphorus level, refers to the amount of phosphorus found in a waterbody that would be present in the absence of human activity. This a difficult value to derive as there are very few areas that are not impacted humans at least to some extent. 
+	
+	In the Wisconsin River Basin SWAT modeling, we used values of reference phosphorus from CITE Robertson et al 2006 from their study of nutrient concentrations in wadeable streams in Wisconsin. In their study, they used "environmental phosphorus zones" as a way of dividing the state into smaller regions. These zones were derived in an earlier study by...
+	For each of the phosphorus zones, the percent land area in agricultural use and urban use was calculated along with the number of point source dischargers. Using these variables, the log concentration of phosphorus was predicted. To understand what the concentration of phosphorous would be without these human-caused variables the intercept of the equation was taken to represent the scenario where these variables were zero. These values are what we are using to in the SWAT mdoel to as background phosphorus. The SWAT subbasins were overlaid over the phosphorus zones, and the predicted reference phosphorus was extracted to each subbasin. For those subbasins that spanned more than one phosphorus zone, the area weighted average of the reference phosphorus was taken.
+	
+	These reference phosphorus levels were input into SWAT using the groundwater soluble P parameter.

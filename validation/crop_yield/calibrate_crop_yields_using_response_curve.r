@@ -1,13 +1,14 @@
-# library(sendmailR)
+# run SWAT for different crops using a range of bio E
+#   This should be run with MONTHLY output (code 0)
 wd = "H:\\WRB\\Scenarios\\Default\\TxtInOut"
 setwd(wd)
-source("T:/Projects/Wisconsin_River/Code/validation/functions_query_output.r")
+source("C:/Users/evansdm/Documents/Code/validation/functions_query_output.r")
 
 file.copy("C:/SWAT/ArcSWAT/SWAT_64rel.exe", paste(wd, "SWAT_64rel.exe", sep="\\"))
 
 cal_table = data.frame()
 for (crop in c("CORN", "SOYB", "ALFA")) {
-    for (bio_e in seq(10,90,5)) {
+    for (bio_e in seq(10,90,15)) {
         print(paste("Running SWAT with",crop,"having a Bio E of", bio_e))
         plant.dat = readLines(paste(wd, "plant.dat", sep="\\"))
         plant.dat.ind = which(substr(plant.dat, 7, 10) == crop)
@@ -52,3 +53,4 @@ for (crop in c("CORN", "SOYB", "ALFA")) {
     writeLines(plant.dat, paste(wd, "plant.dat", sep="\\"))
 }
 
+source("C:/Users/evansdm/Documents/Code/validation/calibrate_crop_yields_using_response_curve_plotting.r")

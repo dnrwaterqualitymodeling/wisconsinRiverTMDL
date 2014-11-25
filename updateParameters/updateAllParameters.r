@@ -8,8 +8,10 @@ reservoir_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/hydrology/d
 gw_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/alphaBflowSubbasin_lookup.csv"
 op_db_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/OpSchedules_fert_3Cuts_later.mdb"
 lu_op_xwalk_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/landuse_operation_crosswalk.csv"
-#UPDATE SWAT RESERVOIR PARAMETERS 
+background_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/phosphorus/background_P_from_EPZ.txt"
+soil_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Soil_Phosphorus/soil_phosphorus_by_subbasin.txt"
 
+#UPDATE SWAT RESERVOIR PARAMETERS 
 reservoir_parameters = read.csv(reservoir_parameter_file)
 
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
@@ -33,14 +35,47 @@ for (row in 1:nrow(reservoir_parameters)) {
 
 close(con)
 
+#UPDATE SWAT SOIL PHOSPHORUS PARAMETER
+soil_p = read.table(soil_p_file, header = T)
+
+inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
+con = odbcConnectAccess(inDb)
+
+for (sb in soil_p$Subbasin){   
+    soilp_query = paste(
+        "UPDATE chm",
+        "SET SOL_LABP1 = ", soil_p$SOLP[which(soil_p$Subbasin == sb)], ",",
+        "SOL_ORGP1 =", soil_p$ORGP[which(soil_p$Subbasin == sb)],
+        "WHERE SUBBASIN =", sb, "AND LANDUSE NOT IN",
+        "('BARR','FRSD', 'WATR', 'URML', 'RNGB','RNGE','WETF', 'WETN','HAY');"
+        )   
+    stdout = sqlQuery(con, soilp_query)
+}
+close(con)
+
+#UPDATE SWAT GROUNDWATER PHOSPHORUS PARAMETER
+background_p = read.table(background_p_file, header = T)
+
+inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
+con = odbcConnectAccess(inDb)
+
+for (rw in background_p$ID){
+    gwp_query = paste(
+        "UPDATE gw ",
+        "SET GWSOLP = ", background_p$layer[which(background_p$ID == rw)],
+        " WHERE SUBBASIN = ", rw, ";",
+        sep = ''
+        )   
+    stdout = sqlQuery(con, gwp_query)
+}
+close(con)
+
 #UPDATE SWAT POND PARAMETERS
 
 pond_geometry = read.csv(pond_geometry_file)
 
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 con = odbcConnectAccess(inDb)
-
-pndData = sqlQuery(con, "SELECT * FROM pnd")
 
 for (row in 1:nrow(pond_geometry)) {
 	query = paste(
