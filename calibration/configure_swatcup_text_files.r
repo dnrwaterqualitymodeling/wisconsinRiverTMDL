@@ -1,34 +1,43 @@
 # CHANGE THESE ###########
 # SWAT project
-projectDir = "H:/swat_cup_projs/wrb_desk.Sufi2.SwatCup"
-simCount = 2
+
+projectDir = "D:/WRB.Sufi2.SwatCup"
+simCount = 2001
 subbasinCount = 338
 startYr = 2002
 endYr = 2013
-objFuncCode = 5
+objFuncCode = 8
 # Observations -- variable name, column index in output.rch, subbasin ID, observed data
-obsDir = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw"
-gage_subbasin_lu = read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
+obsDir = "D:/usgs_raw"
+gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
     colClasses=c("character", "character", "integer", "integer", "character"))
-monthly = F
+monthly = T
 
+# parameterization = rbind(
+    # c("r__ALPHA_BF.gw", -0.99, -0.5),
+    # c("r__CN2.mgt", -0.6, 0.2),
+    # c("a__SOL_AWC().sol", -0.05, 0.05),
+    # c("v__ESCO.hru", 0.9, 1),
+    # c("v__GWQMN.gw", 500, 3000),
+    # c("v__GW_REVAP.gw", 0.02, 0.2),
+    # c("v__REVAPMN.gw", 0, 500)
+# )
 parameterization = rbind(
-    c("r__ALPHA_BF.gw", -0.99, -0.5),
-    c("r__CN2.mgt", -0.6, 0.2),
-    c("a__SOL_AWC().sol", -0.05, 0.05),
-    c("v__ESCO.hru", 0.9, 1)#,
-#     c("v__GWQMN.gw", 500, 3000),
-#     c("v__GW_REVAP.gw", 0.02, 0.2),
-#     c("v__REVAPMN.gw", 0, 500)
+	c("v__SFTMP.bsn",-20,20),
+	c("v__SMTMP.bsn",-20,20),
+	c("v__SMFMX.bsn",0,20),
+	c("v__SMFMN.bsn",0,20),
+	c("v__TIMP.bsn",0,1)
 )
 
 # Don't change these
 source("C:/Users/evansdm/Documents/Code/calibration/functions_query_output.r")
 
+
 gage_subbasin_lu = subset(gage_subbasin_lu, Keep == 1)
 gage_subbasin_lu = gage_subbasin_lu[c("USGS_ID", "WRB_SubbasinID")]
 observed_table = cbind(rep("FLOW_OUT", nrow(gage_subbasin_lu)),
-    rep(7, nrow(gage_subbasin_lu)),
+    rep(6, nrow(gage_subbasin_lu)),
     gage_subbasin_lu$WRB_SubbasinID,
     paste(obsDir, "/", gage_subbasin_lu$USGS_ID, ".txt", sep="")
 )
@@ -38,6 +47,9 @@ inDir = paste(projectDir,
     "/",
     toupper(strsplit(basename(projectDir), "\\.")[[1]][2]),
     ".IN",
+    sep="")
+file.cio = paste(projectDir,
+    "/file.cio",
     sep="")
 Par_inf_file = paste(inDir,
     "/par_inf.txt",
@@ -78,6 +90,19 @@ if (monthly) {
     time_series = cbind(data.frame(i = 1:nrow(time_series)), time_series)
 }
 
+# Write file.cio
+file.cio.dat = readLines(file.cio)
+if (monthly) {
+	file.cio.dat[59] = "               0    | IPRINT: print code (month, day, year)"
+} else {
+	file.cio.dat[59] = "               1    | IPRINT: print code (month, day, year)"
+}
+file.cio.dat[65] = "   2   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
+file.cio.dat[67] = "   4   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
+file.cio.dat[69] = "   6   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
+file.cio.dat[71] = "   1   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
+writeLines(file.cio.dat, file.cio)
+
 # Write par_inf file
 l1 = paste(nrow(parameterization), "  : Number of Parameters (the program only reads the first 4 parameters or any number indicated here)", sep="")
 l2 = paste(simCount, "  : number of simulations", sep="")
@@ -114,7 +139,7 @@ for (obs_i in 1:nrow(observed_table)) {
             FLOW_OBSERVED=obsMonthly[,2])
         obsData = merge(time_series, obsData, all.y=T, all.x=F)
         obsData = obsData[order(obsData$i),]
-        obsData$FLOW_OBSERVED = paste(
+        obsData$VARNAME_DATE = paste(
             observed_table[obs_i, 1],
             format(obsData$DATE, "%m"),
             format(obsData$DATE, "%Y"),
