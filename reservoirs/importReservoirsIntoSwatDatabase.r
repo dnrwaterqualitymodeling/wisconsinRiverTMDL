@@ -2,7 +2,7 @@ library(RODBC)
 
 # CHANGE THESE ###########
 # SWAT project
-projectDir = "C:/SWAT/Reservoirs_2"
+projectDir = "H:/WRB"
 reservoir_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/hydrology/dams_parameters.csv"
 
 reservoir_parameters = read.csv(reservoir_parameter_file)
@@ -15,7 +15,7 @@ con = odbcConnectAccess(inDb)
 for (row in 1:nrow(reservoir_parameters)) {
 	query = paste(
 		"UPDATE res ",
-		"SET RES_ESA = ", reservoir_parameters$MaxStorage[row], ",",
+		"SET RES_ESA = ", reservoir_parameters$MaxStorage[row] * 1.1, ",",
 		"RES_EVOL = ", reservoir_parameters$MaxS_10to4[row], ",",
 		"RES_PSA = ", reservoir_parameters$res_psa[row], ",",
 		"RES_PVOL = ", reservoir_parameters$NormS_10to[row], ",",
