@@ -22,7 +22,7 @@ resData = sqlQuery(con, "SELECT * FROM res")
 for (row in 1:nrow(reservoir_parameters)) {
 	query = paste(
 		"UPDATE res ",
-		"SET RES_ESA = ", reservoir_parameters$res_psa[row], ",",
+		"SET RES_ESA = ", reservoir_parameters$res_psa[row] * 1.5, ",",
 		"RES_EVOL = ", reservoir_parameters$res_evol[row], ",",
 		"RES_PSA = ", reservoir_parameters$res_psa[row], ",",
 		"RES_PVOL = ", reservoir_parameters$res_pvol[row], ",",
