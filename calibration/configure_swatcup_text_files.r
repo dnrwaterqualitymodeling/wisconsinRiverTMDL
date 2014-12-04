@@ -7,12 +7,13 @@ subbasinCount = 338
 startYr = 2002
 endYr = 2013
 objFuncCode = 8
+# 1=mult,2=sum,3=r2,4=chi2,5=NS,6=br2,7=ssqr,8=PBIAS,9=RSR
 # Observations -- variable name, column index in output.rch, subbasin ID, observed data
 obsDir = "D:/usgs_raw"
 gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
     colClasses=c("character", "character", "integer", "integer", "character"))
 monthly = T
-
+use_only_winter_spring = T
 # parameterization = rbind(
     # c("r__ALPHA_BF.gw", -0.99, -0.5),
     # c("r__CN2.mgt", -0.6, 0.2),
@@ -20,19 +21,36 @@ monthly = T
     # c("v__ESCO.hru", 0.9, 1),
     # c("v__GWQMN.gw", 500, 3000),
     # c("v__GW_REVAP.gw", 0.02, 0.2),
-    # c("v__REVAPMN.gw", 0, 500)
+    # c("v__REVAPMN.gw", 0, 500),
+	# c("v__RCHRG_DP.gw", 0, 1),
+	# c("v__SURLAG.bsn", 0.05, 24),
+	# c("v__GW_DELAY.gw", 0, 500),
+	# c("r__sol_z().sol", 1.5, 3),
+	# c("v__SMFMX.bsn", 0,20),
+	# c("v__canmx.hru", 0, 100),
+	# c("v__CH_K2.rte", -0.1, 500),
+	# c("r__SLSUBBSN.hru", 1.5, 2),
+	# c("v__ch_n1.sub", 0.01, 30),
+	# c("v__SFTMP.bsn",-20,20),
+	# c("v__SMTMP.bsn",-20,20),
+	# c("v__SMFMN.bsn",0,20),
+	# c("v__TIMP.bsn",0,1),
+	# c("v__BIOMIX.mgt",0,1),
+	# c("v__EPCO.hru",0,1)
 # )
 parameterization = rbind(
 	c("v__SFTMP.bsn",-20,20),
 	c("v__SMTMP.bsn",-20,20),
 	c("v__SMFMX.bsn",0,20),
 	c("v__SMFMN.bsn",0,20),
-	c("v__TIMP.bsn",0,1)
+	c("v__TIMP.bsn",0,1),
+	c("a__WET_K.pnd",0,1),
+	c("r__WET_MXVOL.pnd",2,11)
 )
 
 # Don't change these
-source("C:/Users/evansdm/Documents/Code/calibration/functions_query_output.r")
-
+source("https://raw.githubusercontent.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/master/calibration/functions_query_output.r")
+#source("C:/Users/evansdm/Documents/Code/calibration/functions_query_output.r")
 
 gage_subbasin_lu = subset(gage_subbasin_lu, Keep == 1)
 gage_subbasin_lu = gage_subbasin_lu[c("USGS_ID", "WRB_SubbasinID")]
