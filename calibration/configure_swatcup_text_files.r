@@ -13,7 +13,17 @@ obsDir = "D:/usgs_raw"
 gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
     colClasses=c("character", "character", "integer", "integer", "character"))
 monthly = T
+# to use only winter and spring months
 use_only_winter_spring = T
+#   assumed to be December to June
+mnths = c(
+    "December", 
+    "January", 
+    "February", 
+    "March", 
+    "April", 
+    "May", 
+    "June") 
 # parameterization = rbind(
     # c("r__ALPHA_BF.gw", -0.99, -0.5),
     # c("r__CN2.mgt", -0.6, 0.2),
@@ -107,7 +117,10 @@ if (monthly) {
         1))
     time_series = cbind(data.frame(i = 1:nrow(time_series)), time_series)
 }
-
+if (use_only_winter_spring){
+    wntr_sprng_ind = months(time_series$DATE) %in% mnths 
+    time_series = time_series[wntr_sprng_ind,]
+}
 # Write file.cio
 file.cio.dat = readLines(file.cio)
 if (monthly) {
