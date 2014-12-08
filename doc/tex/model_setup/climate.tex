@@ -1,6 +1,6 @@
 \subsubsection{Climate}	
 
-Provided are data concerning temperature (found in the "tmp" folder) and precipitation	(found in the "pcp" folder). The data are in two different formats, text files (.txt) and data base files (.dbf),	note that these files are, to some extent, redundant. The data in the database files are the raw data from the climate stations formatted for input to the SWAT model. The naming convention for the DBF file names is the weather station ID followed by a 'tmp' for temperature or 'pcp' for precipitation.	Similarly, the naming convention for the text files is a 't' for temperature or 'p' for precipitation, followed by the station ID. The files pcp.txt and tmp.txt contain the station names, and the latitude and longitude in WGS84 coordinate reference system.
+%Provided are data concerning temperature (found in the "tmp" folder) and precipitation	(found in the "pcp" folder). The data are in two different formats, text files (.txt) and data base files (.dbf),	note that these files are, to some extent, redundant. The data in the database files are the raw data from the climate stations formatted for input to the SWAT model. The naming convention for the DBF file names is the weather station ID followed by a 'tmp' for temperature or 'pcp' for precipitation.	Similarly, the naming convention for the text files is a 't' for temperature or 'p' for precipitation, followed by the station ID. The files pcp.txt and tmp.txt contain the station names, and the latitude and longitude in WGS84 coordinate reference system.
 
 The text files contain largely the same data as the database files, however, the text files contain a time series where any gaps in the raw data have been filled by data from the nearest climate station. If that nearest weather station was also missing data for that period, the next closest weather station's data was used to fill the gaps. 
 
@@ -9,11 +9,15 @@ The format of the database files is the Date, the daily maximum and the daily mi
 The climate data used in the SWAT model was provided for the US EPA contractors (Limnotech). This data was retrieved on 13 August, 2014 from the National Climate Data Center - Global Historic Climate Data Network.
 
 We chose an evapotranspiration method by evaluating percent bias and Nash-Sutcliffe coefficients when comparing modeled water yield to observed water yield at 20 sites acroos the basin. The three methods compared were Hargreaves, Penman-Monteith, and Preistley-Taylor. Without calibrating the initial model, Penman-Monteith outperformed the other 2 methods in both Nash-Sutcliffe coefficient and percent bias. 
-
-\begin{tabular}{ l c r }
-ET Method         &	Percent bias & Nash-Sutcliffe \\
-\hline	\hline
-Hargreaves        &	204.730	& 	-17.873	\\
-Penman-Monteith	  &	30.645	&	-4.491 	\\
-Preistley-Taylor  &	42.090	&	-5.089 	\\
-\end{tabular}
+\begin{table}[h!]
+	\caption{Soil property data for the first horizon of each cluster. Total depth is the depth of entire profile, not just the horizon. Abbreviations: $D_B$ is bulk density, AWC is available water capacity, $K_{sat}$ is saturated conductivity, C is carbon percentage, clay is percentage of clay-size particles, and sand is percentage of sand size particles.}
+	\centering
+		\begin{tabular}{ l c r }
+			ET Method         &	Percent bias & Nash-Sutcliffe \\
+			\hline	\hline
+			Hargreaves        &	204.730	& 	-17.873	\\
+			Penman-Monteith	  &	30.645	&	-4.491 	\\
+			Preistley-Taylor  &	42.090	&	-5.089 	\\
+		\end{tabular}
+		\label{table:et_method}
+	\end{table}	
