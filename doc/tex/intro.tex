@@ -1,3 +1,34 @@
 \section{Introduction}
-The Wisconsin River SWAT model
+This document is intended to describe the configuration of the Soil and Watershed Assessment Model (SWAT) for the estimation of streamflow and sources of sediment and phosphorus in the Wisconsin River basin. It is a technical document that presumes the reader has a high level of familiarity with SWAT and the Wisconsin River TMDL. In fact, it is written specifically to water quality modelers to invite a critical review to ensure the quality of the resulting estimations. The document was written after the model was configured, but before it has been calibrated. Therefore, the methods described here may change prior to the release of the final model given new findings during the calibration phase of the project. The model itself is available to be downloaded here:
+
+At a minimum, the basic SWAT configuration includes data for the following:
+
+\begin{enumerate}
+	\item Subbasin delineations
+	\item Land cover
+	\item Soil
+	\item Topographic slope
+\begin{enumerate}
+
+These elements are used to define discrete model components. Combinations of these elements form discrete units in the model that SWAT defines as hydrologic response units, or HRUs. Each of these elements has been configured for the Wisconsin River SWAT model, and HRUs have been classifed---both of these processes are described in this document. HRUs only provide a simple, physical representation of water-quality drivers, and therefore a number of additional datasets were compiled to provide supplemental information to aid in calibrating the model to streamflow, sediment, and phosphorus.
+
+
+	
+		\input{./tex/model_setup/subbasin_delineation.tex}
+		\input{./tex/model_setup/urban_delineation.tex}
+		\input{./tex/model_setup/point_sources.tex}
+		\input{./tex/model_setup/land_cover.tex}
+		\input{./tex/model_setup/soils.tex}
+		\input{./tex/model_setup/topographic_slope.tex}
+		\input{./tex/model_setup/climate.tex}
+	\pagebreak
+	\subsection{Agricultural Land Management}
+		\input{./tex/model_setup/crop_rotations.tex}
+		\input{./tex/model_setup/rotation_randomization.tex}
+		\input{./tex/model_setup/agricultural_practices.tex}
+	\pagebreak
+	\subsection{Other Model Configurations}
+		\input{./tex/model_setup/internally_draining_areas.tex}
+		\input{./tex/model_setup/groundwater.tex}
+		\input{./tex/model_setup/reservoirs.tex}
 \pagebreak
