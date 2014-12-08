@@ -75,7 +75,7 @@ for (s in 215:length(subbasins@data$Subbasin)) {
     # masking those wetlands that are coincident with ponds
     lc_sb <- mask(lc_sb, ponds_sb, inverse = T)
     
-    # subbasin sinks and sink bin
+    # subbasin sinks and sink binary
     sinks_sb <- filled_sb - dem_sb
     sinks_sb_crp <- mask(sinks_sb, subbasin)
     sinkBin_sb <- sinks_sb 
