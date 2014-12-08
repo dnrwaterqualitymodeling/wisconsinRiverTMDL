@@ -1,9 +1,20 @@
 \documentclass[10pt,letterpaper]{article}%,draft
 
+% package import
 \usepackage{report}
+\usepackage[printwatermark]{xwatermark}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{multirow}
 
+% author and title
 \author{Wisconsin Department of Natural Resources}
 \title{Estimations of loads and sources of phosphorus and sediment at ungauged sites in the Wisconsin River: Preliminary notes on SWAT model configuration}
+
+% new commands and document wide settings
+\newwatermark[allpages,angle=45,scale=3,xpos=0,ypos=0]{DRAFT}
+%	to change to footnote symbols
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
 
 \begin{document}
 
