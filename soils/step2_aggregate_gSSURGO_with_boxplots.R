@@ -28,12 +28,9 @@ excld = c(
 #     "Psammaquents",
     "Fluvaquents, wet",
     "Alluvial land, wet",
-    
     "Marsh",
-    
 	"Water",
     "Water greater than 40 acres",
-
     "Rock land",
 	"Rock outcrop",
 	"Stony and rocky land",
@@ -119,7 +116,7 @@ for (hsg in LETTERS[1:4]) {
 	clus_d_scld = scale(clus_d)
 	# For each HSG, find clusters
 	# clusters = kmeans(clus_d, centers = 3)
-	clusters = hc("VVV", clus_d_scld) #
+	clusters = Mclust(clus_d_scld) #
     clus_d_scld = cbind(clusters$classification, clus_d_scld)
     clus_d_scld = data.frame(clus_d_scld)
     names(clus_d_scld) = c(

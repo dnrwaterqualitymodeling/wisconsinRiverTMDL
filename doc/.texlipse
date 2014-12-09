@@ -1,0 +1,14 @@
+#TeXlipse project settings
+#Tue Dec 09 16:19:02 CST 2014
+markTmpDer=true
+builderNum=2
+outputDir=
+makeIndSty=
+bibrefDir=
+outputFormat=pdf
+tempDir=tmp
+mainTexFile=wisconsin_river_tmdl_model_report.tex
+outputFile=wisconsin_river_tmdl_model_report.pdf
+langSpell=en
+markDer=true
+srcDir=
