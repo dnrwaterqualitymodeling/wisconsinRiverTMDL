@@ -65,20 +65,19 @@ The first aggregation step was to aggregate components by map unit to conform to
 the SWAT soils data structure. The data structure for soils in SWAT does not
 directly conform to SSURGO data structure, mainly that there is no analog to the
 SSURGO \textit{component} level in SWAT---in other words, soils in SWAT cannot
-be subdivided. We aggregated components by computing averages of each soil
-property weighted by horizon depth and percent composition of components within
-a map unit \cite{gatzke_aggregation_2011, beaudette_algorithms_2013}. These
-averages were computed using the \texttt{slab} function in the \texttt{aqp}
-package in R \cite{beaudette_algorithms_2013}. We used this algorithm to apply a
-depth weighted average to each horizon, while also weighting the percent
-composition of each component. This achieved a robust average of the soil
-properties for each horizon, while also accounting for differing compositions of
-each component. The depth and number of horizons of the aggregated soil profile
-produced by this algorithm must be specified before processing. The depth was
-calculated by using the weighted mean of the depths of the components, with the
-weights equal to the percent composition of each component. As the number of
-horizons was not seen to matter as much as the maximum depth, an arbitrary
-number of five horizons was chosen for the aggregation algorithm.
+be subdivided. We aggregated components by computing
+component-weighted averages of each soil property for any given depth of soil from the soil surface to the average depth\cite{gatzke_aggregation_2011, beaudette_algorithms_2013}.
+These averages were computed using the \texttt{slab} function in the \texttt{aqp} package in R \cite{beaudette_algorithms_2013}. We
+used this algorithm to apply a depth weighted average to each horizon, while
+also weighting the percent composition of each component. This achieved a robust
+average of the soil properties for each horizon, while also accounting for
+differing compositions of each component. The depth and number of horizons of
+the aggregated soil profile produced by this algorithm must be specified before
+processing. The depth was calculated by using the weighted mean of the depths of
+the components, with the weights equal to the percent composition of each
+component. As the number of horizons was not seen to matter as much as the
+maximum depth, an arbitrary number of five horizons was chosen for the
+aggregation algorithm.
 
 The aggregation algorithm was not used on every mapunit. It was not necessary to
 aggregate mapunits with only one component. Additionally, the algorithm requires
