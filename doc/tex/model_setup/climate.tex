@@ -10,14 +10,16 @@ The climate data used in the SWAT model was provided for the US EPA contractors 
 
 We chose an evapotranspiration method by evaluating percent bias and Nash-Sutcliffe coefficients when comparing modeled water yield to observed water yield at 20 sites acroos the basin. The three methods compared were Hargreaves, Penman-Monteith, and Preistley-Taylor. Without calibrating the initial model, Penman-Monteith outperformed the other 2 methods in both Nash-Sutcliffe coefficient and percent bias. 
 \begin{table}[h!]
-	\caption{Soil property data for the first horizon of each cluster. Total depth is the depth of entire profile, not just the horizon. Abbreviations: $D_B$ is bulk density, AWC is available water capacity, $K_{sat}$ is saturated conductivity, C is carbon percentage, clay is percentage of clay-size particles, and sand is percentage of sand size particles.}
+	\caption[Different evapotranspiration equations ]{Different evapotranspiration equations and their percent bias and Nash-Sutcliffe coefficients.}
 	\centering
 		\begin{tabular}{ l c r }
+		\hline
 			ET Method         &	Percent bias & Nash-Sutcliffe \\
 			\hline	\hline
 			Hargreaves        &	204.730	& 	-17.873	\\
 			Penman-Monteith	  &	30.645	&	-4.491 	\\
 			Preistley-Taylor  &	42.090	&	-5.089 	\\
+			\hline
 		\end{tabular}
 		\label{table:et_method}
 	\end{table}	
