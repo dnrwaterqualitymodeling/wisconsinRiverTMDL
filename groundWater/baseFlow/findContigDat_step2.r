@@ -47,7 +47,9 @@ for (site in sites[,2]){
         print(paste("Working on", site_name, '...'))
         # here breaks are counted, and the places where the time gaps
         #   of longer than 10 days occur are noted
-        contigList <- NULL; breakcounter <- 1; jmp <- 1
+        contigList <- NULL
+		breakcounter <- 1
+		jmp <- 1
         for (day in 1:nrow(daily_data)){
             today <- daily_data$Date[day]
             nextRecord <- daily_data$Date[day+1]
@@ -100,4 +102,3 @@ for (site in sites[,2]){
     }
 }
 dev.off()
-

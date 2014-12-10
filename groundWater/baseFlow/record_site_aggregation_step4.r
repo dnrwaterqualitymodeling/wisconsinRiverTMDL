@@ -11,7 +11,8 @@ setwd(wd)
 flLst <- list.files("C:/evans/bflow/baseflow/", pattern = "*.flw")
 # bflow output, complete output with be length 7, incomplete length 4
 #       For some reason, bflow.exe would not give full outputs.
-bflowOut <- read.fwf("data_files/bflow_OutPut.txt", widths=c(15,13,13,13,7,13,14))
+bflowOut <- read.fwf("data_files/bflow_OutPut.txt", 
+	widths=c(15,13,13,13,7,13,14))
 bflowOut[,1] = gsub(" ", "", bflowOut[,1])
 # removing those without a complete output
 naOut <- bflowOut[which(is.na(bflowOut[,7])),]
