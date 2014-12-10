@@ -3,7 +3,7 @@ Soils are a critical part of the SWAT modeling framework; they determine many
 surface hydraulic properties such as texture, hydraulic conductivity, and
 available water capacity. We used the county-scale Soil Survey Geographical
 Database (SSURGO) maintained by the USDA-NRCS \cite{staff_gridded_2014}. For more information about SSURGO
-data see SSURGO metadata\footnote{\url{http://www.nrcs.usda.gov/wps/portal/nrcs/detail/soils/survey}.
+data see SSURGO metadata\footnote{\url{http://www.nrcs.usda.gov/wps/portal/nrcs/detail/soils/survey}}.
 The SSURGO database is structured by three levels of information: map units,
 components, and horizons \ref{ssurgo_schematic}. Horizons are the fundamental unit of soil in SSURGO, and are
 therefore where the majority of soil information is stored in the database.
@@ -18,7 +18,7 @@ are 1,796 map units with an average area of 15 sq. km..
 \begin{figure}[h]
   \centering
     \includegraphics[width=0.5\textwidth]{./img/ssurgo_data_structure_schematic.jpeg}
-	\caption{Schematic diagram of SSURGO data structure \cite{gatzke_aggregation_2011}.
+	\caption[Schematic diagram of SSURGO data structure]{Schematic diagram of SSURGO data structure \cite{gatzke_aggregation_2011}}.
 	\label{fig:ssurgo_shematic}
 \end{figure}
 
@@ -49,9 +49,9 @@ similarity\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiv
 
 Several changes were made to the dataset before aggregation, in order to
 facilitate processing. Soil organic carbon content is required by SWAT, but is
-given by SSURGO as soil organic matter. The organic matter value given in SSURGO
-was converted to an organic carbon value by multiplying by the average carbon
-content of soil organic matter, 50\% \citep{brady_elements_2004}. The HSG is
+given by SSURGO as soil organic matter. The organic matter (percent) value given in SSURGO
+was converted to percent organic carbon by multiplying by 50\% which is the average carbon
+content of soil organic matter \citep{brady_elements_2004}. The HSG is
 denoted as a letter in SSURGO, either A through D, or if the soil has different
 characteristics when drained, as two letters, A/D, B/D or C/D, the latter of
 which is the natural state of the soil if not artificially drained (e.g.,
@@ -87,7 +87,7 @@ aggregation algorithm.
 \begin{figure}[h]
   \centering
     \includegraphics[width=0.5\textwidth]{./img/component_schematic.png}
-	\caption{Schematic diagram of SSURGO map unit. Antigo and Houghton are aach components within the map unit. Within each component are varying numbers of components with varying horizon depths (e.g., Ap and O1 are the surface horizons for Antigo and Houghton respectively. Components were aggregated to map units by averaging soil properties (e.g., percent sand) horizontally across horizons.
+	\caption[Schematic diagram of SSURGO map unit]{Schematic diagram of SSURGO map unit. Antigo and Houghton are aach components within the map unit. Within each component are varying numbers of components with varying horizon depths (e.g., Ap and O1 are the surface horizons for Antigo and Houghton respectively. Components were aggregated to map units by averaging soil properties (e.g., percent sand) horizontally across horizons.}
 	\label{fig:component_shematic}
 \end{figure}
 
@@ -139,38 +139,29 @@ algorithm.
 
 
 Not every mapunit was included in the clustering procedure. Several of the soil property fields of the SSURGO dataset were not populated or commonly had "no data" values, these properties were not used in the
-clustering process so the spurious zeros would not influence the algorithm.
-These properties were coarse fragments, calcium carbonate, and electrical
-conductivity.  Further, we believe that several of the soil properties used by
-SWAT were not as important as others and so these properties were also excluded
-from the clustering algorithm; these variables were pH and albedo.
-
- Those mapunits that
-did not have hydrologic soil group were not included, nor were mapunits that did
-not have information on the soil properties of the horizons. These included the
-same miscellaneous mapunits as were excluded from the aggregation algorithm used
-in aggregating components to the mapunit level: pits, landfills, urban or made
-land, and rock outcrops. These miscellaneous mapunits were grouped by their
-non-soil/no-property status. Water polygons were also not included in the
-clustering analysis.
+clustering process so the spurious zeros would not influence the algorithm. These properties were coarse fragments, calcium carbonate, and electrical conductivity. Albedo and pH were also excluded from the clustering algorithm. Mapunits that had no HSG designation were not included, nor were mapunits that did not have information on the soil properties of the horizons. Examining these excluded map units revealed that they were generally disturbed landscapes or those without a significant soil layer such as pits, landfills, urban or made land, rock outcrops, and water. These miscellaneous mapunits were all grouped together as one cluster with the exception of water, which we clustered by itself.
 
 The same soil profile aggregation algorithm \citep{beaudette_algorithms_2013}
-used to aggregate several components together in the first part of the
-configuration was used to combine the soil profiles of a cluster into one
+used to aggregate several components together in the first step was used to combine the soil profiles of a cluster into one
 composite soil profile. In this implementation each mapunit was given equal
 weight in the aggregation algorithm. Those mapunits designated as miscellaneous
 were aggregated into one soil profile as the other clusters were, while the
-water mapunits were not aggregated. The miscellaneous  grouping was assigned a
-hydrologic soil group by converting the letter designation into an ordinal
+water mapunits were not aggregated. The miscellaneous grouping was assigned an
+HSG by converting the letter designation into an ordinal
 integer (that is A, B, C, D to 1, 2, 3, 4) and the average was taken, rounded to
-the nearest integer, and converted by to the appropriate hydrologic soil group
-designation, which happened to be B. Following SWAT convention, the water units
+the nearest integer, and converted back to a letter, which happened to be B. Following SWAT convention, the water units
 were given an HSG of D, and assigned an albedo of 0.23, a saturated conductivity
 of 600.
 
-A total of 35 soil classes were distilled from this process. A sample of the
-properties are found in table \ref{table:soil_prop}.
+A total of 35 soil classes were distilled from this process. The properties of each are summarized in \ref{table:soil_prop} and \ref{soil_boxplots}.
 \input{./tab/soil_property_table.tex}
+
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=\textwidth]{./img/cluster_variability.png}
+	\caption[Boxplots showing the variability of soil properties]{Boxplots showing the variability of soil properties within the final set of soil clusters. The letter above each plot denotes hydrologic soil group (HSG). Each color represents a cluster of map units. The Z score for each soil property is reported as $Z = X - \mu / \sigma$ where $X$ is the value of the soil property, $\mu$ and $\sigma$ are the population mean and standard deviation of a soil property. Outliers were excluded. The x-axis shows soil properties where tot\_depth is the soil depth, sand/silt/clay are the percent composition of each texture class, bd is bulk density, k is saturated conductivity, awc is avaiable water capacity, cbn is organic carbon concentration, and usle\_k is soil erodibility.}
+	\label{fig:soil_boxplots}
+\end{figure}
 
 Soil Phosphorus concentrations were obtained through the University of Wisconsin
 Soil Testing Laboratory \footnote{\url{http://uwlab.soils.wisc.edu/}}. Soil
@@ -189,4 +180,4 @@ concentrations were estimated as half of the reported phosphorus using the
 Bray-1 method measured with a spectrophotometer \citep{vadas_validating_2010}.
 Organic phosphorus concentrations were estimated by assuming that phosphorus
 constitues 0.85\% of organic material measured by loss of weight upon ignition
-(correspondence with Phillip Barak, needs citation).
+(correspondence with Phillip Barak, needs citation). Soil phosphorus estimates are not included in the SWAT model provided---they will be included during the phosphorus calibration phase.
