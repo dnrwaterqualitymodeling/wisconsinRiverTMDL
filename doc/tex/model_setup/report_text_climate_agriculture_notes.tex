@@ -1,0 +1,60 @@
+CLIMATE 
+
+Daily weather and climate data used in the SWAT model were downloaded from the National Climate Data Center (NCDC) - Global Historic Climate Data Network website.  Data sets from XXX different stations were downloaded.  Weather data include precipitation and temperature.  Climate data included solar radiation, wind speed, and relative humidity.  
+
+Not all stations had complete data records covering the entire timeframe being modeled.  For time periods missing precipitation or temperature data, the record was supplemented with data from the nearest weather station that did have data for that time period.  For time periods missing climate data, the record was not supplemented with data from another station.  Instead, the recommended option for SWAT is to allow the model to generate these values.  The generated values were used for all missing solar radiation, wind speed, and relative humidity data.
+
+The method selected to model potential evapotranspiration is used across all subbasins within the model.  The three methods to choose from include the Hargreaves, the Penman-Monteith, and the Preistley-Taylor methods.  We determined which method would work best by evaluating the percent bias and the Nash-Sutcliffe model efficiency coefficient........ 
+
+The Penman-Monteith equation is an energy balance and aerodynamic formula that computes water evaporation from vegetated surfaces.  The equation estimates evapotranspiration rates based on solar radiation, temperature, wind speed, and relative humidity.  The equation is:
+
+λE= DELTA(Hnet-G)+RHOair*cp[ez^o-ez]/ra
+      DELTA+GAMMA*(1+rc/ra) 
+
+where λE is the latent heat flux density (Mj m^-2 d^-1), E is the depth rate evaporation (mm d^-1), DELTA is the slope of the saturation vapor pressure-temperature curve, de/dT (kPa degree C^-1), Hnet is the net radiation (Mj m^-2 d^-1), G is the heat flux density to the ground (MJ m^-2 d^-1), RHOair is the air density (kg m^-3), cp is the specific heat at constant pressure (MJ kg^-1 degree C^-1), ez^o is the saturation vapor pressure of air at height z (kPa), ez is the water vapor pressure of air at height z (kPa), GAMMA is the psychometric constant (kPa degree C^-1), rc is the plan canopy resistance (s m^-1), and ra is the diffusion resistance of the air layer (aerodynamic resistance) (s m^-1).
+
+
+AGRICULTURAL LAND MANAGEMENT
+
+The representation of agriculture is particularly important in the WRB where agriculture covers nearly
+25\% of the 9,156 mi2 watershed and when combined with other variables such as precipitation, soils,
+and slope, agriculture can be a significant contributor of sediment and phosphorus delivery to receiving waters.  The SWAT model provides the opportunity to distinguish between land cover and land management.  One of SWAT’s strengths, and one of the primary reasons it was selected for the WRB TMDL modeling effort, is its ability to model variability in land management on a daily time step.
+
+The objective of this effort was to develop and implement a methodology to define agricultural management by integrating geospatial data and analysis, local knowledge from county Land and Water Conservation staff and agronomist, and field data. The methodology was applied to agricultural landcover within the WRB. The result is a spatial layer that defines spatiotemporal variability of agricultural land management, such as rotation, tillage, and nutrient application, for all 160-acre agricultural plots above Lake Wisconsin.  Details on how this dataset was developed can be found in the DNR report "Land Cover and Agricultural Management Definition within the Upper Wisconsin River Basin" \footnote{\url{http://dnr.wi.gov/topic/TMDLs/documents/WisconsinRiver/Technical/WRBLndManagmntJuly2014.pdf}}.  A summary of how this data was represented in SWAT can be found below.
+
+CROP ROTATIONS
+
+The generalized rotations were entered into a database where each activity was stored for the 6 year
+period. In total 15 rotations (11 dairy, 3 cash grain, and 1 potato/vegetable) were created for the WRB,
+based on the data from the CDL, information from county and regional staff, NASS census data, and
+information from our meeting with various crop consultants. Each of the 15 rotations had three
+variations, resulting in 45 rotations that were incorporated into the SWAT model.
+
+A more detailed explanation of the development of crop rotation data can be found in Section 3.2 of the "Land Cover and Agricultural Management Definition within the Upper Wisconsin River Basin".
+
+ROTATION RANDOMIZATION
+
+
+TILLAGE
+
+No unified dataset existed with data related to crop rotations such as changes in tillage practices, fertilizer application, timing of the fertilizer application, etc.  Local knowledge became essential as county and regional experts were brought together to supply this missing information and develop a regionally-specific dataset at the quarter section level. A balance was struck between relying on the satellite imagery and relying on local knowledge. The satellite imagery is trusted(with confidence percentages hovering around 95%) to spatially identify rotation types better than a local expert, but the local experts were trusted to inform the satellite-identified rotation with the land
+management information.  
+
+Transect data collected in the field provided us with tillage information by crop type. The tillage information from the transects was compared with the information that the county/regional staff provided. The tillage information was very dense and there was not consistent naming of the tillage types by county.
+
+The general tillage types and timing were interpreted by looking at the predominant tillage by
+crop type. This data corroborated what we heard from county staff, which was that
+fall tillage is predominant in the north central WRB and that spring tillage is predominant in the
+southern WRB. Note that the tillage reported is for all crop types under all rotations for each county. 
+
+INORGANIC FERTILIZER
+
+The starter fertilizer applications were changed from 200lbs/acre/year to 150lbs/acre/year. This was done in accordance to the suggestion from a panel of WDNR staff, faculty from the Unversity of Wisconsin, and private agronomists, manure haulers, and crop consultants were invited to a three hour discussion of the agricultural management data that had been created. The agricultural management process was well received by the group and only minor adjustments were made to a few of the rotations.
+
+MANURE
+
+Similar to past SWAT applications, cattle inventories were used to validate the amount of manure application reported by the counties, as well as the extent of dairy rotation identification (Baumgart 2005, Freihoefer and McGinley 2008, Timm and McGinley 2011).
+
+SWAT uses dry weight values for manure application, so reported values of liquid and solid manure were converted to dry weight values in kg/ha. The conversion process required dry weight percentages of dry manure and liquid manure. Based on previous research 6% dry weight for liquid manure and 24% dry weight for solid manure were used (Jokela and Peters 2009, Laboski and Peters 2012, NRCS 2006). Based on the DATCP dairy manure estimation calculator, it was assumed that there are 8.34 pounds of dry weight per gallon of liquid manure. 
+
+A more detailed explanation of the development of the manure data can be found in Section 3.3.5 of the "Land Cover and Agricultural Management Definition within the Upper Wisconsin River Basin".
