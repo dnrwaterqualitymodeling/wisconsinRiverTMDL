@@ -14,13 +14,6 @@ to 1:63,360) that contain one or more components that are stored non-spatially
 in the database---that is, only a list of components and their percent
 composition of the map unit is given. 
 
-\begin{figure}[h]
-  \centering
-    \includegraphics[width=0.5\textwidth]{./img/ssurgo_data_structure_schematic.jpeg}
-	\caption[Schematic diagram of SSURGO data structure]{Schematic diagram of SSURGO data structure \cite{gatzke_aggregation_2011}}.
-	\label{fig:ssurgo_schematic}
-\end{figure}
-
 We chose to use the gSSURGO distribution of SSURGO. gSSURGO is a form of the SSURGO database that is packaged in a more
 convenient form for GIS users. The tabular data representing the components and
 horizons were joined together so that each component had the data required for
@@ -82,13 +75,6 @@ component. As the number of horizons was not seen to matter as much as the
 maximum depth, an arbitrary number of five horizons was chosen for the
 aggregation algorithm.
 
-\begin{figure}[h]
-  \centering
-    \includegraphics[width=0.5\textwidth]{./img/component_schematic.png}
-	\caption[Schematic diagram of SSURGO map unit]{Schematic diagram of SSURGO map unit. Antigo and Houghton are each components within the map unit. Within each map unit are varying numbers of components with varying horizon depths (e.g., Ap and O1 are the surface horizons for Antigo and Houghton respectively. Components were aggregated to map units by averaging soil properties (e.g., percent sand) horizontally across horizons.}
-	\label{fig:component_schematic}
-\end{figure}
-
 Using the above aggregation method 48,585 individual soil components were
 aggregated to 1,603 map units. Because the HRU used in
 SWAT is derived using unique combinations of land use, slope and soil types,
@@ -124,7 +110,7 @@ settings of the function, the algorithm clustered all of the A HSG map units int
 6 clusters, and all of the other HSG classes into 9 clusters.
 
 Each of the 1603 map units had data regarding the soil property values at each
-horizon. In this format it was thought that profile depth would have undue influence over the clustering algorithm, that is deep soils would cluster together and shallow soils cluster together regardless of the nature of the other properites, causing clusters to be entirely governed by
+horizon. In this format it was thought that profile depth would have undue influence over the clustering algorithm, that is deep soils would cluster together and shallow soils cluster together regardless of the nature of the other properties, causing clusters to be entirely governed by
 depth. To remedy this issue, depth weighted averages of the horizons were taken
 to derive one value per soil property for each map unit; essentially collapsing
 the soil profile down to one aggregate horizon. Profile depth was still
@@ -147,16 +133,9 @@ the nearest integer, and converted back to a letter, which happened to be B. Fol
 were given an HSG of D, and assigned an albedo of 0.23, and a saturated conductivity
 of 600.
 
-A total of 35 soil classes were distilled from this process. An example of the properties of can be seen in \ref{table:soil_prop} and the number of map units in each cluster can be found in \input{./tab/soil_clusters_table.tex}.
+A total of 35 soil classes were distilled from this process. An example of the properties of each cluster can be seen in table \ref{table:soil_prop} and the number of map units in each cluster can be found in table \ref{tab:soil_clusterss}. 
 
 The hydrologic soil groups and the clusters within these groups are displayed in figure \ref{fig:soil_boxplots}. This figure shows the relative variability for each soil property for each cluster.
-\input{./tab/soil_property_table.tex} 
-\begin{figure}[H]
-  \centering
-    \includegraphics[width=\textwidth]{./img/cluster_variability.png}
-	\caption[Boxplots showing the variability of soil properties]{Boxplots showing the variability of soil properties within the final set of soil clusters. The letter above each plot denotes hydrologic soil group (HSG). Each color represents a cluster of map units. The Z score for each soil property is reported as $Z = X - \mu / \sigma$ where $X$ is the value of the soil property, $\mu$ and $\sigma$ are the population mean and standard deviation of a soil property. Outliers were excluded. The x-axis shows soil properties where tot\_depth is the soil depth, sand/silt/clay are the percent composition of each texture class, bd is bulk density, k is saturated conductivity, awc is available water capacity, cbn is organic carbon concentration, and usle\_k is soil erodibility.}
-	\label{fig:soil_boxplots}
-\end{figure}
 
 Soil Phosphorus concentrations were obtained through the University of Wisconsin
 Soil Testing Laboratory \footnote{\url{http://uwlab.soils.wisc.edu/}}. Soil

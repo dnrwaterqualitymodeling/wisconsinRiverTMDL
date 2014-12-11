@@ -2,10 +2,6 @@
 
 The Wisconsin River basin is a highly managed system with many reservoirs and hydroelectric dams. To calibrate the water budget of the SWAT model, we forced flow to match observed flow at impoundments where flow is measured. We assume that if flow is not measured, then the impoundment outfall flows with the run of the river. We forced flow to observed at the sites of 24 impoundments within the WRB (Table \ref{table:res_table}).
 
-\begin{landscape}
-\input{./tab/reservoir_geometries.tex}
-\end{landscape}
-
 Reservoir geometries were taken from the WDNR Statewide Dam Database\footnote{\url{http://dnr.wi.gov/topic/Dams/documents/StatewideDamData.zip}}. Principal volumes, emergency volumes, principal surface areas, and dam locations (Table \ref{table:res_table}) were taken from the columns MAX\_STORAGE\_ACFT\_AMT, NORM\_STORAGE\_ACFT\_AMT, IMPOUND\_AC\_AMT, and LL\_LAT\_DD\_AMT and LL\_LAT\_DD\_AMT, respectively. No estimates of emergency surface area exists for all reservoirs; it was therefore assumed that emergency surface area is 50\% greater than principal surface area.
 
 Outflow of all SWAT subbasins with reservoirs were forced to daily flow measurements. Daily flow measurements were compiled from the USGS NWIS \citep{usgs_nwis_2014} and the Wisconsin Valley Improvement Company (WVIC) (personal communication with Peter Hansen). For each daily time series, we inspected its hydrograph, and only used data from dams that clearly regulated flow. If the hydrograph did not appear as though the dam regulated flow, we did not force outflow of the associated subbasin to the daily observed time series, but rather estimated flow in the same way we estimate flow at the outflow of all ungaged subbasins. 
