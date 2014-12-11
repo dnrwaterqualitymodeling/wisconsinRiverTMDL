@@ -1,1 +1,38 @@
 \subsubsection{Reservoir Outflow}
+The Wisconsin River basin is a highly managed system with many reservoirs and hydroelectric dams. To calibrate the water budget of the SWAT model, we forced flow to match observed flow at impoundments where flow is measured. We assume that if flow is not measured, then the impoundment outfall flows with the run of the river. We forced flow to observed at the sites of 24 impoundments.
+\begin{table}[h!]
+	\caption[Different evapotranspiration equations ]{Different evapotranspiration equations and their percent bias and Nash-Sutcliffe coefficients.}
+	\centering
+	\begin{tabular}{ l c r }
+		\hline
+		Name & Impoundmen  & Lat            & Long & res_evol & res_pvol & res_psa
+		\hline\hline
+		DUBAY & LAKE DUBAY & 44.66496 & -89.65057 & 12581.5 & 6833.48 & 2692.38 \\
+		MERRILL & LAKE ALEXANDER & 45.17821 & -89.68643 & 135.683 & 74.0088 & 66.3685 \\
+		WILLOW RIVER RESERVOIR & WILLOW RESERVOIR & 45.71242 & -89.8447 & 12532.2 & 9349.78 & 3090.99 \\
+		TOMAHAWK & LAKE MOHAWKSON & 45.4414 & -89.7302 & 3145.37 & 1973.57 & 772.95 \\
+		BIG EAU PLEINE & BIG EAU PLEINE RESERVOIR & 44.73082 & -89.75941 & 16898.7 & 12618.5 & 2764.01 \\
+		ROTHSCHILD & LAKE WAUSAU & 44.89222 & -89.62654 & 2651.98 & 1665.2 & 776.188 \\
+		KILBOURN & KILBOURN FLOWAGE & 43.626727 & -89.7812986 & 4440.53 & 2281.94 & 755.953 \\
+		BIRON & BIRON FLOWAGE & 44.43099 & -89.78116 & 2797.53 & 2010.57 & 860.362 \\
+		CASTLE ROCK & CASTLE ROCK FLOWAGE & 43.86516 & -89.95592 & 38441.4 & 21222 & 5649.42 \\
+		STEVENS POINT & WISCONSIN RIVER FLOWAGE & 44.51648 & -89.58662 & 1850.22 & 1467.84 & 847.008 \\
+		RICE & LAKE NOKOMIS, RICE RIVER FLOW & 45.5387 & -89.74651 & 7894.27 & 5118.94 & 1794.78 \\
+		KINGS & LAKE ALICE & 45.4823742 & -89.6799475 & 1628.19 & 1295.15 & 554.015 \\
+		PRAIRIE DU SAC & LAKE WISCONSIN & 43.31004 & -89.72518 & 23830.8 & 14795.6 & 3642.17 \\
+		RHINELANDER & BOOM LAKE AND THUNDER LAKE & 45.64163 & -89.42064 & 542.731 & 357.709 & 246.454 \\
+		PETENWELL & PETENWELL FLOWAGE & 44.05768 & -90.02049 & 67483.7 & 40125.1 & 9323.97 \\
+		SPIRIT RIVER RESERVOIR & SPIRIT RIVER FLOWAGE & 45.43733 & -89.74213 & 3453.74 & 2146.26 & 848.222 \\
+		MOSINEE & MOSINEE FLOWAGE & 44.7914967 & -89.697966 & 1480.18 & 740.088 & 402.258 \\
+		RAINBOW RESERVOIR & RAINBOW FLOWAGE & 45.83372 & -89.54558 & 7293.57 & 6167.4 & 1815.02 \\
+		BUCKATAHPON & BUCKATAHPON & 46.02196593 & -89.31276606 & 764.758 & 370.044 & 433.014 \\
+		SEVENMILE & SEVENMILE & 45.87577271 & -89.06610447 & 567.401 & 259.031 & 216.507 \\
+		LOWER NINEMILE & LOWER NINEMILE & 45.89158321 & -89.13412081 & 518.062 & 345.374 & 349.244 \\
+		LITTLE SAINT GERMAIN & LITTLE SAINT GERMAIN & 45.90282156 & -89.45449917 & 740.088 & 222.026 & 416.827 \\
+
+		\hline
+	\end{tabular}
+	\label{table:res_table}
+\end{table}	
+
+

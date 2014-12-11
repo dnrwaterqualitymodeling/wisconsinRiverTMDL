@@ -1,0 +1,398 @@
+!SESSION 2014-12-10 14:56:09.639 -----------------------------------------------
+eclipse.buildId=4.4.1.M20140925-0400
+java.version=1.7.0_71
+java.vendor=Oracle Corporation
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=en_US
+Framework arguments:  -product org.eclipse.epp.package.java.product
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 -product org.eclipse.epp.package.java.product
+
+!ENTRY org.eclipse.m2e.logback.configuration 2 0 2014-12-10 14:57:14.703
+!MESSAGE Exception while setting up logging:org.eclipse.osgi.internal.framework.EquinoxConfiguration$1 cannot be cast to java.lang.String
+!STACK 0
+java.lang.ClassCastException: org.eclipse.osgi.internal.framework.EquinoxConfiguration$1 cannot be cast to java.lang.String
+	at org.eclipse.m2e.logback.configuration.LogHelper.logJavaProperties(LogHelper.java:26)
+	at org.eclipse.m2e.logback.configuration.LogPlugin.loadConfiguration(LogPlugin.java:189)
+	at org.eclipse.m2e.logback.configuration.LogPlugin.configureLogback(LogPlugin.java:144)
+	at org.eclipse.m2e.logback.configuration.LogPlugin.access$2(LogPlugin.java:107)
+	at org.eclipse.m2e.logback.configuration.LogPlugin$1.run(LogPlugin.java:62)
+	at java.util.TimerThread.mainLoop(Unknown Source)
+	at java.util.TimerThread.run(Unknown Source)
+
+!ENTRY org.eclipse.egit.ui 2 0 2014-12-10 15:00:57.862
+!MESSAGE Warning: EGit couldn't detect the installation path "gitPrefix" of native Git. Hence EGit can't respect system level
+Git settings which might be configured in ${gitPrefix}/etc/gitconfig under the native Git installation directory.
+The most important of these settings is core.autocrlf. Git for Windows by default sets this parameter to true in
+this system level configuration. The Git installation location can be configured on the
+Team > Git > Configuration preference page's 'System Settings' tab.
+This warning can be switched off on the Team > Git > Confirmations and Warnings preference page.
+
+!ENTRY org.eclipse.egit.ui 2 0 2014-12-10 15:00:57.862
+!MESSAGE Warning: The environment variable HOME is not set. The following directory will be used to store the Git
+user global configuration and to define the default location to store repositories: 'C:\Users\ruesca'. If this is
+not correct please set the HOME environment variable and restart Eclipse. Otherwise Git for Windows and
+EGit might behave differently since they see different configuration options.
+This warning can be switched off on the Team > Git > Confirmations and Warnings preference page.
+
+!ENTRY de.walware.statet.r.ui 4 20100 2014-12-10 15:02:25.236
+!MESSAGE An error occurred while submitting selected R-code to R.
+!STACK 1
+org.eclipse.core.runtime.CoreException: No session of R is active in the current workbench window.
+	at de.walware.statet.nico.ui.NicoUITools.accessTool(NicoUITools.java:139)
+	at de.walware.statet.nico.ui.NicoUITools.accessController(NicoUITools.java:180)
+	at de.walware.statet.nico.ui.NicoUITools.accessController(NicoUITools.java:168)
+	at de.walware.statet.r.internal.debug.ui.RControllerCodeLaunchConnector.submit(RControllerCodeLaunchConnector.java:72)
+	at de.walware.statet.r.internal.debug.ui.RControllerCodeLaunchConnector.submit(RControllerCodeLaunchConnector.java:55)
+	at de.walware.statet.r.launching.RCodeLaunching.runRCodeDirect(RCodeLaunching.java:435)
+	at de.walware.statet.r.internal.debug.ui.launcher.SubmitSelectionHandler.execute(SubmitSelectionHandler.java:68)
+	at org.eclipse.ui.internal.handlers.HandlerProxy.execute(HandlerProxy.java:294)
+	at org.eclipse.ui.internal.handlers.E4HandlerProxy.execute(E4HandlerProxy.java:90)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+	at java.lang.reflect.Method.invoke(Unknown Source)
+	at org.eclipse.e4.core.internal.di.MethodRequestor.execute(MethodRequestor.java:55)
+	at org.eclipse.e4.core.internal.di.InjectorImpl.invokeUsingClass(InjectorImpl.java:247)
+	at org.eclipse.e4.core.internal.di.InjectorImpl.invoke(InjectorImpl.java:229)
+	at org.eclipse.e4.core.contexts.ContextInjectionFactory.invoke(ContextInjectionFactory.java:132)
+	at org.eclipse.e4.core.commands.internal.HandlerServiceHandler.execute(HandlerServiceHandler.java:149)
+	at org.eclipse.core.commands.Command.executeWithChecks(Command.java:499)
+	at org.eclipse.core.commands.ParameterizedCommand.executeWithChecks(ParameterizedCommand.java:508)
+	at org.eclipse.e4.core.commands.internal.HandlerServiceImpl.executeHandler(HandlerServiceImpl.java:210)
+	at org.eclipse.ui.internal.handlers.LegacyHandlerService.executeCommand(LegacyHandlerService.java:343)
+	at org.eclipse.ui.menus.CommandContributionItem.handleWidgetSelection(CommandContributionItem.java:829)
+	at org.eclipse.ui.menus.CommandContributionItem.access$21(CommandContributionItem.java:815)
+	at org.eclipse.ui.menus.CommandContributionItem$5.handleEvent(CommandContributionItem.java:805)
+	at org.eclipse.swt.widgets.EventTable.sendEvent(EventTable.java:84)
+	at org.eclipse.swt.widgets.Display.sendEvent(Display.java:4353)
+	at org.eclipse.swt.widgets.Widget.sendEvent(Widget.java:1061)
+	at org.eclipse.swt.widgets.Display.runDeferredEvents(Display.java:4172)
+	at org.eclipse.swt.widgets.Display.readAndDispatch(Display.java:3761)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine$9.run(PartRenderingEngine.java:1151)
+	at org.eclipse.core.databinding.observable.Realm.runWithDefault(Realm.java:332)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine.run(PartRenderingEngine.java:1032)
+	at org.eclipse.e4.ui.internal.workbench.E4Workbench.createAndRunUI(E4Workbench.java:148)
+	at org.eclipse.ui.internal.Workbench$5.run(Workbench.java:636)
+	at org.eclipse.core.databinding.observable.Realm.runWithDefault(Realm.java:332)
+	at org.eclipse.ui.internal.Workbench.createAndRunWorkbench(Workbench.java:579)
+	at org.eclipse.ui.PlatformUI.createAndRunWorkbench(PlatformUI.java:150)
+	at org.eclipse.ui.internal.ide.application.IDEApplication.start(IDEApplication.java:135)
+	at org.eclipse.equinox.internal.app.EclipseAppHandle.run(EclipseAppHandle.java:196)
+	at org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.runApplication(EclipseAppLauncher.java:134)
+	at org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.start(EclipseAppLauncher.java:104)
+	at org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:380)
+	at org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:235)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+	at java.lang.reflect.Method.invoke(Unknown Source)
+	at org.eclipse.equinox.launcher.Main.invokeFramework(Main.java:648)
+	at org.eclipse.equinox.launcher.Main.basicRun(Main.java:603)
+	at org.eclipse.equinox.launcher.Main.run(Main.java:1465)
+	at org.eclipse.equinox.launcher.Main.main(Main.java:1438)
+!SUBENTRY 1 de.walware.statet.nico.ui 4 -1 2014-12-10 15:02:25.236
+!MESSAGE No session of R is active in the current workbench window.
+
+!ENTRY org.eclipse.equinox.preferences 4 2 2014-12-10 15:06:37.058
+!MESSAGE Problems occurred when invoking code from plug-in: "org.eclipse.equinox.preferences".
+!STACK 0
+org.eclipse.swt.SWTException: Invalid thread access
+	at org.eclipse.swt.SWT.error(SWT.java:4441)
+	at org.eclipse.swt.SWT.error(SWT.java:4356)
+	at org.eclipse.swt.SWT.error(SWT.java:4327)
+	at org.eclipse.swt.widgets.Widget.error(Widget.java:476)
+	at org.eclipse.swt.widgets.Widget.checkWidget(Widget.java:367)
+	at org.eclipse.swt.widgets.Tree.getSelection(Tree.java:3446)
+	at org.eclipse.jface.viewers.TreeViewer.getSelection(TreeViewer.java:232)
+	at org.eclipse.jface.viewers.TreeViewer.setSelection(TreeViewer.java:311)
+	at org.eclipse.jface.viewers.AbstractTreeViewer.setSelectionToWidget(AbstractTreeViewer.java:2524)
+	at org.eclipse.jface.viewers.StructuredViewer.setSelectionToWidget(StructuredViewer.java:1751)
+	at org.eclipse.jface.viewers.AbstractTreeViewer.setSelectionToWidget(AbstractTreeViewer.java:2977)
+	at org.eclipse.jface.viewers.StructuredViewer.preservingSelection(StructuredViewer.java:1443)
+	at org.eclipse.jface.viewers.TreeViewer.preservingSelection(TreeViewer.java:366)
+	at org.eclipse.jface.viewers.StructuredViewer.preservingSelection(StructuredViewer.java:1397)
+	at org.eclipse.jface.viewers.StructuredViewer.refresh(StructuredViewer.java:1525)
+	at org.eclipse.jface.viewers.ColumnViewer.refresh(ColumnViewer.java:533)
+	at org.eclipse.jface.viewers.StructuredViewer.refresh(StructuredViewer.java:1481)
+	at org.eclipse.jdt.internal.debug.ui.classpath.RuntimeClasspathViewer$1.preferenceChange(RuntimeClasspathViewer.java:58)
+	at org.eclipse.core.internal.preferences.EclipsePreferences$3.run(EclipsePreferences.java:896)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:42)
+	at org.eclipse.core.internal.preferences.EclipsePreferences.firePreferenceEvent(EclipsePreferences.java:899)
+	at org.eclipse.core.internal.preferences.EclipsePreferences.put(EclipsePreferences.java:912)
+	at org.eclipse.jdt.launching.AbstractVMInstall.evaluateSystemProperties(AbstractVMInstall.java:457)
+	at de.walware.statet.r.internal.console.ui.launching.ExtJavaJRETab$3.run(ExtJavaJRETab.java:252)
+	at org.eclipse.jface.operation.ModalContext$ModalContextThread.run(ModalContext.java:122)
+
+!ENTRY org.eclipse.equinox.preferences 4 2 2014-12-10 15:06:37.058
+!MESSAGE Problems occurred when invoking code from plug-in: "org.eclipse.equinox.preferences".
+!STACK 0
+org.eclipse.swt.SWTException: Invalid thread access
+	at org.eclipse.swt.SWT.error(SWT.java:4441)
+	at org.eclipse.swt.SWT.error(SWT.java:4356)
+	at org.eclipse.swt.SWT.error(SWT.java:4327)
+	at org.eclipse.swt.widgets.Widget.error(Widget.java:476)
+	at org.eclipse.swt.widgets.Widget.checkWidget(Widget.java:367)
+	at org.eclipse.swt.widgets.Tree.getSelection(Tree.java:3446)
+	at org.eclipse.jface.viewers.TreeViewer.getSelection(TreeViewer.java:232)
+	at org.eclipse.jface.viewers.TreeViewer.setSelection(TreeViewer.java:311)
+	at org.eclipse.jface.viewers.AbstractTreeViewer.setSelectionToWidget(AbstractTreeViewer.java:2524)
+	at org.eclipse.jface.viewers.StructuredViewer.setSelectionToWidget(StructuredViewer.java:1751)
+	at org.eclipse.jface.viewers.AbstractTreeViewer.setSelectionToWidget(AbstractTreeViewer.java:2977)
+	at org.eclipse.jface.viewers.StructuredViewer.preservingSelection(StructuredViewer.java:1443)
+	at org.eclipse.jface.viewers.TreeViewer.preservingSelection(TreeViewer.java:366)
+	at org.eclipse.jface.viewers.StructuredViewer.preservingSelection(StructuredViewer.java:1397)
+	at org.eclipse.jface.viewers.StructuredViewer.refresh(StructuredViewer.java:1525)
+	at org.eclipse.jface.viewers.ColumnViewer.refresh(ColumnViewer.java:533)
+	at org.eclipse.jface.viewers.StructuredViewer.refresh(StructuredViewer.java:1481)
+	at org.eclipse.jdt.internal.debug.ui.classpath.RuntimeClasspathViewer$1.preferenceChange(RuntimeClasspathViewer.java:58)
+	at org.eclipse.core.internal.preferences.EclipsePreferences$3.run(EclipsePreferences.java:896)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:42)
+	at org.eclipse.core.internal.preferences.EclipsePreferences.firePreferenceEvent(EclipsePreferences.java:899)
+	at org.eclipse.core.internal.preferences.EclipsePreferences.put(EclipsePreferences.java:912)
+	at org.eclipse.jdt.launching.AbstractVMInstall.evaluateSystemProperties(AbstractVMInstall.java:457)
+	at de.walware.statet.r.internal.console.ui.launching.ExtJavaJRETab$3.run(ExtJavaJRETab.java:252)
+	at org.eclipse.jface.operation.ModalContext$ModalContextThread.run(ModalContext.java:122)
+
+!ENTRY org.eclipse.equinox.preferences 4 2 2014-12-10 15:06:37.058
+!MESSAGE Problems occurred when invoking code from plug-in: "org.eclipse.equinox.preferences".
+!STACK 0
+org.eclipse.swt.SWTException: Invalid thread access
+	at org.eclipse.swt.SWT.error(SWT.java:4441)
+	at org.eclipse.swt.SWT.error(SWT.java:4356)
+	at org.eclipse.swt.SWT.error(SWT.java:4327)
+	at org.eclipse.swt.widgets.Widget.error(Widget.java:476)
+	at org.eclipse.swt.widgets.Widget.checkWidget(Widget.java:367)
+	at org.eclipse.swt.widgets.Tree.getSelection(Tree.java:3446)
+	at org.eclipse.jface.viewers.TreeViewer.getSelection(TreeViewer.java:232)
+	at org.eclipse.jface.viewers.TreeViewer.setSelection(TreeViewer.java:311)
+	at org.eclipse.jface.viewers.AbstractTreeViewer.setSelectionToWidget(AbstractTreeViewer.java:2524)
+	at org.eclipse.jface.viewers.StructuredViewer.setSelectionToWidget(StructuredViewer.java:1751)
+	at org.eclipse.jface.viewers.AbstractTreeViewer.setSelectionToWidget(AbstractTreeViewer.java:2977)
+	at org.eclipse.jface.viewers.StructuredViewer.preservingSelection(StructuredViewer.java:1443)
+	at org.eclipse.jface.viewers.TreeViewer.preservingSelection(TreeViewer.java:366)
+	at org.eclipse.jface.viewers.StructuredViewer.preservingSelection(StructuredViewer.java:1397)
+	at org.eclipse.jface.viewers.StructuredViewer.refresh(StructuredViewer.java:1525)
+	at org.eclipse.jface.viewers.ColumnViewer.refresh(ColumnViewer.java:533)
+	at org.eclipse.jface.viewers.StructuredViewer.refresh(StructuredViewer.java:1481)
+	at org.eclipse.jdt.internal.debug.ui.classpath.RuntimeClasspathViewer$1.preferenceChange(RuntimeClasspathViewer.java:58)
+	at org.eclipse.core.internal.preferences.EclipsePreferences$3.run(EclipsePreferences.java:896)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:42)
+	at org.eclipse.core.internal.preferences.EclipsePreferences.firePreferenceEvent(EclipsePreferences.java:899)
+	at org.eclipse.core.internal.preferences.EclipsePreferences.put(EclipsePreferences.java:912)
+	at org.eclipse.jdt.launching.AbstractVMInstall.evaluateSystemProperties(AbstractVMInstall.java:457)
+	at de.walware.statet.r.internal.console.ui.launching.ExtJavaJRETab$3.run(ExtJavaJRETab.java:252)
+	at org.eclipse.jface.operation.ModalContext$ModalContextThread.run(ModalContext.java:122)
+
+!ENTRY org.eclipse.ui 4 4 2014-12-10 15:06:48.945
+!MESSAGE Conflicting handlers for de.walware.statet.nico.commands.CancelAll: {de.walware.statet.nico.ui.actions.CancelHandler@332f9c3a} vs {de.walware.statet.nico.ui.actions.CancelHandler@7ab9be16}
+
+!ENTRY org.eclipse.ui 4 4 2014-12-10 15:06:48.949
+!MESSAGE Conflicting handlers for de.walware.statet.nico.commands.CancelCurrent: {de.walware.statet.nico.ui.actions.CancelHandler@648ead76} vs {de.walware.statet.nico.ui.actions.CancelHandler@531e518d}
+
+!ENTRY org.eclipse.ui 4 4 2014-12-10 15:06:48.952
+!MESSAGE Conflicting handlers for de.walware.statet.nico.commands.CancelCurrentAndPause: {de.walware.statet.nico.ui.actions.CancelHandler@14f8419d} vs {de.walware.statet.nico.ui.actions.CancelHandler@369bb52c}
+
+!ENTRY de.walware.statet.r.core 1 0 2014-12-10 15:09:08.568
+!MESSAGE Indexing: 'R'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.568
+!MESSAGE Beginning batch (index directory= 'C:\Users\ruesca\Documents\wisconsin_river_tmdl\Code\.metadata\.plugins\de.walware.statet.r.core\renv\user-local--u0tp8ea6777p\shared\index').
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.568
+!MESSAGE Setting doc dir to: 'C:\Users\ruesca\Documents\R\R-3.1.2\doc'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.568
+!MESSAGE Beginning package: 'acepack'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.568
+!MESSAGE Beginning package: 'aqp'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.568
+!MESSAGE Beginning package: 'base'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.568
+!MESSAGE Beginning package: 'boot'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.568
+!MESSAGE Beginning package: 'class'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.568
+!MESSAGE Beginning package: 'cluster'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.568
+!MESSAGE Beginning package: 'codetools'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.568
+!MESSAGE Beginning package: 'colorspace'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.568
+!MESSAGE Beginning package: 'compiler'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.568
+!MESSAGE Beginning package: 'datasets'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.568
+!MESSAGE Beginning package: 'dichromat'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'digest'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'foreign'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'Formula'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'ggplot2'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'graphics'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'grDevices'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'grid'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'gridExtra'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'gtable'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'Hmisc'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'KernSmooth'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'labeling'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'lattice'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'latticeExtra'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'MASS'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'Matrix'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'mclust'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'methods'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'mgcv'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'munsell'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'nlme'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'nnet'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'parallel'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'plotrix'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'plyr'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'proto'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'RColorBrewer'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'Rcpp'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'reshape'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'reshape2'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'rgdal'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'rj'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'rj.gd'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'RODBC'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'rpart'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'scales'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'soilDB'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'soiltexture'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'sp'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'spatial'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.569
+!MESSAGE Beginning package: 'splines'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.570
+!MESSAGE Beginning package: 'stats'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.570
+!MESSAGE Beginning package: 'stats4'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.570
+!MESSAGE Beginning package: 'stringr'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.570
+!MESSAGE Beginning package: 'survival'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.570
+!MESSAGE Beginning package: 'tcltk'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.570
+!MESSAGE Beginning package: 'tools'.
+!SUBENTRY 1 de.walware.statet.r.core 1 0 2014-12-10 15:09:08.570
+!MESSAGE Beginning package: 'utils'.
+!SUBENTRY 1 de.walware.statet.r.core 1 -1 2014-12-10 15:09:08.570
+!MESSAGE Finishing batch.
+
+!ENTRY de.walware.rj.client 4 -1 2014-12-10 15:14:41.020
+!MESSAGE Communication error detail. Send:
+MainCmdC2SList ():
+<ITEM i="0">
+ConsoleReadCmdItem
+	options= 0xc1000000
+<TEXT>
+n
+
+</TEXT>
+</ITEM>
+!STACK 0
+java.rmi.UnmarshalException: Error unmarshaling return header; nested exception is: 
+	java.net.SocketException: Connection reset
+	at sun.rmi.transport.StreamRemoteCall.executeCall(Unknown Source)
+	at sun.rmi.server.UnicastRef.invoke(Unknown Source)
+	at java.rmi.server.RemoteObjectInvocationHandler.invokeRemoteMethod(Unknown Source)
+	at java.rmi.server.RemoteObjectInvocationHandler.invoke(Unknown Source)
+	at com.sun.proxy.$Proxy19.runMainLoop(Unknown Source)
+	at de.walware.rj.server.client.AbstractRJComClient.runMainLoop(AbstractRJComClient.java:871)
+	at de.walware.rj.server.client.AbstractRJComClient.answerConsole(AbstractRJComClient.java:1146)
+	at de.walware.statet.r.nico.impl.RjsController.doSubmitL(RjsController.java:1057)
+	at de.walware.statet.nico.core.runtime.ToolController.submitToConsole(ToolController.java:1760)
+	at de.walware.statet.r.nico.AbstractRDbgController.submitToConsole(AbstractRDbgController.java:767)
+	at de.walware.statet.nico.core.runtime.ToolController$ConsoleCommandRunnable.run(ToolController.java:189)
+	at de.walware.statet.r.nico.AbstractRController$RCommandRunnable.run(AbstractRController.java:69)
+	at de.walware.statet.nico.core.runtime.ToolController.loopRunTask(ToolController.java:1252)
+	at de.walware.statet.nico.core.runtime.ToolController.loop(ToolController.java:1058)
+	at de.walware.statet.nico.core.runtime.ToolController.run(ToolController.java:572)
+	at de.walware.statet.nico.core.runtime.ToolRunner.run(ToolRunner.java:85)
+	at de.walware.statet.nico.core.runtime.ToolRunner.access$0(ToolRunner.java:83)
+	at de.walware.statet.nico.core.runtime.ToolRunner$1.run(ToolRunner.java:97)
+Caused by: java.net.SocketException: Connection reset
+	at java.net.SocketInputStream.read(Unknown Source)
+	at java.net.SocketInputStream.read(Unknown Source)
+	at java.io.BufferedInputStream.fill(Unknown Source)
+	at java.io.BufferedInputStream.read(Unknown Source)
+	at java.io.DataInputStream.readByte(Unknown Source)
+	... 18 more
+
+!ENTRY org.eclipse.ui 4 4 2014-12-10 15:14:42.061
+!MESSAGE Conflicting handlers for de.walware.statet.nico.commands.CancelCurrent: {de.walware.statet.nico.ui.actions.CancelHandler@1cc4a2b6} vs {de.walware.statet.nico.ui.actions.CancelHandler@648ead76}
+
+!ENTRY org.eclipse.ui 4 4 2014-12-10 15:14:42.070
+!MESSAGE Conflicting handlers for de.walware.statet.nico.commands.CancelAll: {de.walware.statet.nico.ui.actions.CancelHandler@332f9c3a} vs {de.walware.statet.nico.ui.actions.CancelHandler@43c30460}
+
+!ENTRY org.eclipse.ui 4 4 2014-12-10 15:14:42.077
+!MESSAGE Conflicting handlers for de.walware.statet.nico.commands.CancelAll: {de.walware.statet.nico.ui.actions.CancelHandler@332f9c3a} vs {de.walware.statet.nico.ui.actions.CancelHandler@43c30460}
+
+!ENTRY org.eclipse.ui 4 4 2014-12-10 15:14:42.084
+!MESSAGE Conflicting handlers for de.walware.statet.nico.commands.CancelCurrentAndPause: {de.walware.statet.nico.ui.actions.CancelHandler@14f8419d} vs {de.walware.statet.nico.ui.actions.CancelHandler@1eff8950}
+
+!ENTRY org.eclipse.ui 4 4 2014-12-10 15:14:42.088
+!MESSAGE Conflicting handlers for de.walware.statet.nico.commands.CancelCurrentAndPause: {de.walware.statet.nico.ui.actions.CancelHandler@14f8419d} vs {de.walware.statet.nico.ui.actions.CancelHandler@1eff8950}
+
+!ENTRY org.eclipse.jface 2 0 2014-12-10 15:15:47.364
+!MESSAGE Keybinding conflicts occurred.  They may interfere with normal accelerator operation.
+!SUBENTRY 1 org.eclipse.jface 2 0 2014-12-10 15:15:47.364
+!MESSAGE A conflict occurred for F2:
+Binding(F2,
+	ParameterizedCommand(Command(org.eclipse.ui.edit.rename,Rename,
+		Rename the selected item,
+		Category(org.eclipse.ui.category.file,File,null,true),
+		org.eclipse.ui.internal.WorkbenchHandlerServiceHandler@5da521e,
+		,,true),null),
+	org.eclipse.ui.defaultAcceleratorConfiguration,
+	org.eclipse.ui.contexts.window,,,system)
+Binding(F2,
+	ParameterizedCommand(Command(org.eclipse.ui.edit.text.showInformation,Show Tooltip Description,
+		Displays information for the current caret location in a focused hover,
+		Category(org.eclipse.ui.category.textEditor,Text Editing,Text Editing Commands,true),
+		org.eclipse.ui.internal.WorkbenchHandlerServiceHandler@e4a987,
+		,,true),null),
+	org.eclipse.ui.defaultAcceleratorConfiguration,
+	de.walware.ecommons.base.contexts.StructuredElementViewer,,,system)
+
+!ENTRY org.eclipse.m2e.logback.appender 2 0 2014-12-10 17:09:22.062
+!MESSAGE 1 threads could not be stopped

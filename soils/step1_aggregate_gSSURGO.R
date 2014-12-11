@@ -1,8 +1,5 @@
 library(reshape2)
 library(aqp)
-# library(soilDB)
-# library(RCurl)
-# library(SSOAP)
 library(plyr)
 options(stringsAsFactors = F, warn = 1)
 
@@ -164,7 +161,6 @@ for (m in wrb_mukeys){
             check.on.these = rbind(check.on.these, mc)
         }
     } else {
-        print("Slabber...")
         max_depths = aggregate(cbind(hzdepb_r, comppct_r) ~ cokey, mc, max, na.rm=T)
         max_depth = with(max_depths, weighted.mean(hzdepb_r, w = comppct_r))
     	depths(mc) = cokey ~ hzdept_r + hzdepb_r
@@ -196,7 +192,7 @@ for (m in wrb_mukeys){
 	nlayers = length(unique(mky_data$top))
 	hydgrp = round(mean(mky_data$value[mky_data$variable == "hydgrp"]))
     if (is.na(hydgrp)) {
-        hydgrp = NA # Move along, nothing to see here.
+        hydgrp = NA
     } else {
         if (hydgrp == 1) {hydgrp = "A"}
         if (hydgrp == 2) {hydgrp = "B"}
