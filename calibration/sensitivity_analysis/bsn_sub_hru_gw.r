@@ -68,6 +68,7 @@ writeLines(file.cio.dat, file.cio)
 	ncols = length(dat[[1]])
 	dat = unlist(dat)
 	dat = matrix(dat, nrow=nrows, ncol=ncols, byrow=T)
+	dat = apply(dat, 2, as.numeric)
 	
 	tf = tempfile(fileext=".csv")
 	writeLines(dat, tf)

@@ -2,10 +2,10 @@
 Soils are a critical part of the SWAT modeling framework; they determine many
 surface hydraulic properties such as texture, hydraulic conductivity, and
 available water capacity. We used the county-scale Soil Survey Geographical
-Database (SSURGO) maintained by the USDA-NRCS \cite{staff_gridded_2014}. For more information about SSURGO
+Database (SSURGO) maintained by the USDA-NRCS \citep{staff_gridded_2014}. For more information about SSURGO
 data see SSURGO metadata\footnote{\url{http://www.nrcs.usda.gov/wps/portal/nrcs/detail/soils/survey}}.
 The SSURGO database is structured by three levels of information: map units,
-components, and horizons \ref{ssurgo_schematic}. Horizons are the fundamental unit of soil in SSURGO, and are
+components, and horizons \ref{fig:ssurgo_schematic}. Horizons are the fundamental unit of soil in SSURGO, and are
 therefore where the majority of soil information is stored in the database.
 Components are aggregations of horizons that represent a full soil profile,
 typically conforming to the Official Soil Series Description (OSD). Map units
@@ -64,13 +64,13 @@ then rounded to the nearest integer and converted in the same manner to a letter
 once the aggregation was finished. For those components with dual HSGs, we
 assumed that if half of the area in the mapunit was agriculture it was drained
 and the first HSG taken; conversely, if the landuse was not majority agriculture
-then it was assumed to not be drained and the "D" designation was chosen.
+then it was assumed to not be drained and the ``D'' designation was chosen.
 
 The first aggregation step was to aggregate components by map unit to conform to
 the SWAT soils data structure. The data structure for soils in SWAT does not
 directly conform to SSURGO data structure, mainly that there is no analog to the
 SSURGO \textit{component} level in SWAT---in other words, soils in SWAT cannot
-be subdivided \ref{component_schematic}. We aggregated components by computing
+be subdivided, see figure \ref{fig:component_schematic}. We aggregated components by computing
 component-weighted averages of each soil property for any given depth of soil from the soil surface to the average depth\cite{gatzke_aggregation_2011, beaudette_algorithms_2013}.
 These averages were computed using the \texttt{slab} function in the \texttt{aqp} package in R \cite{beaudette_algorithms_2013}. We
 used this algorithm to apply a depth weighted average to each horizon, while
@@ -88,7 +88,7 @@ aggregation algorithm.
   \centering
     \includegraphics[width=0.5\textwidth]{./img/component_schematic.png}
 	\caption[Schematic diagram of SSURGO map unit]{Schematic diagram of SSURGO map unit. Antigo and Houghton are aach components within the map unit. Within each component are varying numbers of components with varying horizon depths (e.g., Ap and O1 are the surface horizons for Antigo and Houghton respectively. Components were aggregated to map units by averaging soil properties (e.g., percent sand) horizontally across horizons.}
-	\label{fig:component_shematic}
+	\label{fig:component_schematic}
 \end{figure}
 
 Using the above aggregation method 48,585 individual soil components were
@@ -153,13 +153,14 @@ the nearest integer, and converted back to a letter, which happened to be B. Fol
 were given an HSG of D, and assigned an albedo of 0.23, a saturated conductivity
 of 600.
 
-A total of 35 soil classes were distilled from this process. The properties of each are summarized in \ref{table:soil_prop} and \ref{soil_boxplots}.
-\input{./tab/soil_property_table.tex}
+A total of 35 soil classes were distilled from this process. The properties of each are summarized in \ref{table:soil_prop} and the number of mapunits in each cluster can be found in \input{./tab/soil_clusters_table.tex}.
 
-\begin{figure}[h!]
+The hydrologic soil groups, the  \ref{fig:soil_boxplots}.
+\input{./tab/soil_property_table.tex} 
+\begin{figure}[H]
   \centering
     \includegraphics[width=\textwidth]{./img/cluster_variability.png}
-	\caption[Boxplots showing the variability of soil properties]{Boxplots showing the variability of soil properties within the final set of soil clusters. The letter above each plot denotes hydrologic soil group (HSG). Each color represents a cluster of map units. The Z score for each soil property is reported as $Z = X - \mu / \sigma$ where $X$ is the value of the soil property, $\mu$ and $\sigma$ are the population mean and standard deviation of a soil property. Outliers were excluded. The x-axis shows soil properties where tot\_depth is the soil depth, sand/silt/clay are the percent composition of each texture class, bd is bulk density, k is saturated conductivity, awc is avaiable water capacity, cbn is organic carbon concentration, and usle\_k is soil erodibility.}
+	\caption[Boxplots showing the variability of soil properties]{Boxplots showing the variability of soil properties within the final set of soil clusters. The letter above each plot denotes hydrologic soil group (HSG). Each color represents a cluster of map units. The Z score for each soil property is reported as $Z = X - \mu / \sigma$ where $X$ is the value of the soil property, $\mu$ and $\sigma$ are the population mean and standard deviation of a soil property. Outliers were excluded. The x-axis shows soil properties where tot\_depth is the soil depth, sand/silt/clay are the percent composition of each texture class, bd is bulk density, k is saturated conductivity, awc is available water capacity, cbn is organic carbon concentration, and usle\_k is soil erodibility.}
 	\label{fig:soil_boxplots}
 \end{figure}
 
