@@ -1,4 +1,0 @@
-2014-12-10 15:00:59,593 [Worker-3] INFO  org.eclipse.jetty.server.Server - jetty-8.1.14.v20131031
-2014-12-10 15:00:59,625 [Worker-3] INFO  o.e.jetty.server.AbstractConnector - Started SelectChannelConnector@127.0.0.1:56450
-2014-12-10 17:09:22,011 [Framework stop] INFO  o.e.j.server.handler.ContextHandler - stopped o.e.j.s.ServletContextHandler{/rhelp,null}
-2014-12-10 17:09:22,061 [Framework stop] WARN  o.e.j.util.thread.QueuedThreadPool - 1 threads could not be stopped
