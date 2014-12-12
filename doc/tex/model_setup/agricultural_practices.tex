@@ -1,6 +1,26 @@
+The representation of agriculture is particularly important in the WRB where agriculture covers nearly
+25\% of the watershed, and when combined with other variables such as precipitation, soils,
+and slope, agriculture can be a significant contributor of sediment and phosphorus delivery to receiving waters.  The SWAT model provides the opportunity to distinguish between land cover and land management.  One of SWAT’s strengths, and one of the primary reasons it was selected for the WRB TMDL modeling effort, is its ability to model variability in land management on a daily time step.
+
+The objective of this effort was to develop and implement a methodology to define agricultural management by integrating geospatial data and analysis, local knowledge from county Land and Water Conservation staff and agronomist, and field data. The methodology was applied to agricultural landcover within the WRB. The result is a spatial layer that defines spatiotemporal variability of agricultural land management, such as rotation, tillage, and nutrient application for any given 900 mi$^2$ pixel in the basin-wide grid. All methods described in Section \ref{sec:ag_land_mgt} are fully described in \cite{wdnr_landcover_2014}.
+
 \subsubsection{Tillage}
-For a detailed description of tillage definitions, see WDNR Land Management Report\footnote{\url{http://dnr.wi.gov/topic/TMDLs/documents/WisconsinRiver/Technical/WRBLndManagmntJuly2014.pdf}}.
+
+No unified dataset existed with data related to crop rotations such as changes in tillage practices, fertilizer application, timing of the fertilizer application, etc.  Local knowledge became essential as county and regional experts were brought together to supply this missing information and develop a regionally-specific dataset at the quarter section level. A balance was struck between relying on the satellite imagery and relying on local knowledge. The satellite imagery is trusted (with confidence percentages hovering around 95\%) to spatially identify rotation types better than a local expert, but the local experts were trusted to inform the satellite-identified rotation with the land management information.  
+
+Transect data collected in the field provided us with tillage information by crop type. The tillage information from the transects was compared with the information that the county/regional staff provided. The tillage information was very dense and there was not consistent naming of the tillage types by county.
+
+The general tillage types and timing were interpreted by looking at the predominant tillage by
+crop type. This data corroborated what we heard from county staff, which was that
+fall tillage is predominant in the north central WRB and that spring tillage is predominant in the
+southern WRB. Note that the tillage reported is for all crop types under all rotations for each county.
+
 \subsubsection{Inorganic Fertilizer}
-Starter fertilizer, 20-10-18 N-P-K applied at 150 lbs/acre/year (consult SWAT manual to convert to proper units).
+
+The starter fertilizer applications were changed from 0.22 to 0.17 $tons \cdot ha^-1 \cdot yr^-1$. This was done in accordance to the suggestion from a panel of WDNR staff, faculty from the Unversity of Wisconsin, and private agronomists, manure haulers, and crop consultants were invited to a three hour discussion of the agricultural management data that had been created. The agricultural management process was well received by the group and only minor adjustments were made to a few of the rotations.
+
 \subsubsection{Manure}
-For a detailed description of manure definitions, see see WDNR Land Management Report\footnotemark[\value{footnote}].
+
+Similar to past SWAT applications, cattle inventories were used to validate the amount of manure application reported by the counties, as well as the extent of dairy rotation identification \citep{baumgart_source_2005, freihoefer_mead_2007, timm_swat_2011}.
+
+SWAT uses dry weight values for manure application, so reported values of liquid and solid manure were converted to dry weight values in kg/ha. The conversion process required dry weight percentages of dry manure and liquid manure. Based on previous research 6\% dry weight for liquid manure and 24\% dry weight for solid manure were used (Jokela and Peters 2009, Laboski and Peters 2012, NRCS 2006). Based on the DATCP dairy manure estimation calculator, it was assumed that there are 8.34 pounds of dry weight per gallon of liquid manure.
