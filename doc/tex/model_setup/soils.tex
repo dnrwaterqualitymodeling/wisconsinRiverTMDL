@@ -14,16 +14,9 @@ to 1:63,360) that contain one or more components that are stored non-spatially
 in the database---that is, only a list of components and their percent
 composition of the map unit is given. 
 
-We chose to use the gSSURGO distribution of SSURGO. gSSURGO is a form of the SSURGO database that is packaged in a more
-convenient form for GIS users. The tabular data representing the components and
+We chose to use the gSSURGO distribution of SSURGO. gSSURGO is a form of the SSURGO database that is packaged in a more convenient form for GIS users. The tabular data representing the components and
 horizons were joined together so that each component had the data required for
-the SWAT model; these properties were hydrologic soil group (HSG), albedo,
-horizon depths, bulk density, available water capacity, organic matter,
-saturated conductivity, total percentage of clay/silt/sand, USLE K factor,
-electrical conductivity, calcium carbonate concentrations, pH (1 to 1 in water),
-and coarse fragment percentage. Of these, the hydrologic soil group and albedo
-were stored at the component level, while all other properties were stored at
-the horizon level. For all these properties, the representative value given by
+the SWAT model (Table \ref{table:soil_attr_in_swat}). For all these properties, the representative value given by
 SSURGO was used. For more information about these parameters see the SSURGO
 metadata\footnote{\url{http://www.nrcs.usda.gov/wps/portal/nrcs/detail/soils/survey/?cid=nrcs142p2_053631}}.
 
@@ -37,7 +30,7 @@ hydrologic cycle. This was a two step process: first, components within map
 units were aggregated
 together\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/blob/master/soils/step1_aggregate_gSSURGO.R} } ,
 and second, map units were aggregated together based on
-similarity\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/blob/master/soils/step2_aggregate_gSSURGO.R}}.
+similarity\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/blob/master/soils/step2_aggregate_gSSURGO.R}} \ref{fig:agg_flow_diagram}.
 
 Several changes were made to the dataset before aggregation, in order to
 facilitate processing. Soil organic carbon content is required by SWAT, but is
@@ -80,7 +73,7 @@ aggregated to 1,603 map units. Because the HRU used in
 SWAT is derived using unique combinations of land use, slope and soil types,
 this number of soil map units is still too many for efficient computation  and so
 the second step of the soils data configuration was necessary to further reduce
-the number of soil types. %\textbf{[More justification necessary?]}
+the number of soil types.
 
 Other researchers have aggregated soil types by their taxonomic class
 \citep{gatzke_aggregation_2011} but Soil Taxonomy, the soil classification
@@ -119,7 +112,7 @@ property and so in this way it is represented but does not dominate the clusteri
 algorithm.
 
 Not every map unit was included in the clustering procedure. Several of the soil property fields of the SSURGO dataset were not populated or commonly had ``no data'' values, these properties were not used in the
-clustering process so the spurious zeros would not influence the algorithm. These properties were coarse fragments, calcium carbonate, and electrical conductivity. Albedo and pH were also excluded from the clustering algorithm. Mapunits that had no HSG designation were not included, nor were map units that did not have information on the soil properties of the horizons. Examining these excluded map units revealed that they were generally disturbed landscapes or those without a significant soil layer such as pits, landfills, urban or made land, rock outcrops, and water. These miscellaneous map units were all grouped together as one cluster with the exception of water, which we did not use in the cluster analysis.
+clustering process so the spurious zeros would not influence the algorithm (Table \ref{table:soil_attr_in_swat}). These properties were coarse fragments, calcium carbonate, and electrical conductivity. Albedo and pH were also excluded from the clustering algorithm. Mapunits that had no HSG designation were not included, nor were map units that did not have information on the soil properties of the horizons. Examining these excluded map units revealed that they were generally disturbed landscapes or those without a significant soil layer such as pits, landfills, urban or made land, rock outcrops, and water. These miscellaneous map units were all grouped together as one cluster with the exception of water, which we did not use in the cluster analysis.
 
 The same soil profile aggregation algorithm \citep{beaudette_algorithms_2013}
 used to aggregate several components together in the first step was used to combine the soil profiles of a cluster into one
