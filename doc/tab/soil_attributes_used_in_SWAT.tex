@@ -1,8 +1,8 @@
 \begin{table}[h]
-	\centering
+	
 	\caption{Soil attributes used in SWAT and the methods used to cluster SSURGO map units. The listed soil attributes are all soil properties used in SWAT. Not all these properties were used to cluster soil map units. The aggregation method is the aggregation function used to simplify the properties used in the clustering algorithm. Also listed are the original tables where the soil properties are located in SSURGO.}
-	\\
-	\begin{tabular}{cccc}
+	\centering
+	\begin{tabular}{lccc}
 		\hline
 		Variable                               & Used in clustering? & Aggregation method  & SSURGO table \\
 		\hline \hline
@@ -13,16 +13,16 @@
 		Clay ($\%$)                            & Yes                 & depth-weighted mean & chorizon     \\
 		Electric conductivity ($dS / m$)       & No                  & depth-weighted mean & chorizon     \\
 		Horizon depth ($mm$)                   & Yes                 & Sum of all horizons & chorizon     \\
-		Hydrologic soil group                  & Yes                 & category*           & component    \\
+		Hydrologic soil group                  & Yes                 & category\footnote{Prior to clustering, map units were first categorized by Hydrologic Soil Group (HSG).}           & component    \\
 		Organic carbon ($\%$)                  & Yes                 & depth-weighted mean & chorizon     \\
 		pH                                     & No                  & depth-weighted mean & chorizon     \\
 		Rock fragments ($\%$)                  & No                  & depth-weighted mean & chfrags      \\
 		Sand ($\%$)                            & Yes                 & depth-weighted mean & chorizon     \\
 		Saturated conductivity ($\mu m / sec$) & No                  & depth-weighted mean & chorizon     \\
 		Silt ($\%$)                            & Yes                 & depth-weighted mean & chorizon     \\
-		USLE erodibility                       & Yes                 & surface horizon     & chorizon     \\
+		USLE erodibility\footnote{Universal Soil Loss Equation}                       & Yes                 & surface horizon     & chorizon     \\
 		\hline
-		\multicolumn{4}{l}{*\textit{Prior to clustering, map units were first categorized by Hydrologic Soil Group (HSG).}}
+		%\multicolumn{4}{l}{*\textit{}}
 		\label{table:soil_attr_in_swat}
 	\end{tabular}
 \end{table}

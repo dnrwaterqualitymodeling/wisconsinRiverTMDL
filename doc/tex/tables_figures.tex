@@ -1,11 +1,40 @@
-%FIG = schematic fig of ssurgo data struct
-	\begin{figure}[h]
-	  \centering
-	    \includegraphics[width=0.5\textwidth]{./img/ssurgo_data_structure_schematic.jpeg}
-		\caption[Schematic diagram of SSURGO data structure]{Schematic diagram of SSURGO data structure \cite{gatzke_aggregation_2011}}.
-		\label{fig:ssurgo_schematic}
-	\end{figure}
-%FIG = schematic diagram of ssurgo mapunit
+\section{Tables}
+
+\begin{landscape}
+\input{./tab/soil_attributes_used_in_SWAT.tex}
+\end{landscape}
+
+\input{./tab/soil_clusters_table.tex}
+
+\input{./tab/soil_property_table.tex}
+
+\begin{table}[h!]
+	\caption[Different evapotranspiration equations ]{Different evapotranspiration equations and their percent bias and Nash-Sutcliffe coefficients.}
+	\centering
+	\begin{tabular}{ l c r }
+		\hline
+		ET Method         &	Percent bias & Nash-Sutcliffe \\
+		\hline	\hline
+		Hargreaves        &	204.730	& 	-17.873	\\
+		Penman-Monteith	  &	30.645	&	-4.491 	\\
+		Preistley-Taylor  &	42.090	&	-5.089 	\\
+		\hline
+	\end{tabular}
+	\label{table:et_method}
+\end{table}	
+
+\begin{landscape}
+	\input{./tab/reservoir_geometries.tex}
+\end{landscape}
+
+\section{Figures}
+
+\begin{figure}[h]
+\centering
+ \includegraphics[width=0.5\textwidth]{./img/ssurgo_data_structure_schematic.jpeg}
+	\caption[Schematic diagram of SSURGO data structure]{Schematic diagram of SSURGO data structure \cite{gatzke_aggregation_2011}}.
+	\label{fig:ssurgo_schematic}
+\end{figure}
 
 \begin{figure}[h]
   \centering
@@ -14,38 +43,10 @@
 	\label{fig:component_schematic}
 \end{figure}
 
-%TAB = number of mapunits in cluster
-\input{./tab/soil_clusters_table.tex}
-
-%TAB = soil property data
-\input{./tab/soil_property_table.tex} 
-
-%FIG = boxplot horrendograms
 \clearpage
-	\begin{figure}[H]
-	  \centering
-	    \includegraphics[width=\textwidth]{./img/cluster_variability.png}
-		\caption[Boxplots showing the variability of soil properties]{Boxplots showing the variability of soil properties within the final set of soil clusters. The letter above each plot denotes hydrologic soil group (HSG). Each color represents a cluster of map units. The Z score for each soil property is reported as $Z = X - \mu / \sigma$ where $X$ is the value of the soil property, $\mu$ and $\sigma$ are the population mean and standard deviation of a soil property. Outliers were excluded. The x-axis shows soil properties where tot\_depth is the soil depth, sand/silt/clay are the percent composition of each texture class, bd is bulk density, k is saturated conductivity, awc is available water capacity, cbn is organic carbon concentration, and usle\_k is soil erodibility.}
-		\label{fig:soil_boxplots}
-	\end{figure}
-
-%TAB = evapo transp
-
-	\begin{table}[h!]
-	\caption[Different evapotranspiration equations ]{Different evapotranspiration equations and their percent bias and Nash-Sutcliffe coefficients.}
+\begin{figure}[H]
 	\centering
-		\begin{tabular}{ l c r }
-		\hline
-			ET Method         &	Percent bias & Nash-Sutcliffe \\
-			\hline	\hline
-			Hargreaves        &	204.730	& 	-17.873	\\
-			Penman-Monteith	  &	30.645	&	-4.491 	\\
-			Preistley-Taylor  &	42.090	&	-5.089 	\\
-			\hline
-		\end{tabular}
-		\label{table:et_method}
-			\end{table}	
-%TAB = goddamn geometries 
-\begin{landscape}
-\input{./tab/reservoir_geometries.tex}
-\end{landscape}
+	\includegraphics[width=\textwidth]{./img/cluster_variability.png}
+	\caption[Boxplots showing the variability of soil properties]{Boxplots showing the variability of soil properties within the final set of soil clusters. The letter above each plot denotes hydrologic soil group (HSG). Each color represents a cluster of map units. The Z score for each soil property is reported as $Z = X - \mu / \sigma$ where $X$ is the value of the soil property, $\mu$ and $\sigma$ are the population mean and standard deviation of a soil property. Outliers were excluded. The x-axis shows soil properties where tot\_depth is the soil depth, sand/silt/clay are the percent composition of each texture class, bd is bulk density, k is saturated conductivity, awc is available water capacity, cbn is organic carbon concentration, and usle\_k is soil erodibility.}
+	\label{fig:soil_boxplots}
+\end{figure}
