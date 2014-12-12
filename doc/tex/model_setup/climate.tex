@@ -1,4 +1,4 @@
-\subsubsection{Climate}	
+\subsubsection{Climate}	\label{sec:climate}
 
 %Provided are data concerning temperature (found in the "tmp" folder) and precipitation	(found in the "pcp" folder). The data are in two different formats, text files (.txt) and data base files (.dbf),	note that these files are, to some extent, redundant. The data in the database files are the raw data from the climate stations formatted for input to the SWAT model. The naming convention for the DBF file names is the weather station ID followed by a 'tmp' for temperature or 'pcp' for precipitation.	Similarly, the naming convention for the text files is a 't' for temperature or 'p' for precipitation, followed by the station ID. The files pcp.txt and tmp.txt contain the station names, and the latitude and longitude in WGS84 coordinate reference system.
 
@@ -8,11 +8,11 @@ Not all stations had complete data records covering the entire timeframe being m
 
 The method selected to model potential evapotranspiration is used across all subbasins within the model.  The three methods to choose from include the Hargreaves, the Penman-Monteith, and the Preistley-Taylor methods.  We determined which method would work best by evaluating the percent bias and the Nash-Sutcliffe model efficiency coefficient  when comparing modeled water yield to observed water yield at 20 sites across the basin. The three methods compared were Hargreaves, Penman-Monteith, and Preistley-Taylor. Without calibrating the initial model, Penman-Monteith outperformed the other two methods in both Nash-Sutcliffe coefficient and percent bias, table \ref{table:et_method}.
 
-The Penman-Monteith equation is an energy balance and aerodynamic formula that computes water evaporation from vegetated surfaces.  The equation estimates evapotranspiration rates based on solar radiation, temperature, wind speed, and relative humidity.  The equation is:
+The Penman-Monteith equation is an energy balance and aerodynamic formula that computes water evaporation from vegetated surfaces.  The equation estimates evapotranspiration rates based on solar radiation, temperature, wind speed, and relative humidity.  The equation is: 
 
 \begin{equation}
-	\gamma E = \frac{\delta(H_{net}-G) + \rho_{air} * c_p * [e_z^o-e_z]/r_a}
-	{\delta + \gamma * (1 + r_c/r_a)}
+	\gamma E = \frac{\delta(H_{net}-G) + \rho_{air} \cdot c_p \cdot [e_z^o-e_z]/r_a}
+	{\delta + \gamma \cdot (1 + r_c/r_a)}
 \end{equation}
 
 %where λE is the latent heat flux density (Mj m^-2 d^-1), E is the depth rate evaporation (mm d^-1), DELTA is the slope of the saturation vapor pressure-temperature curve, de/dT (kPa degree C^-1), Hnet is the net radiation (Mj m^-2 d^-1), G is the heat flux density to the ground (MJ m^-2 d^-1), RHOair is the air density (kg m^-3), cp is the specific heat at constant pressure (MJ kg^-1 degree C^-1), ez^o is the saturation vapor pressure of air at height z (kPa), ez is the water vapor pressure of air at height z (kPa), GAMMA is the psychometric constant (kPa degree C^-1), rc is the plan canopy resistance (s m^-1), and ra is the diffusion resistance of the air layer (aerodynamic resistance) (s m^-1).

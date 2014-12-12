@@ -1,4 +1,4 @@
-\subsubsection{Soils}
+\subsubsection{Soils}\label{sec:soils}
 Soils are a critical part of the SWAT modeling framework; they determine many
 surface hydraulic properties such as texture, hydraulic conductivity, and
 available water capacity. We used the county-scale Soil Survey Geographical
@@ -35,7 +35,7 @@ be feasible to acquire. To reduce the number of HRUs in the model, we aggregated
 soils together based on similarity of several key properties that impact the
 hydrologic cycle. This was a two step process: first, components within map
 units were aggregated
-together\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/blob/master/soils/step1_aggregate_gSSURGO.R}},
+together\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/blob/master/soils/step1_aggregate_gSSURGO.R} } ,
 and second, map units were aggregated together based on
 similarity\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/blob/master/soils/step2_aggregate_gSSURGO.R}}.
 
@@ -54,7 +54,7 @@ HSG, it was treated as any other soil property in the aggregation process and
 then rounded to the nearest integer and converted in the same manner to a letter
 once the aggregation was finished. For those components with dual HSGs, we
 assumed that if half of the area in the map unit was agriculture it was drained
-and the first HSG taken; conversely, if the landuse was not majority agriculture
+and the first HSG taken; conversely, if the land use was not majority agriculture
 then it was assumed to not be drained and the ``D'' designation was chosen.
 
 The first aggregation step was to aggregate components by map unit to conform to
