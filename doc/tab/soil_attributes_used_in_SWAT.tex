@@ -1,0 +1,29 @@
+\begin{table}[h]
+	
+	\caption{Soil attributes used in SWAT and the methods used to cluster SSURGO map units. The listed soil attributes are all soil properties used in SWAT. Not all these properties were used to cluster soil map units. The aggregation method is the aggregation function used to simplify the properties used in the clustering algorithm. Also listed are the original tables where the soil properties are located in SSURGO.}
+	\centering
+	\begin{tabular}{lllll}
+		\hline
+		Variable                               & Used in clustering? & Aggregation method  & SSURGO table & Column name  \\
+		\hline \hline
+		Albedo dry                             & Yes                 & surface horizon     & component    & albedodry\_r \\
+		Available water capacity ($cm / cm$)   & Yes                 & depth-weighted mean & chorizon     & awc\_r       \\
+		Bulk density ($g / cm^3$)              & Yes                 & depth-weighted mean & chorizon     & dbovendry\_r \\
+		Calcium carbonate ($\%$)               & No                  & depth-weighted mean & chorizon     & caco3\_r     \\
+		Clay ($\%$)                            & Yes                 & depth-weighted mean & chorizon     & claytotal\_r \\
+		Electric conductivity ($dS / m$)       & No                  & depth-weighted mean & chorizon     & ec\_r        \\
+		Horizon depth ($mm$)                   & Yes                 & Sum of all horizons & chorizon     & hzdepb\_r    \\
+		Hydrologic soil group                  & Yes                 & category*           & component    & hydgrp\_r    \\
+		Organic carbon ($\%$)                  & Yes                 & depth-weighted mean & chorizon     & cbn\_r       \\
+		pH                                     & No                  & depth-weighted mean & chorizon     & ph1to1h2o\_r \\
+		Rock fragments ($\%$)                  & No                  & depth-weighted mean & chfrags      & fragvol\_r   \\
+		Sand ($\%$)                            & Yes                 & depth-weighted mean & chorizon     & sandtotal\_r \\
+		Saturated conductivity ($\mu m / sec$) & No                  & depth-weighted mean & chorizon     & ksat\_r      \\
+		Silt ($\%$)                            & Yes                 & depth-weighted mean & chorizon     & silttotal\_r \\
+		USLE** erodibility                     & Yes                 & surface horizon     & chorizon     & usle\_kwfact \\
+		\hline
+		\multicolumn{4}{l}{*\textit{Prior to clustering, map units were first categorized by Hydrologic Soil Group (HSG).}} \\
+		\multicolumn{4}{l}{**\textit{Universal Soil Loss Equation}}
+		\label{table:soil_attr_in_swat}
+	\end{tabular}
+\end{table}

@@ -1,0 +1,59 @@
+\section{Tables}
+
+\begin{landscape}
+\input{./tab/soil_attributes_used_in_SWAT.tex}
+\end{landscape}
+
+\input{./tab/soil_clusters_table.tex}
+
+\input{./tab/soil_property_table.tex}
+
+\begin{table}[h!]
+	\caption[Different evapotranspiration equations ]{Different evapotranspiration equations and their percent bias and Nash-Sutcliffe coefficients.}
+	\centering
+	\begin{tabular}{ l c r }
+		\hline
+		ET Method         &	Percent bias & Nash-Sutcliffe \\
+		\hline	\hline
+		Hargreaves        &	204.730	& 	-17.873	\\
+		Penman-Monteith	  &	30.645	&	-4.491 	\\
+		Preistley-Taylor  &	42.090	&	-5.089 	\\
+		\hline
+	\end{tabular}
+	\label{table:et_method}
+\end{table}	
+
+\begin{landscape}
+	\input{./tab/reservoir_geometries.tex}
+\end{landscape}
+
+\section{Figures}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{./img/aggregation_flow_diagram}
+	\caption[Flow diagram of the soil aggregation process]{Flow diagram of the soil aggregation process. Horizons are grouped together according to which component they belong. Components are grouped together according to which map unit they  belong. A weighted average is calculated, based upon the component percentage. Mapunits are grouped together according to hydrologic soil group  and are then assigned to a cluster based on a clustering algorithm. Clusters are created by aggregated map units together using a depth-weighted horizon average of soil properties.}
+	\label{fig:agg_flow_diagram}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+ \includegraphics[width=0.5\textwidth]{./img/ssurgo_data_structure_schematic.jpeg}
+	\caption[Schematic diagram of SSURGO data structure]{Schematic diagram of SSURGO data structure \cite{gatzke_aggregation_2011}}.
+	\label{fig:ssurgo_schematic}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+    \includegraphics[width=0.5\textwidth]{./img/component_schematic.png}
+	\caption[Schematic diagram of SSURGO map unit]{Schematic diagram of SSURGO map unit. Antigo and Houghton are each components within the map unit. Within each map unit are varying numbers of components with varying horizon depths (e.g., Ap and O1 are the surface horizons for Antigo and Houghton respectively. Components were aggregated to map units by averaging soil properties (e.g., percent sand) horizontally across horizons.}
+	\label{fig:component_schematic}
+\end{figure}
+
+\clearpage
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{./img/cluster_variability.png}
+	\caption[Boxplots showing the variability of soil properties]{Boxplots showing the variability of soil properties within the final set of soil clusters. The letter above each plot denotes hydrologic soil group (HSG). Each color represents a cluster of map units. The Z score for each soil property is reported as $Z = X - \mu / \sigma$ where $X$ is the value of the soil property, $\mu$ and $\sigma$ are the population mean and standard deviation of a soil property. Outliers were excluded. The x-axis shows soil properties where tot\_depth is the soil depth, sand/silt/clay are the percent composition of each texture class, bd is bulk density, k is saturated conductivity, awc is available water capacity, cbn is organic carbon concentration, and usle\_k is soil erodibility.}
+	\label{fig:soil_boxplots}
+\end{figure}

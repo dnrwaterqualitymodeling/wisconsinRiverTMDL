@@ -1,0 +1,49 @@
+%\subsubsection{Model Data}
+\label{sec:model_data}
+The Wisconsin River Basin (WRB) SWAT model distributed for review contains all the files necessary to run the model. The ArcSWAT program was used to set up the SWAT project and so the file structure was determined by this program. 
+
+Much of the model configuration was done with the R statistical package (files with a .r extension) and the Python scripting language (files ending with .py). These scripts can be found on GitHub\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/tree/model_setup_public}} website and the WDNR water quality modeling team's page. Below is a brief description of the contents of each code folder and how the scripts inside were used, included are references and links to sections for further description of methods. The titles of each folder are listed here as they appear on the GitHub site.
+
+\begin{itemize}
+\item ``climate'' --- contains scripts pertaining to the processing of the temperature, precipitation, relative humidity and solar radiation and the nearest neighbor approach to filling in missing data (see Section \ref{sec:climate})
+
+\item ``DEM'' --- script for processing the WRB elevation data
+
+\item ``LandManagement'' --- the script correlateCdlAndDatcpDairy.R is for validating the predictions of the generalized rotation algorithm\footnote{The generalized rotation algorithm used was the algorithm from within the EVAAL tool, the script of which can be found here \url{https://github.com/dnrwaterqualitymodeling/EVAAL/blob/master/__EVAAL__.pyt}} and GeneralizeMergeLandManagementLandCover.R is for creating a map of the land management types of the WRB (see Section \ref{sec:ag_land_mgt})
+
+\item ``et'' --- the scripts contained in the folder pertain to investigating the proper equation for modeling evapotranspiration in the WRB (see Section \ref{sec:climate})
+
+\item ``groundWater'' --- the script baseflow\_phosphorus contains the processing for estimating the amount of phosphorus from the groundwater and the scripts in the baseFlow folder contain the files for carrying out the processing and modeling for the baseflow contribution to streams (see Section \ref{sec:gwp} and \ref{sec:baseflow})
+
+\item ``hydrology'' --- calculateRunoffUsingBaseflowSeparation.R is a script for developing a basin-wide water balance estimates and formatting the outflows from the basin reservoirs
+
+\item ``landCover'' --- {\bf...Aaron?}
+
+\item ``ponds'' --- these scripts are used in the processing and modeling to derive pond parameters for SWAT (see Section \ref{sec:ponds} 
+
+\item ``soils'' --- scripts for determining which HSG to assign to dual hydrologic soil group map units, for aggregating SSURGO data, and processing the soil phosphorus data  (see Section \ref{sec:soils} 
+
+\item ``updateParameters'' --- the script in this folder is used to update the ArcSWAT database with specific data derived in many of the scripts in these folders; they include:
+	\begin{itemize}
+	\item Management operations
+		\begin{itemize}
+		\item Crop rotations 
+		\item Plant harvest schedule
+		\item Fertilizer type/amount/schedule
+		\end{itemize}
+	\item Groundwater
+		\begin{itemize}
+		\item Baseflow
+		\item Groundwater phosphorus
+		\end{itemize}
+	\item Reservoirs
+	\item Wetlands
+	\item Ponds
+	\item Soil phosphorus	
+	\end{itemize} 
+
+\item ``watershedAggregation'' --- scripts for aggregating the WHDPlus small watersheds up to the SWAT subbasins  (see Section \ref{sec:sub_delineation})
+
+\item ``wetlands'' --- script for calculating wetland parameters  (see Section \ref{sec:wetlands})
+
+\end{itemize}

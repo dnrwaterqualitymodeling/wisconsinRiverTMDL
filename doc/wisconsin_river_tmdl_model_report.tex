@@ -1,14 +1,10 @@
 \documentclass[10pt,letterpaper]{article}%,draft
 
 \usepackage{report}
-\usepackage[printwatermark]{xwatermark}
-\usepackage{xcolor}
-\usepackage{graphicx}
-
-\newwatermark[allpages,angle=45,scale=3,xpos=0,ypos=0]{DRAFT}
-
+	
 \author{Wisconsin Department of Natural Resources}
 \title{Estimations of loads and sources of phosphorus and sediment at ungauged sites in the Wisconsin River basin: preliminary notes on SWAT model configuration}
+
 
 \begin{document}
 
@@ -18,15 +14,11 @@
 \tableofcontents
 \pagebreak
 
-\listoffigures
-\pagebreak
-
-\listoftables
-\pagebreak
-
+\input{./tex/abbreviations.tex}
 \input{./tex/intro.tex}
 \input{./tex/model_setup.tex}
 \input{./tex/conclusion.tex}
+\input{./tex/tables_figures.tex}
 
 \bibliography{./library}
 \bibliographystyle{plainnat}

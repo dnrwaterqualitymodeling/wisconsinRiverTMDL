@@ -1,25 +1,18 @@
-\subsubsection{Climate}	
+\subsubsection{Climate}	\label{sec:climate}
 
 %Provided are data concerning temperature (found in the "tmp" folder) and precipitation	(found in the "pcp" folder). The data are in two different formats, text files (.txt) and data base files (.dbf),	note that these files are, to some extent, redundant. The data in the database files are the raw data from the climate stations formatted for input to the SWAT model. The naming convention for the DBF file names is the weather station ID followed by a 'tmp' for temperature or 'pcp' for precipitation.	Similarly, the naming convention for the text files is a 't' for temperature or 'p' for precipitation, followed by the station ID. The files pcp.txt and tmp.txt contain the station names, and the latitude and longitude in WGS84 coordinate reference system.
 
-The text files contain largely the same data as the database files, however, the text files contain a time series where any gaps in the raw data have been filled by data from the nearest climate station. If that nearest weather station was also missing data for that period, the next closest weather station's data was used to fill the gaps. 
+Daily weather and climate data used in the SWAT model were downloaded from the National Climate Data Center (NCDC) - Global Historic Climate Data Network website.  Data sets from XXX different stations were downloaded.  Weather data include precipitation and temperature.  Climate data included solar radiation, wind speed, and relative humidity.  
 
-The format of the database files is the Date, the daily maximum and the daily minimum, in Celsius for temperature and millimeters for precipitation. The value -99 means that there was no data for that day. The text files were formatted specifically for ArcSWAT. The first line contains the starting date of the model simulation, in the format yyyymmdd (19900101 or 1 January, 1990). Each row after this contains minimum and maximum daily temperature or precipitation. All the dates in the warm-up period until the beginning of the model period (1 January, 2002) are given the value of -99, thus the first 12 years do not have climate data, but are represented in the text files for SWAT input. 
+Not all stations had complete data records covering the entire timeframe being modeled.  For time periods missing precipitation or temperature data, the record was supplemented with data from the nearest weather station that did have data for that time period.  For time periods missing climate data, the record was not supplemented with data from another station.  Instead, the recommended option for SWAT is to allow the model to generate these values.  The generated values were used for all missing solar radiation, wind speed, and relative humidity data. 
 
-The climate data used in the SWAT model was provided for the US EPA contractors (Limnotech). This data was retrieved on 13 August, 2014 from the National Climate Data Center - Global Historic Climate Data Network.
+The method selected to model potential evapotranspiration is used across all subbasins within the model.  The three methods to choose from include the Hargreaves, the Penman-Monteith, and the Preistley-Taylor methods.  We determined which method would work best by evaluating the percent bias and the Nash-Sutcliffe model efficiency coefficient  when comparing modeled water yield to observed water yield at 20 sites across the basin. The three methods compared were Hargreaves, Penman-Monteith, and Preistley-Taylor. Without calibrating the initial model, Penman-Monteith outperformed the other two methods in both Nash-Sutcliffe coefficient and percent bias, table \ref{table:et_method}.
 
-We chose an evapotranspiration method by evaluating percent bias and Nash-Sutcliffe coefficients when comparing modeled water yield to observed water yield at 20 sites acroos the basin. The three methods compared were Hargreaves, Penman-Monteith, and Preistley-Taylor. Without calibrating the initial model, Penman-Monteith outperformed the other 2 methods in both Nash-Sutcliffe coefficient and percent bias. 
-\begin{table}[h!]
-	\caption[Different evapotranspiration equations ]{Different evapotranspiration equations and their percent bias and Nash-Sutcliffe coefficients.}
-	\centering
-		\begin{tabular}{ l c r }
-		\hline
-			ET Method         &	Percent bias & Nash-Sutcliffe \\
-			\hline	\hline
-			Hargreaves        &	204.730	& 	-17.873	\\
-			Penman-Monteith	  &	30.645	&	-4.491 	\\
-			Preistley-Taylor  &	42.090	&	-5.089 	\\
-			\hline
-		\end{tabular}
-		\label{table:et_method}
-	\end{table}	
+The Penman-Monteith equation is an energy balance and aerodynamic formula that computes water evaporation from vegetated surfaces.  The equation estimates evapotranspiration rates based on solar radiation, temperature, wind speed, and relative humidity.  The equation is: 
+
+\begin{equation}
+	\gamma E = \frac{\delta(H_{net}-G) + \rho_{air} \cdot c_p \cdot [e_z^o-e_z]/r_a}
+	{\delta + \gamma \cdot (1 + r_c/r_a)}
+\end{equation}
+
+%where λE is the latent heat flux density (Mj m^-2 d^-1), E is the depth rate evaporation (mm d^-1), DELTA is the slope of the saturation vapor pressure-temperature curve, de/dT (kPa degree C^-1), Hnet is the net radiation (Mj m^-2 d^-1), G is the heat flux density to the ground (MJ m^-2 d^-1), RHOair is the air density (kg m^-3), cp is the specific heat at constant pressure (MJ kg^-1 degree C^-1), ez^o is the saturation vapor pressure of air at height z (kPa), ez is the water vapor pressure of air at height z (kPa), GAMMA is the psychometric constant (kPa degree C^-1), rc is the plan canopy resistance (s m^-1), and ra is the diffusion resistance of the air layer (aerodynamic resistance) (s m^-1).

@@ -1,226 +1,125 @@
-args <- commandArgs(TRUE)
-start_i = args[1]
-end_i = args[2]
-out_raster_dir = args[3]
-out_geometry_file = args[4]
-  
-# start_i = 2
-# end_i = 2
-# out_raster_dir = "K:/temp/wetlands_rasters"
-# out_geometry_file = "T:/Projects/Wisconsin_River/GIS_datasets/wetlands/wetland_geometry_1.csv"
-
 library(rgdal)
 library(rgeos)
 library(raster)
 
-rasterOptions(tmpdir="K:/temp")
-presumed_depth_of_wetlands = 0.5 # meters
-perennial_threshold = 200 # pixels
+# Items that need addressing:
+#     1.) How are land locked ponds/lakes incorporated in these calculations?
+#     Should those areas be subtracted from each subbasin before processing?
+#     2.) What is the conversion factor for the volume? Units are 10^4 m^3?
 
-# out_wetland_ca_file = "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands/wetland_ca.tif"
-# out_wetland_mxsa_file = "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands/wetland_mxsa.tif"
-
-mi_dir = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs"
-wd = "T:/Projects/Wisconsin_River/GIS_Datasets"
+wd <- "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands"
 setwd(wd)
+# 
+gd_dir <- "T:/Projects/Wisconsin_River/GIS_Datasets"
+# orginal dem
+dem <- raster(paste(gd_dir, 'DEM','wrb_dem',sep ='/'))
+# filled dem
+dem_fl <- raster(paste(gd_dir, 'DEM','wrb_fill',sep ='/'))
 
-optFillExe = "T:\\Projects\\Wisconsin_River\\Code\\general_software/OptimizedPitRemoval.exe"
-
+#ponds
+# watersheds_ll = readOGR("ponds", "landlocked_watersheds")
+# watersheds_ll_df = watersheds_ll@data
+# subbasins_dissolve = gUnionCascaded(subbasins)
+# watersheds_ll = gIntersection(watersheds_ll, subbasins_dissolve, drop_not_poly=T, byid=T)
+# watersheds_ll = SpatialPolygonsDataFrame(watersheds_ll,
+#     data=data.frame(watersheds_ll_df, row.names=row.names(watersheds_ll)))
+# #rasterizing ponds
+# ponds <- rasterize(watersheds_ll, dem, field = watersheds_ll$Subbasin)
+# ponds <- reclassify(pondsRas,     
+#         rbind(c(-Inf,Inf,1)))
+# 
+# writeRaster(ponds, 'ponds.tif')
+ponds <- raster('ponds.tif')
+# land cover
+# lc_lm <- raster("T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/landcoverlandmanagement.img")
+# lc_lm <- resample(lc_lm, dem)
+# lc_lm <- reclassify(lc_lm, 
+#            rbind(
+    #             c(-Inf,6.5,NA),
+    #             c(6.5,9.5,1),
+    #             c(9.5,Inf,NA)
+#     ))
+# writeRaster("wetland_landcover.tif")
+# already resampled and reclassed so wetland areas are 1
+lc_lm <- raster("wetland_landcover.tif")
+    # 7 is woody wetlands
+    # 8 is herbaceous wetlands
+    # 9 is cranberries
 subbasins = readOGR("T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro",
                     "subbasins_minus_urban_boundaries")
-watersheds_ll = readOGR("ponds", "landlocked_watersheds")
-watersheds_ll_df = watersheds_ll@data
-subbasins_dissolve = gUnionCascaded(subbasins)
-watersheds_ll = gIntersection(watersheds_ll, subbasins_dissolve, drop_not_poly=T, byid=T)
-watersheds_ll = SpatialPolygonsDataFrame(watersheds_ll,
-    data=data.frame(watersheds_ll_df, row.names=row.names(watersheds_ll)))
-
-if (file.exists("C:/TEMP/dem.grd") == F) {
-    dem = raster(paste(mi_dir, "DEM/30m_dem_wrb_2milebuffer.img", sep="/"))
-    writeRaster(dem, "C:/TEMP/dem.grd", "raster", overwrite=T)
-    dem = raster("C:/TEMP/dem.grd")
-} else {
-    dem = raster("C:/TEMP/dem.grd")
-}
-if (file.exists("C:/TEMP/lc_lm.grd") == F) {
-    lc_lm = raster(paste(mi_dir, "LandCoverLandManagement/landcoverlandmanagement.img", sep="/"))
-    writeRaster(lc_lm, "C:/TEMP/lc_lm.grd", "raster", overwrite=T)
-    lc_lm = raster("C:/TEMP/lc_lm.grd")
-} else {
-    lc_lm = raster("C:/TEMP/lc_lm.grd")
-}
-
-proj4string(subbasins) = proj4string(dem)
-
-py_file = gsub("\\\\", "/", tempfile(pattern="watershed_", fileext=".py"))
-py_prefix = paste(
-    "import arcpy;",
-    "from arcpy.sa import *;",
-    "from arcpy import env;",
-    "env.overwriteOutput = True;",
-    "arcpy.CheckOutExtension('Spatial');",
-    sep=""
-)
-dem_asc = gsub("\\\\", "/", tempfile(pattern="dem_", fileext=".asc"))
-dem_tif = gsub("\\\\", "/", tempfile(pattern="dem_", fileext=".tif"))
-optim_fill_asc = gsub("\\\\", "/", tempfile(pattern="optim_fill_", fileext=".asc"))
-optim_fill_tif = gsub("\\\\", "/", tempfile(pattern="optim_fill_", fileext=".tif"))
-fill_tif = gsub("\\\\", "/", tempfile(pattern="fill_", fileext=".tif"))
-fdr_tif = gsub("\\\\", "/", tempfile(pattern="fdr_", fileext=".tif"))
-sd8_tif = gsub("\\\\", "/", tempfile(pattern="sd8_", fileext=".tif"))
-ca_tif = gsub("\\\\", "/", tempfile(pattern="ca_", fileext=".tif"))
-seed_tif = gsub("\\\\", "/", tempfile(pattern="seed_", fileext=".tif"))
-watershed_tif = gsub("\\\\", "/", tempfile(pattern="watershed_", fileext=".tif"))
-
-# 7 is woody wetlands
-# 8 is herbaceous wetlands
-# 9 is cranberries
 
 geometry_table = data.frame()
-for (s in subbasins@data$Subbasin[start_i:end_i]) {
+# failed after 148 subbasins, due to lack of memory, 
+#   added clean up lines to hopefully improve. sb 149 is huge.
+for (s in 215:length(subbasins@data$Subbasin)) {
+#     s <- 250
+    # for elapsed time
+    ptm <- proc.time()[3]
     print("###################")
     print(" ")
-    print(paste("Subbasin :", s))
+    print(paste("Subbasin:", s))
     print(" ")
-    print("###################")
-    wetland_ca_file = paste(out_raster_dir, "/wetland_ca_", s, "_", ".tif", sep="")
-    wetland_mxsa_file = paste(out_raster_dir, "/wetland_mxsa_", s, "_", ".tif", sep="")
-    if (file.exists(wetland_ca_file) & file.exists(wetland_mxsa_file)) {next}
     subbasin = subset(subbasins, Subbasin == s)
     subbasin_buffer = gBuffer(subbasin, width = 600)
-    e = alignExtent(subbasin, lc_lm)
-    e_buffer = alignExtent(subbasin_buffer, lc_lm)
-    mask_dem = mask(crop(dem, e_buffer), subbasin_buffer)
-    mask_lc_lm = mask(crop(lc_lm, e_buffer), subbasin_buffer)
-    mask_lc_lm = reclassify(mask_lc_lm, 
-    rbind(
-        c(-Inf,6.5,NA),
-        c(6.5,9.5,1),
-        c(9.5,Inf,NA)
-    ))    
-    # write dem to ASCII file
-    writeRaster(mask_dem, dem_asc, format="ascii", overwrite=T)
-    writeRaster(mask_dem, dem_tif, format="GTiff", options=c("COMPRESS=NONE"), overwrite=T)
-    # Create optimized fill file
-    optim_fill_cmd = paste(optFillExe, '-z', dem_asc, '-fel', optim_fill_asc, '-mode',
-                           'bal', '-step', '0.1')
-    optim_fill_stdout = system(optim_fill_cmd)
-    # Read in optimized fill file and define projection
-    optim_fill = raster(optim_fill_asc)
-    proj4string(optim_fill) = proj4string(mask_dem)
-    # Write optimized fill to tiff for watershed analysis
-    writeRaster(optim_fill, optim_fill_tif, format="GTiff", options=c("COMPRESS=NONE"), overwrite=T)
-    # Fill pits in the standard way
-    fill_cmd = paste("mpiexec -n 4 pitremove -z", dem_tif, "-fel", fill_tif)
-    fill_stdout = system(fill_cmd) 
-    # D8 flow directions for watershed delineation
-    fdr_cmd = paste("mpiexec -n 4 D8Flowdir -fel", optim_fill_tif, "-p", fdr_tif, "-sd8", sd8_tif)
-    fdr_stdout = system(fdr_cmd)
-    fdr = raster(fdr_tif)
-    # Calculate contributing area to mask out perennial pixels
-    ca_cmd = paste("mpiexec -n 8 AreaD8 -p", fdr_tif, "-ad8", ca_tif, "-nc")
-    ca_stdout = system(ca_cmd)
-    ca = raster(ca_tif)
-    # Reclassify D8 flow directions for use in ArcGIS
-    fdr = reclassify(fdr,
-        rbind(
-         c(-Inf,1.5,1), # 1
-         c(1.5,2.5,128), 
-         c(2.5,3.5,64), 
-         c(3.5,4.5,32),
-         c(4.5,5.5,16),
-         c(5.5,6.5,8),
-         c(6.5,7.5,4),
-         c(7.5,Inf,2)
-        )
-    )
-    # Mask out perennial pixels from seeds to discourage propogation of watersheds downstream
-    perennial = reclassify(ca,
-        rbind(
-           c(-Inf,perennial_threshold,1),
-           c(perennial_threshold,Inf,NA)
-        )
-    )
-    seeds = mask_lc_lm
-    seeds[is.na(perennial)] = NA
-    writeRaster(fdr, fdr_tif, format="GTiff", options=c("COMPRESS=NONE"),
-                overwrite=T, datatype='INT1U')
-    writeRaster(seeds, seed_tif, format="GTiff", options=c("COMPRESS=NONE"),
-                overwrite=T,datatype='INT1U')
-    py_code = paste(py_prefix,
-        "w = Watershed(Raster('",
-        fdr_tif,
-        "'), Raster('",
-        seed_tif,
-        "'));w.save('",
-        watershed_tif,
-        "')",
-        sep=""
-    )
-    write(py_code, py_file)
-    py_cmd = paste("python", py_file)
-    py_stdout = system(py_cmd)
-    watershed = raster(watershed_tif)
-    watershed[mask_lc_lm == 1] = 1
-    watershed = mask(crop(watershed, e), subbasin)
-    mask_lc_lm = mask(crop(mask_lc_lm, e), subbasin)
-    if (any(gContains(subbasin, watersheds_ll, byid=T)[,1])) {
-        contained_watersheds_ll = subset(watersheds_ll, gContains(subbasin, watersheds_ll, byid=T)[,1])
-        contained_watersheds_ll_rast = rasterize(contained_watersheds_ll, watershed)
-        watershed[!is.na(contained_watersheds_ll_rast)] = NA
-        mask_lc_lm[!is.na(contained_watersheds_ll_rast)] = NA
-    }
-    wet_nsa = length(which(!is.na(getValues(mask_lc_lm)))) * 0.09
-    wet_nvol = wet_nsa * presumed_depth_of_wetlands
-    wet_vol = wet_nvol
-    fill = raster(fill_tif)
-    diff = fill - mask_dem
-    diff_bin = diff
-    diff_bin[diff_bin > 0] = 1
-    diff_bin[diff_bin == 0] = NA
-    diff_bin = mask(crop(diff_bin, e), subbasin)
-    fill_poly = rasterToPolygons(diff_bin)
-    if (any(gContains(subbasin, watersheds_ll, byid=T)[,1])) {
-        if (any(gIntersects(contained_watersheds_ll, fill_poly, byid=T)[,1] == F)) {
-            fill_poly = subset(fill_poly,
-                               gIntersects(contained_watersheds_ll, fill_poly, byid=T)[,1] == F)
-        }
-    }
-    wetlands_poly = gUnionCascaded(rasterToPolygons(mask_lc_lm))
-    if (any(gIntersects(wetlands_poly, fill_poly, byid=T)[,1])) {
-        fill_poly = subset(fill_poly, gIntersects(wetlands_poly, fill_poly, byid=T)[,1])
-    }
-    wet_mxsa = wet_nsa + gArea(fill_poly) * 0.0001
-    fill_intersect = rasterize(fill_poly, mask_lc_lm, "layer")
-    fill_intersect = mask(fill_intersect, subbasin)
-    wetland_mxsa_subbasin = sum(fill_intersect, mask_lc_lm, na.rm=T)
-    wetland_mxsa_subbasin[wetland_mxsa_subbasin > 1] = 1
-    wetland_mxsa_subbasin[wetland_mxsa_subbasin == 0] = NA
-    lost_pixels = is.na(getValues(watershed)) & getValues(fill_intersect) == 1
-    watershed[lost_pixels] = 1
-    wet_fr = (length(which(!is.na(getValues(watershed)))) * 900) / gArea(subbasin)
-    if (any(gContains(subbasin, watersheds_ll, byid=T)[,1])) {
-        fill_intersect[!is.na(contained_watersheds_ll_rast)] = NA
-    }
-    diff = mask(crop(diff, e), wetland_mxsa_subbasin)
-    depths = getValues(diff)[!is.na(getValues(wetland_mxsa_subbasin))]
-    vols = depths * 0.09
-    wet_mxvol = sum(vols) + wet_nvol
-    row = data.frame(
-        subbasin = subbasin@data$Subbasin,
-        WET_FR = wet_fr,
-        WET_NSA = wet_nsa,
-        WET_NVOL = wet_nvol,
-        WET_VOL = wet_vol,
-        WET_MXSA = wet_mxsa,
-        WET_MXVOL = wet_mxvol
-    )
-    writeRaster(watershed, wetland_ca_file, format="GTiff")
-    writeRaster(wetland_mxsa_subbasin, wetland_mxsa_file, format="GTiff")
-    if (!file.exists(out_geometry_file)) {
-        write.csv(row, file=out_geometry_file, row.names=F)
-    } else {
-        write.table(row, file=out_geometry_file, row.names=F, col.names=F, append=T, sep=",")
-    }
-    removeTmpFiles(h=0.01)
+    # extents to speed processing     
+    e = alignExtent(subbasin, dem)
+    e_buffer = alignExtent(subbasin_buffer, dem)
+    print('Reducing data to subbasin area...')
+    # dem and filled dem clipped
+    dem_sb <- mask(crop(dem, e_buffer), subbasin_buffer) 
+    filled_sb <- mask(crop(dem_fl, e_buffer), subbasin_buffer) 
+    #processing lc
+    lc_sb <- mask(crop(lc_lm, e_buffer), subbasin_buffer)
+    # ponds, ponds = 1, else NA
+    ponds_sb <- mask(crop(ponds, e_buffer), subbasin_buffer)
+    # masking those wetlands that are coincident with ponds
+    lc_sb <- mask(lc_sb, ponds_sb, inverse = T)
+    
+    # subbasin sinks and sink binary
+    sinks_sb <- filled_sb - dem_sb
+    sinks_sb_crp <- mask(sinks_sb, subbasin)
+    sinkBin_sb <- sinks_sb 
+    sinkBin_sb[sinkBin_sb > 0] <- 1
+    sinkBin_sb[sinkBin_sb == 0] <- NA
+    sinkBin_sb_crp <- mask(sinkBin_sb, subbasin)
+
+    ### finding SA and V normal
+    wet_n <- lc_sb * sinkBin_sb
+    wet_n_crp <- mask(wet_n, subbasin)
+    # multiplying the number of wetland cells
+    #   by the pixel length and width and converting to ha
+    print("Calculating Normal and maximum SA and Vols...")
+    SA_N <- cellStats(wet_n_crp, stat = sum, na.rm = T) * (10*10)*0.0001
+    # units are 10^4-m3?
+    volRast <- (wet_n_crp * 0.5) * (10*10) 
+    # what is the conversion factor?
+    V_N <- cellStats(volRast, stat = sum, na.rm = T) * 0.0001
+    ### finding SA and V maximum
+    SA_MAX <- cellStats(sinkBin_sb_crp, stat = sum, na.rm = T) * (10*10)*0.0001
+    volRast_max <- (sinks_sb_crp) * (10*10) * 0.0001 
+    V_MAX <- cellStats(volRast_max, stat = sum, na.rm = T) + V_N
+    # fraction draining to wetland
+    WET_FR <- SA_MAX/(gArea(subbasin)*0.0001)
+    
+    rw <- c(s, WET_FR, SA_N, V_N, V_N, SA_MAX, V_MAX)
+    geometry_table <- rbind(geometry_table, rw)
+    elpsd <- proc.time()[3] - ptm
+    print(paste('Elapsed time for this subbasin:',round(elpsd,2),'seconds.'))
+    print("###################")
 }
+names(geometry_table) <- c('subbasin','WET_FR','WET_NSA','WET_NVOL','WET_VOL','WET_MXSA','WET_MXVOL')
+write.csv(geometry_table, 'testGeom_new_v3_pt2.csv',row.names = F)
+
+    # giving a unique ID to contiguous areas of sinks
+#     sinkBinClump <- clump(sinkBin_sb_crp)
+#     # finding which sink areas overlie mapped wetlands 
+#     zonMat_bool <- zonal(wet_n_crp, sinkBinClump, fun = 'sum')
+#     #finding the sink depths
+#     zonMat_depth <- zonal(sinks_sb_crp, sinkBinClump, fun = 'sum')
+#     # finding the number of cells in each sink clump
+#     zonMat_area <- zonal(sinkBin_sb_crp, sinkBinClump, fun = 'sum')
+#     #aggregating
+#     zonMat <- data.frame(Zone = zonMat_bool[,1],
+#                          Wetland = zonMat_bool[,2] > 0,
+#                          n_cells = zonMat_area[,2],
+#                          depthSum = zonMat_depth[,2])

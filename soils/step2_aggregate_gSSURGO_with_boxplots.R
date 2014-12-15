@@ -136,7 +136,11 @@ for (hsg in LETTERS[1:4]) {
     gp <- ggplot(clus_d_scld, aes(x=variable, y=z_score, fill=hru_grp)) + 
         geom_boxplot(outlier.shape=NA) +
         scale_y_continuous(limits = quantile(clus_d_scld$z_score, c(0.1, 0.9))) +
-        ggtitle(hsg)
+        ggtitle(hsg) + 
+		ylab("Z score") + 
+		xlab("Soil property") + 
+		scale_fill_discrete(name="Cluster") + 
+		guides(shape=guide_legend(override.aes=list(size=0.1)))
     plot_list[[hsg]] = gp
 	print(table(clusters$classification))
 # 	soil_tbl[ind, "hru_grp"] = paste(hsg,clusters$classification, sep="")

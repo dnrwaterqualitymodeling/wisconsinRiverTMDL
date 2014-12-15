@@ -1,0 +1,12 @@
+\subsubsection{Baseflow Phosphorus}\label{sec:gwp}
+	The baseflow component of background phosphorus is not simulated by default in SWAT and so the parameter controlling soluble phosphorus in groundwater, GW\_SOLP, needs to be populated manually. In the Wisconsin River Basin SWAT model, we used values of reference baseflow phosphorus from a USGS study of nutrient concentrations in wadeable streams in Wisconsin \citet{robertson_wadeable_2006}. In their study, they used a multiple linear regression equation to predict reference phosphorus in nutrient boundaries known as ``environmental phosphorus zones'', which they use as a way of dividing the state into smaller, homogeneous regions. These zones were derived in an earlier study by \citet{robertson_phosphoruszones_2006}.
+	
+	For each of the phosphorus zones, the percent land area in agricultural use and percent land in urban use was calculated along with the number of point sources. Using these variables, a multiple linear regression model predicting the log concentration of phosphorus was constructed. To represent the scenario where human impact is negligible, the values of the predictors of this model (all of which represent human impact) are set to zero. With the predictors set to zero (i.e., model intercept), the predicted value of the model is the median phosphorus concentration when human impact is zero. The SWAT subbasins were overlaid with the phosphorus zones, and the predicted reference phosphorus was calculated for each subbasin using an area-weighted average. These reference phosphorus levels were input into SWAT using the groundwater soluble P parameter.
+	
+	[map of baseflow P]
+	
+	\citet{robertson_wadeable_2006} intend their background phosphorus values to estimate median phosphorus concentration in streams when there is no human impact in the watershed. They do not specifically estimate the groundwater or baseflow contribution to reference phosphorus concentration. We assume that the median reference phosphorus estimate is an accurate estimate of baseflow phosphorus concentration because a landscape under natural conditions (that is one without human impact) will experience much less runoff, and that the median estimate represents low-runoff conditions \citepalias{nrcs_tr55_1986}.
+	
+	
+	
+	

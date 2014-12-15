@@ -13,3 +13,7 @@ Thumbs.db
 *.lot
 *.synctex.gz
 tmp
+*.xwm
+.metadata
+.project
+.texlipse
