@@ -2,6 +2,30 @@ The SWAT model simulates rainfall storage using the \textit{ponds}, \textit{wetl
 
 \subsubsection{Ponds}\label{sec:ponds}
 
-The ponds function in SWAT requires geometric properties and hydraulic conductivity at the very least, with a number of additional paramaters to control sediment and chemical processes. We calculated geometric properties using a combination of WHDPlus, the Wisconsin Lake Book \citep{wisconsin_wisconsin_lakes_2009}, and terrain analysis. However, we set hydraulic conductivity to zero, reserving it as a calibration parameter.
+The ponds function in SWAT requires geometric properties and hydraulic conductivity at the very least, with a number of additional paramaters to control sediment and chemical processes. We calculated geometric properties using a combination of WHDPlus (NEEDS CITATION), the Wisconsin 1:24k Hydrography Geodatabase(NEEDS CITATION), the Wisconsin Lake Book \citep{wisconsin_wisconsin_lakes_2009}, and terrain analysis. We set hydraulic conductivity to zero, reserving it as a calibration parameter.
 
-The geometric properties for the lakes themselves, as required by SWAT, are principal and emergency storage volume, and principal and emergency surface area. The principal/emergency jargon are adopted from reservoir management, but here are taken to mean \textit{normal} conditions and conditions that would cause the internally drained lake to overtop. Normal surface area was taken directly from Wisconsin Lakes \cite{wisconsin_wisconsin_lakes_2009} 
+The geometric properties for the lakes themselves, as required by SWAT, are the percent of the subbasin that drains to a pond, principal and emergency storage volume, and principal and emergency surface area. The principal/emergency jargon are adopted from reservoir management, but here are taken to mean \textit{normal} conditions and conditions that would cause the internally drained lake to overtop. Normal surface areas were extracted from the Wisconsin Hydrography Geodatabase (NEEDS CITATION). The Wisconsin Hydrography Geodatabase was digitized from USGS topographic maps, so we assume that the interpretation of the aerial photography associated with the USGS topography maps was representative of normal conditions.  We also assume that normal surface area matches normal volumes that were taken directly from Wisconsin Lakes \cite{wisconsin_wisconsin_lakes_2009}.
+
+If normal volumes were not listed in Wisconsin Lakes \cite{wisconsin_wisconsin_lakes_2009}, at least the maximum depth of the lake typically was. For those lakes where volume was not listed, we predicted their volume based on a fitted regression using maximum depth ($p < 0.001$) and surface area ($p < 0.001$) as predictors (Figure \ref{fig:volume_regressions}).
+
+\begin{equation}
+V = e^{-0.1 + 1.1 \cdot ln(A) + 0.6 \cdot ln(D)} 
+\end{equation}
+
+If maximum depth was not available, we fitted a seperate regression using only surface area. (Figure \ref{fig:volume_regressions}).
+
+\begin{equation}
+V = e^{0.7 + 1.3 \cdot ln(A)} 
+\end{equation}
+
+In the above equations, $V$ is the volume of any given lake in $acre \cdot feet$, $A$ is its surface area in acres, and $D$ is its maximum depth in feet.
+
+The contributing area of each pond was estimated using WHDPlus. WHDPlus includes a polygon feature class of watersheds of each hydrographic unit in the Wisconsin Hydrography Geodatabase. Stream-type hydrographic units are confluence-bounded reaches that are further subdivided by changes in hydrology "type" (e.g., transition from stream to wetland gap). Lake-type hydrographic units are any lake greater than 5 acres. The watersheds of all lake-type hydrographic units defined as "landlocked" were selected, and the sums of the areas of these watersheds were used to define the percent of each subbasin that flows to a pond.
+
+Emergency volume and surface area were estimated using terrain analysis. We simulated overtopping of ponds by "filling" the DEM---filling the DEM raises the elevation of grid cells within internally draining areas until the landscape simulates overtopping of internally draining areas. Once the DEM was filled, we calculated the elevation difference of each filled grid cell that intersected the internally draining area associated with the landlocked lake (Figure \ref{fig:maximum_pond_volume}). To calculate emergency volume, we summed the elevation differences and multiplied by the grid cell area. This was done for each landlocked hydrographic unit in WHDPlus, and summarized for each of the 338 subbasins in the WRB.
+
+\begin{equation}
+V_{max,s} = \sum\limits_{l=1}^m \sum\limits_{c=1}^n (\Delta e_c * 900)_l
+\end{equation}
+
+Emergency volumes of all ponds within a given subbasin $V_{max,s}$ were calculated using the above equation where $l$ represents a landlocked lake within a subbasin, $c$ is a grid cell associated with the internally drained area of a landlocked lake, $\Delta e_c$ is the elevation difference between the original DEM and the filled DEM for any grid cell $c$, and 900 is equal to the area in meters of all grid cells in the DEM.

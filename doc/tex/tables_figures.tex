@@ -57,3 +57,19 @@
 	\caption[Boxplots showing the variability of soil properties]{Boxplots showing the variability of soil properties within the final set of soil clusters. The letter above each plot denotes hydrologic soil group (HSG). Each color represents a cluster of map units. The Z score for each soil property is reported as $Z = X - \mu / \sigma$ where $X$ is the value of the soil property, $\mu$ and $\sigma$ are the population mean and standard deviation of a soil property. Outliers were excluded. The x-axis shows soil properties where tot\_depth is the soil depth, sand/silt/clay are the percent composition of each texture class, bd is bulk density, k is saturated conductivity, awc is available water capacity, cbn is organic carbon concentration, and usle\_k is soil erodibility.}
 	\label{fig:soil_boxplots}
 \end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.6\textwidth]{./img/area_model_observed_predicted.pdf}
+	\caption[Scatterplots of observed versus predicted lake volumes]{Scatterplots of observed versus predicted lake volumes used to parameterize geometric properties of ponds in SWAT. The area/depth model used lake surface area and maximum depth to predict lake volume and the area model used only lake surface area to predict its volume. The area/depth model explains 92\% of the variability in volumes and the area model explains 89\% of the variability in volumes.}
+	\label{fig:volume_regressions}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{./img/maximum_pond_volume.png}
+	\caption{Example image of a filled digital elevation model (DEM) used to estimate maximum storage volume and surface area of landlocked lakes for parameterizing geometries of ponds in SWAT. The green to white gradient represents elevation from low to high. Blue polygons are landlocked lakes. Black polygons are the extent of grid cells associated with the internally draining area that flows to a landlocked lake. Black polygons not intersecting a landlocked lake were not used in surface area and volume calculations. The x and y axes are for scale---they are in units of meters from the origin of the Wisconsin Transverse Mercator projection.}
+	\label{fig:maximum_pond_volume}
+\end{figure}
+
+\pagebreak
