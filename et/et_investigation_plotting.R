@@ -70,10 +70,7 @@ for (met in c("pbias", "nashsut")){
                 brks,
                 all.inside = T)],
              add=T, pch=21, cex =2)
-#         text(flow_sites@coords[,1],
-#             flow_sites@coords[,2],
-#             flow_sites@data$pbias_penman[nas],
-#             pos = 3)
+
 #         text(flow_sites@coords[,1],
 #             flow_sites@coords[,2],
 #             na.omit(flow_sites@data$USGS_ID[nas]),
