@@ -28,9 +28,9 @@ be feasible to acquire. To reduce the number of HRUs in the model, we aggregated
 soils together based on similarity of several key properties that impact the
 hydrologic cycle. This was a two step process: first, components within map
 units were aggregated
-together\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/blob/master/soils/step1_aggregate_gSSURGO.R} } ,
+together,\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/blob/master/soils/step1_aggregate_gSSURGO.R} } 
 and second, map units were aggregated together based on
-similarity\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/blob/master/soils/step2_aggregate_gSSURGO.R}} \ref{fig:agg_flow_diagram}.
+similarity,\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/blob/master/soils/step2_aggregate_gSSURGO.R}} see figure \ref{fig:agg_flow_diagram}.
 
 Several changes were made to the dataset before aggregation, in order to
 facilitate processing. Soil organic carbon content is required by SWAT, but is
@@ -100,7 +100,7 @@ with an HSG of A), while the (unknown) subpopulations are the clusters of
 map units with similar distributions of soil properties (such as a cluster of
 sandier soils, shallow soils or slow saturated conductivity). Using the default
 settings of the function, the algorithm clustered all of the A HSG map units into
-6 clusters, and all of the other HSG classes into 9 clusters.
+6 clusters, B HSG map units had 8 clusters and C and D had 9 clusters.
 
 Each of the 1603 map units had data regarding the soil property values at each
 horizon. In this format it was thought that profile depth would have undue influence over the clustering algorithm, that is deep soils would cluster together and shallow soils cluster together regardless of the nature of the other properties, causing clusters to be entirely governed by
@@ -126,7 +126,7 @@ the nearest integer, and converted back to a letter, which happened to be B. Fol
 were given an HSG of D, and assigned an albedo of 0.23, and a saturated conductivity
 of 600.
 
-A total of 35 soil classes were distilled from this process. An example of the properties of each cluster can be seen in table \ref{table:soil_prop} and the number of map units in each cluster can be found in table \ref{tab:soil_clusterss}. 
+A total of 35 soil classes were distilled from this process. An example of the properties of each cluster can be seen in table \ref{table:soil_prop} and the number of map units in each cluster can be found in table \ref{tab:soil_clusters}. 
 
 The hydrologic soil groups and the clusters within these groups are displayed in figure \ref{fig:soil_boxplots}. This figure shows the relative variability for each soil property for each cluster.
 

@@ -94,7 +94,8 @@ for (i in 1:nrow(soil_tbl)) {
 	cbn = sum(d[cbn_cols][1:n] * depths, na.rm=T) / sum(depths, na.rm=T)
 	usle_k = d$USLE_K1
 	tot_depth = d$SOL_ZMX
-	agg_tbl[i,] = as.numeric(c(tot_depth,
+	agg_tbl[i,] = as.numeric(c(
+		tot_depth,
 		sand,
 		silt,
 		clay,
@@ -115,8 +116,8 @@ for (hsg in LETTERS[1:4]) {
 	clus_d = agg_tbl[ind,]
 	clus_d_scld = scale(clus_d)
 	# For each HSG, find clusters
-	# clusters = kmeans(clus_d, centers = 3)
-	clusters = Mclust(clus_d_scld) #
+
+	clusters = Mclust(clus_d_scld) #using defaults
     clus_d_scld = cbind(clusters$classification, clus_d_scld)
     clus_d_scld = data.frame(clus_d_scld)
     names(clus_d_scld) = c(
