@@ -1,2 +1,7 @@
+The SWAT model simulates rainfall storage using the \textit{ponds}, \textit{wetlands}, and \textit{potholes} functions, where ponds and wetlands are defined at the subbasin level and potholes are defined at the HRU level. Due to the large scope of the WRB SWAT, we chose to model rainfall storage using both ponds and wetlands, conceding that HRU-level storage was too detailed and did not match the scale of analysis. The ponds function is used to simulate storage of internally drained ponds or lakes, and the wetlands function is used to simulate smaller depressions that either manifest in true wetlands, or at least function as seasonal capture zones.
+
 \subsubsection{Ponds}\label{sec:ponds}
-{\bf ...Aaron?...}
+
+The ponds function in SWAT requires geometric properties and hydraulic conductivity at the very least, with a number of additional paramaters to control sediment and chemical processes. We calculated geometric properties using a combination of WHDPlus, the Wisconsin Lake Book \citep{wisconsin_wisconsin_lakes_2009}, and terrain analysis. However, we set hydraulic conductivity to zero, reserving it as a calibration parameter.
+
+The geometric properties for the lakes themselves, as required by SWAT, are principal and emergency storage volume, and principal and emergency surface area. The principal/emergency jargon are adopted from reservoir management, but here are taken to mean \textit{normal} conditions and conditions that would cause the internally drained lake to overtop. Normal surface area was taken directly from Wisconsin Lakes \cite{wisconsin_wisconsin_lakes_2009} 
