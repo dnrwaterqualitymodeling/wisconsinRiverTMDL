@@ -16,7 +16,8 @@ map_pcp_count = "pcp_na_counts.pdf"
 map_tmp_count = "tmp_na_counts.pdf"
 map_wetlands = "max_surface_area_wetlands.png"
 map_ponds = "ponds.png"
-map_evapo_transp = NULL
+map_wetlands_and_ponds = "wetlands_and_ponds.png"
+map_evapo_transp = "et_error.png"
 
 # paths
 dir_out = "T:/Projects/Wisconsin_River/Model_Documents/TMDL_report/figures/documentation_figures"
@@ -30,9 +31,13 @@ dir_observed = paste(dir_gis_data, "observed", sep = '/')
 
 file_usgs_basin_lu = paste(dir_gis_data, "observed", "gauge_basin_lookup.csv", sep = '/')
 
-file_dem = paste(dir_gis_data, "DEM/wrb_dem", sep = '/')
-file_filled = paste(dir_gis_data, "DEM/wrb_fill", sep = '/')
+# file_dem = paste(dir_gis_data, "DEM/wrb_dem", sep = '/')
+# file_filled = paste(dir_gis_data, "DEM/wrb_fill", sep = '/')
+file_sinks = paste(dir_gis_data, '/DEM/wrb_sinks.tif', sep = "")
 file_ponds = paste(dir_gis_data, "wetlands/ponds.tif", sep = '/')
+# 30 m versions
+file_sinks_30m = paste(dir_gis_data, '/DEM/wrb_sinks_30m.tif', sep = "")
+file_ponds_30m = paste(dir_gis_data, "wetlands/ponds_30m.tif", sep = '/')
 
 file_gw_p = paste(dir_gis_data, "groundWater/phosphorus", "background_P_from_EPZ.txt", sep = '/')
 file_alpha_bf = paste(dir_gis_data, "groundWater", "alphaBflowSubbasin_lookup.csv", sep = '/')
@@ -54,10 +59,12 @@ flow_calib_pts = readOGR(dir_observed, "WRB_FlowSites")
 
 usgs_basin_lu = read.csv(file_usgs_basin_lu)
 
-dem = raster(file_dem)
-filled = raster(file_filled)  
-ponds = raster(file_ponds)  
-
+# dem = raster(file_dem)
+# filled = raster(file_filled)  
+# sinks = raster(file_sinks)
+# ponds = raster(file_ponds)  
+sinks = raster(file_sinks_30m)
+ponds = raster(file_ponds_30m)
 
 pcp_sites = read.csv(file_precip)
 tmp_sites = read.csv(file_temp)
@@ -69,7 +76,7 @@ gwp = read.delim(file_gw_p)
 
 alpha_bf = read.csv(file_alpha_bf)
 
-et_uncertainty = NULL
+et_uncertainty = read.csv(file_et_uncertainty)
 ##########################
 # ----- data munging ---- #
 basin = gUnionCascaded(subbasins)
@@ -90,6 +97,24 @@ subpcp = merge(subpcp, pcp_sites, by.x="Station", by.y="NAME")
 subtmp = merge(subtmp, tmp_sites, by.x="Station", by.y="NAME")
 coordinates(subpcp) = ~ LONG + LAT
 coordinates(subtmp) = ~ LONG + LAT
+
+# sinks to one value
+sinks = mask(sinks, basin)
+sink_mat = as.matrix(sinks)
+sink_mat[which(sink_mat > 0)] = 1
+sink_mat[which(sink_mat == 0)] = NA
+sinks_bin = raster(sink_mat, sinks)
+rm(sink_mat)
+# ET
+et_uncertainty$USGS_ID = paste(0, et_uncertainty$USGS_ID, sep ='')
+flow_calib_pts_keep = flow_calib_pts[flow_calib_pts@data$Keep == 1,]
+
+flow_calib_pts_keep = merge(flow_calib_pts_keep, 
+	et_uncertainty, 
+	by.x = "FlowStatio", 
+	by.y = "USGS_ID")
+
+not_na = !is.na(flow_calib_pts_keep@data$pbias_harg)
 ##########################
 # map specs
 wdth 	= 6
@@ -120,14 +145,29 @@ plot(reaches,
 	add = T, 
 	col = 'blue',
 	lwd = 0.5)
-plot(flow_calib_pts, 
+plot(flow_calib_pts[flow_calib_pts@data$Keep == 1,], 
 	add = T, 
-	pch = 21)
+	pch = 20,
+	col = 'darkgreen')
+plot(flow_calib_pts[flow_calib_pts@data$Keep == 0,], 
+	add = T, 
+	pch = 3,
+	col = 'red')
+points(flow_calib_pts@coords[,1],
+	flow_calib_pts@coords[,2] + 5000,
+	pch = 22,
+	col = 'white', 
+	bg = 'white',
+	cex = 3)
 text(flow_calib_pts@coords[,1],
 	flow_calib_pts@coords[,2],
 	flow_calib_pts@data$obj_id,
 	pos = 3)
 title(main = "SWAT Reaches\nwith Flow Calibration Sites")
+legend('bottomright', 
+	legend = c("Included",	"Excluded"),
+	pch = c(20, 3),
+	col = c("darkgreen", "red"))
 dev.off()
 
 ##### ##### ##### ##### ##### #####
@@ -197,14 +237,16 @@ dev.off()
 ##### ##### ##### ##### ##### #####
 # Precip and Temp stations
 for (v in c("pcp", "tmp")) {
-	pdf(paste(dir_out, "/", v, "_na_counts.pdf", sep = ""), 
+	pdf(paste(dir_out, "/", v, "_na_count.pdf", sep = ""), 
 		width = wdth, 
 		height = hght)
 	if (v == "pcp") {
+		ttl = "Precipitation Stations"
 		stations = subpcp@data$Station
 		pal = brewer.pal(6, "YlGnBu")
 	}
 	if (v == "tmp") {
+		ttl = "Temperature Stations"
 		stations = subtmp@data$Station
 		pal = brewer.pal(6, "YlOrBr")
 	}
@@ -215,7 +257,7 @@ for (v in c("pcp", "tmp")) {
 	j = 0
 	for (i in stationsList){
 		j = j + 1
-		print(i)
+		# print(i)
 		data <- read.dbf(i, as.is = TRUE)
 		selection <-length(which(data[,2] == -99))
 		row = data.frame(ID=stations[j], count=selection)
@@ -225,23 +267,116 @@ for (v in c("pcp", "tmp")) {
 	stationShape_sel = merge(stationShape_sel, counts)
 	classes = classIntervals(var=stationShape_sel@data$count, 6)
 	col = findColours(classes, pal=pal)
-	
-	plot(subbasins, axes=T, border="white")
+
+	plot(basin, add = F)
+	plot(subbasins, axes=T, border="white", bty = 'n')
 	plot(subbasins, border="grey50", col="grey80", add=T)
 	plot(stationShape_sel, bg=col, cex=2, add=T, pch=21)
 	leg_txt = properLegend(col)
-	legend("topleft", legend=leg_txt, fill=pal, cex=0.9,
+	legend("bottomright", legend=leg_txt, fill=pal, cex=0.9,
 		title="Days missing")
+	title(main=paste(ttl))
 	dev.off()
 }
 
-
 ##### ##### ##### ##### ##### #####
 # Contributing Areas of Wetlands, sinks (Ponds too? Separate?)
-png(paste(dir_out, map_wetlands, sep = "/"), 
+png(paste(dir_out, map_wetlands_and_ponds, sep = "/"), 
 	width = wdth, 
 	height = hght, 
 	units = unts, 
 	res = reso)
+
+plot(basin, add = F)
+plot(sinks_bin, 
+	col = "#9ecae1",
+	ext = basin, 
+	axes = F,
+	legend = F,
+	bty = 'n',
+	add = F)
+plot(ponds, col = "#08519c", add = T, legend = F)
+plot(basin, add = T)
+title(main = "SWAT Ponds\nand Wetlands")
+
+legend('bottomright', legend = c("Wetlands", "Ponds"), fill = c("#9ecae1", "#08519c"), bty = 'n')
+dev.off()
+# just wetlands
+# png(paste(dir_out, map_wetlands, sep = "/"), 
+	# width = wdth, 
+	# height = hght, 
+	# units = unts, 
+	# res = reso)
+
+# plot(sinks_bin, col = "#deebf7")
+# plot(basins, add = T)
+# title(main = "SWAT Wetlands")
+#legend('bottomright', legend = c("Wetlands", "Ponds"), fill = c("#deebf7", "#08519c"))
+# dev.off()
+# just ponds
+# png(paste(dir_out, map_ponds, sep = "/"), 
+	# width = wdth, 
+	# height = hght, 
+	# units = unts, 
+	# res = reso)
+
+
+# plot(ponds, col = "#08519c")
+# plot(basins, add = T)
+# title(main = "SWAT Ponds")
+
+# legend('bottomright', legend = c("Wetlands", "Ponds"), fill = c("#deebf7", "#08519c"))
+# dev.off()
 ##### ##### ##### ##### ##### #####
 # Et figures
+
+pal_et = rev(brewer.pal(9, "RdYlBu"))
+dat_cols <- c("pbias_harg",
+    "pbias_penman",
+    "pbias_priestley",
+    "nashsut_harg",      
+    "nashsut_penman",    
+    "nashsut_priestley")
+
+for (met in c("pbias", "nashsut")){
+    met_cols <- grep(met, dat_cols)
+    toClass <- et_uncertainty[,dat_cols[met_cols]]
+    toClass = as.matrix(toClass)
+    prop_int = classIntervals(toClass, 9)
+#     prop_colr = findColours(prop_int, pal)
+    brks <- prop_int$brks
+    for (i in met_cols){  
+        toplot <- dat_cols[i]
+		png(paste(dir_out,'/',toplot,'.png',sep=''),
+			width = wdth, 
+			height = hght, 
+			units = unts, 
+			res = reso)
+        plot(basin)
+        plot(flow_calib_pts_keep[not_na,], 
+            bg=pal_et[findInterval(flow_calib_pts_keep@data[, toplot],
+                brks,
+                all.inside = T)],
+             add=T, pch=21, cex =2)
+
+#         text(flow_calib_pts_keep@coords[,1],pal
+#             flow_calib_pts_keep@coords[,2],
+#             na.omit(flow_calib_pts_keep@data$USGS_ID[nas]),
+#             pos = 2)
+		dev.off()
+    }
+	png(paste(dir_out,'/',met,"_legend.png",sep=''),
+		width = wdth, 
+		height = hght, 
+		units = unts, 
+		res = reso)
+	plot.new()
+	
+	txt <- properLegend(findColours(prop_int, pal_et), sig_figs=2)
+    legend('right', legend = txt, bg = 'white', bty = 'n', pch = 21,
+		pt.bg = pal_et, cex=2, pt.cex = 2.5)#,
+        #title = paste(toplot))
+	dev.off()
+}
+
+
