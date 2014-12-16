@@ -5,7 +5,7 @@ available water capacity. We used the county-scale Soil Survey Geographical
 Database (SSURGO) maintained by the USDA-NRCS \citep{staff_gridded_2014}. For more information about SSURGO
 data see SSURGO metadata\footnote{\url{http://www.nrcs.usda.gov/wps/portal/nrcs/detail/soils/survey}}.
 The SSURGO database is structured by three levels of information: map units,
-components, and horizons, see figure \ref{fig:ssurgo_schematic}. Horizons are the fundamental unit of soil in SSURGO, and are
+components, and horizons, see Figure \ref{fig:ssurgo_schematic}. Horizons are the fundamental unit of soil in SSURGO, and are
 therefore where the majority of soil information is stored in the database.
 Components are aggregations of horizons that represent a full soil profile,
 typically conforming to the Official Series Description (OSD). Map units
@@ -54,7 +54,7 @@ The first aggregation step was to aggregate components by map unit to conform to
 the SWAT soils data structure. The data structure for soils in SWAT does not
 directly conform to SSURGO data structure, mainly that there is no analog to the
 SSURGO \textit{component} level in SWAT---in other words, soils in SWAT cannot
-be subdivided, see figure \ref{fig:component_schematic}. We aggregated components by computing
+be subdivided, see Figure \ref{fig:component_schematic}. We aggregated components by computing
 component-weighted averages of each soil property for any given depth of soil from the soil surface to the average depth\cite{gatzke_aggregation_2011, beaudette_algorithms_2013}.
 These averages were computed using the \texttt{slab} function in the \texttt{aqp} package in R \cite{beaudette_algorithms_2013}. We
 used this algorithm to apply a depth weighted average to each horizon, while
@@ -126,9 +126,9 @@ the nearest integer, and converted back to a letter, which happened to be B. Fol
 were given an HSG of D, and assigned an albedo of 0.23, and a saturated conductivity
 of 600.
 
-A total of 35 soil classes were distilled from this process. An example of the properties of each cluster can be seen in table \ref{table:soil_prop} and the number of map units in each cluster can be found in table \ref{tab:soil_clusters}. 
+A total of 35 soil classes were distilled from this process. An example of the properties of each cluster can be seen in table \ref{table:soil_prop} and the number of map units in each cluster can be found in table \ref{table:soil_clust}. 
 
-The hydrologic soil groups and the clusters within these groups are displayed in figure \ref{fig:soil_boxplots}. This figure shows the relative variability for each soil property for each cluster.
+The hydrologic soil groups and the clusters within these groups are displayed in Figure \ref{fig:soil_boxplots}. This figure shows the relative variability for each soil property for each cluster.
 
 Soil Phosphorus concentrations were obtained through the University of Wisconsin
 Soil Testing Laboratory \footnote{\url{http://uwlab.soils.wisc.edu/}}. Soil

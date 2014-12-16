@@ -35,16 +35,15 @@ area_depth_model = lm(log(Volume..acre.ft.) ~ log(Area..acres.) + log(Max.Depth.
     data=wb_vol)
 
 
-setwd("T:/Projects/Wisconsin_River/Presentations/Drafts/midwest_watershed_modeling_users_group_2014/images")
+setwd("C:/Users/ruesca/Documents/wisconsin_river_tmdl/Code/doc/img")
 
-png("area_model_observed_predicted.png", width=3, height=3, units="in", res=600)
+pdf("area_model_observed_predicted.pdf", width=3, height=6)
+par(mfrow=c(2,1))
 plot(area_model$fitted.values ~ area_model$model[["log(Volume..acre.ft.)"]],
 	ylab="Predicted volume log(acre-ft)", xlab="Observed volume log(acre-ft)",
 	xlim=c(4,12), ylim=c(4,12), pch=20, main="Area Model")
 abline(a=0, b=1, col="red")
-dev.off()
 
-png("area_depth_model_observed_predicted.png", width=3, height=3, units="in", res=600)
 plot(area_depth_model$fitted.values ~ area_depth_model$model[["log(Volume..acre.ft.)"]],
 	ylab="Predicted volume log(acre-ft)", xlab="Observed volume log(acre-ft)",
 	xlim=c(4,12), ylim=c(4,12), pch=20, main="Area/Depth Model")

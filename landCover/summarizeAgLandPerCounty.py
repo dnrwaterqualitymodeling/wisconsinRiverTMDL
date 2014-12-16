@@ -18,7 +18,7 @@ scratch = 'G:/temp/temp.gdb'
 ############################
 
 # Set up TMDL network paths
-tmdlRoot = r'\\dnr\gis\WD_Projects\DNR\Water\TMDL'
+tmdlRoot = r'T:\'
 wiRiverTmdlDir = tmdlRoot + r'\Projects\Wisconsin_River'
 lcDir = wiRiverTmdlDir + r'\GIS_Datasets\Landcover'
 # Input files
