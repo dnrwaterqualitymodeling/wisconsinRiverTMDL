@@ -9,13 +9,13 @@ The geometric properties for the lakes themselves, as required by SWAT, are the 
 If normal volumes were not listed in Wisconsin Lakes \cite{wisconsin_wisconsin_lakes_2009}, at least the maximum depth of the lake typically was. For those lakes where volume was not listed, we predicted their volume based on a fitted regression using maximum depth ($p < 0.001$) and surface area ($p < 0.001$) as predictors (Figure \ref{fig:volume_regressions}).
 
 \begin{equation}
-\bm{V} = e^{-0.1 + 1.1 \cdot ln(\bm{A}) + 0.6 \cdot ln(\bm{D})} 
+\bm{V} = e^{-0.1 + 1.1 \cdot \ln(\bm{A}) + 0.6 \cdot \ln(\bm{D})} 
 \end{equation}
 
 If maximum depth was not available, we fitted a seperate regression using only surface area. (Figure \ref{fig:volume_regressions}).
 
 \begin{equation}
-\bm{V} = e^{0.7 + 1.3 \cdot ln(\bm{A})} 
+\bm{V} = e^{0.7 + 1.3 \cdot \ln(\bm{A})} 
 \end{equation}
 
 In the above equations, $\bm{V}$ is the volume of any given lake in $acre \cdot feet$, $\bm{A}$ is its surface area in acres, and $\bm{D}$ is its maximum depth in feet.
