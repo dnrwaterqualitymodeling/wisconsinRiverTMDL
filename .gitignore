@@ -3,7 +3,7 @@
 
 *.RData
 *.Rhistory
-*.pdf
+# *.pdf
 
 # OS junk files
 Thumbs.db

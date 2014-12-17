@@ -16,9 +16,8 @@ sdeConn = dbConnDir + sdeName
 # Define a local workspace for intermediate file storage
 scratch = 'G:/temp/temp.gdb'
 ############################
-
 # Set up TMDL network paths
-tmdlRoot = r'\\dnr\gis\WD_Projects\DNR\Water\TMDL'
+tmdlRoot = r'T:\'
 wiRiverTmdlDir = tmdlRoot + r'\Projects\Wisconsin_River'
 stateWetlandDir = tmdlRoot + r'\GIS\Statewide_Coverages\wetlands\DWI'
 lcDir = wiRiverTmdlDir + r'\GIS_Datasets\Landcover'

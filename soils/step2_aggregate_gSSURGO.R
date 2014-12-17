@@ -29,13 +29,10 @@ excld = c(
     "Aquents",
 #     "Psammaquents",
     "Fluvaquents, wet",
-    "Alluvial land, wet",
-    
+    "Alluvial land, wet",    
     "Marsh",
-    
 	"Water",
     "Water greater than 40 acres",
-
     "Rock land",
 	"Rock outcrop",
 	"Stony and rocky land",
