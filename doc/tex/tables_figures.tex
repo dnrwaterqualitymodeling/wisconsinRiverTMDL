@@ -8,7 +8,6 @@
 
 \input{./tab/soil_property_table.tex}
 
-
 \input{./tab/climate_stations_table.tex}
 
 
@@ -31,10 +30,10 @@
 	\input{./tab/reservoir_geometries.tex}
 	\input{./tab/streamflow_calibration_sites_table.tex}
 \end{landscape}
-
+%%%%%%%%%%%%%%%%  FIGURES    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Figures}
 
-\begin{figure}
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\textwidth]{./img/aggregation_flow_diagram}
 	\caption[Flow diagram of the soil aggregation process]{Flow diagram of the soil aggregation process. Horizons are grouped together according to which component they belong. Components are grouped together according to which map unit they  belong. A weighted average is calculated, based upon the component percentage. Mapunits are grouped together according to hydrologic soil group  and are then assigned to a cluster based on a clustering algorithm. Clusters are created by aggregated map units together using a depth-weighted average of soil properties for each horizon.}
@@ -63,6 +62,21 @@
 	\label{fig:soil_boxplots}
 \end{figure}
 
+%%Precipitation
+\begin{landscape}
+\begin{figure}[h]
+
+	\begin{tabular}{c c}
+		\includegraphics[scale = 0.5]{./img/tmp_na_counts} &	\includegraphics[scale=0.5]{./img/pcp_na_counts} \\
+	\end{tabular}
+	\caption{Maps displaying the climate stations used for in the SWAT model. Stations are colored according the number of days missing in the record.}
+	\label{fig:climate_missing}
+
+\end{figure}
+\end{landscape}
+
+\input{./img/et_figures.tex}
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.6\textwidth]{./img/area_model_observed_predicted.pdf}
@@ -77,6 +91,36 @@
 	\label{fig:maximum_pond_volume}
 \end{figure}
 
-\input{et_figures.tex}
+%%Ponds & wetlands
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=\textwidth]{./img/wetlands_and_ponds.png}
+	\caption{Map showing the location of the SWAT ponds and wetlands in the Wisconsin River Basin.}
+	\label{fig:wetlands_and_ponds}
+\end{figure}
 
-\pagebreak
+%%Alpha BF
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=\textwidth]{./img/alpha_bf.png}
+	\caption{Map showing the predicted ALPHA\_BF for each SWAT subbasin. Higher (darker) values indicate a high response of groundwater to recharge.}
+	\label{fig:alpha_bf}
+\end{figure}
+
+%%Groundwater Phophorus
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=\textwidth]{./img/groundwater_phosphorus.png}
+	\caption{Map showing the estimated concentration of groundwater phosphorus in the Wisconsin River Basin. Values were obtained from \citet{robertson_phosphoruszones_2006}}
+	\label{fig:groundwater_p}
+\end{figure}
+
+\clearpage
+%%Streamflow calib sites
+% \begin{figure}[h]
+	% \centering
+	% \includegraphics[]{./img/}
+	% \caption{}
+	% \label{fig:calibration_site_map}
+% \end{figure}
+% \pagebreak
