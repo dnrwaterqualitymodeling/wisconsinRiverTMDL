@@ -7,19 +7,19 @@ the Wisconsin River TMDL. In fact, it is written specifically to water quality
 modelers to invite a critical review to ensure the quality of the resulting
 estimations. The document was written after the model was configured, but before
 it has been calibrated. Therefore, the methods described here may change prior
-to the release of the final model given new findings during the calibration
+to the release of the final model given new developments during the calibration
 phase of the project. The model itself is available for download at the following URL: \\
 
 \url{ftp://dnrftp01.wi.gov/geodata/wrb_swat/} \\
 
-At a minimum, the basic SWAT configuration includes data for the following:
+% At a minimum, the basic SWAT configuration includes data for the following:
 
-\begin{enumerate}
-	\item Subbasin delineations
-	\item Land cover
-	\item Soil
-	\item Topographic slope
-\end{enumerate}
+% \begin{enumerate}
+	% \item Subbasin delineations
+	% \item Land cover
+	% \item Soil
+	% \item Topographic slope
+% \end{enumerate}
 
 These elements are used to define discrete model components. Combinations of
 these elements form discrete units in the model that SWAT defines as hydrologic
@@ -27,8 +27,8 @@ response units, or HRUs. Each of these elements has been configured for the
 Wisconsin River SWAT model, and HRUs have been classified---both of these
 processes are described in this document. HRUs only provide a simple, physical
 representation of water-quality drivers, and therefore a number of additional
-datasets were compiled to provide supplemental information to aid in calibrating
-the model to streamflow, sediment, and phosphorus.
+datasets were compiled to provide supplemental information to aid the accurate estimatation
+and calibration of the model to streamflow, sediment, and phosphorus.
 
 The additional datasets beyond just those for classifying HRUs supply
 information that are considered \textit{a priori} to describe regionally
@@ -40,7 +40,7 @@ latitude that the climate in the northern part of the basin is significantly
 different than that in the southern part. Therefore, a dense network of weather
 observations was necessary to adequately represent climatic geography.
 Additionally, the Wisconsin River spans several regions with very different
-hydrologic properties, mainly related to the storage capacity of the landscape.
+hydrologic properties, mainly related to the surficial geology of the landscape.
 Specifically, internally draining areas due to recently glaciated landscapes
 were characterized using a terrain-based methodology, and groundwater flow
 contribution related to either highly permeable soils or hydrologic springs were
@@ -65,15 +65,15 @@ streamflow, sediment, and phosphorus.
 %final calibration of phosphorus loads, are soil phosphorus concentration
 %estimates and instream baseflow phosphorus concentrations.
 
-Due to extent of data required to configure The Wisconsin River SWAT model, the
+Due to the extent of data required to configure The Wisconsin River SWAT model, the
 products described above were created using a series of data processing scripts
 that can be executed using either the Python or R programming languages. To the
 extent possible, these scripts have been written in a way that intends to make
 the data processing transparent and reproducible. However, because the model is
-not complete in configuration or documentation, in most cases they are not
+not complete in configuration or documentation, in some cases they are not
 annotated to assist in interpretation. Therefore, the reader needs to have a
 strong understanding of computer programming, Python and R syntax, statistics,
-and processing of spatial data. These scripts are publicly available on the
+and processing of spatial data in order to completely understand these scripts. These scripts are publicly available on the
 website GitHub owned by the username
 \texttt{dnrwaterqualitymodeling}\footnote{\url{https://github.com/dnrwaterqualitymodeling}}. These scripts can be viewed and downloaded
 across the history of their development. However, it must be noted that the
