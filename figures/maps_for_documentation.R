@@ -5,22 +5,22 @@ library(rgeos)
 library(RColorBrewer)
 library(classInt)
 library(foreign)
-source("C:/Users/evansdm/Documents/Code/figures/function_proper_legend.r")
+source("./Code/figures/function_proper_legend.r")
 ################################
 # map titles
 map_sub_reaches = "subbasins_reaches.png"
-map_sub_reaches_flow_calib = "subbasins_reaches_flow_calib.png"
+map_sub_reaches_flow_calib = "subbasins_reaches_flow_calib.pdf"
 map_groundwater_p = "groundwater_phosphorus.png"
 map_alpha_bf = "alpha_bf.png"
-map_pcp_count = "pcp_na_counts.pdf"
-map_tmp_count = "tmp_na_counts.pdf"
+map_pcp_count = "pcp_na_counts.png"
+map_tmp_count = "tmp_na_counts.png"
 map_wetlands = "max_surface_area_wetlands.png"
 map_ponds = "ponds.png"
 map_wetlands_and_ponds = "wetlands_and_ponds.png"
 map_evapo_transp = "et_error.png"
 
 # paths
-dir_out = "T:/Projects/Wisconsin_River/Model_Documents/TMDL_report/figures/documentation_figures"
+dir_out = "./Code/doc/img"
 
 dir_gis_data = "T:/Projects/Wisconsin_River/GIS_Datasets"
 dir_mod_inputs = "T:/Projects/Wisconsin_River/Model_Inputs"
@@ -135,26 +135,17 @@ title(main="SWAT\nSubbasins")
 dev.off()
 ##### ##### ##### ##### ##### #####
 # Subbasins with reaches and calib points
-png(paste(dir_out, map_sub_reaches_flow_calib, sep = "/"), 
+pdf(paste(dir_out, map_sub_reaches_flow_calib, sep = "/"), 
 	width = wdth, 
-	height = hght, 
-	units = unts, 
-	res = reso)
+	height = hght)
 plot(basin)
 plot(reaches, 
 	add = T, 
 	col = 'blue',
 	lwd = 0.5)
-plot(flow_calib_pts[flow_calib_pts@data$Keep == 1,], 
-	add = T, 
-	pch = 20,
-	col = 'darkgreen')
-plot(flow_calib_pts[flow_calib_pts@data$Keep == 0,], 
-	add = T, 
-	pch = 3,
-	col = 'red')
+
 points(flow_calib_pts@coords[,1],
-	flow_calib_pts@coords[,2] + 5000,
+	flow_calib_pts@coords[,2] + 10000,
 	pch = 22,
 	col = 'white', 
 	bg = 'white',
@@ -163,11 +154,20 @@ text(flow_calib_pts@coords[,1],
 	flow_calib_pts@coords[,2],
 	flow_calib_pts@data$obj_id,
 	pos = 3)
+plot(flow_calib_pts[flow_calib_pts@data$Keep == 1,], 
+	add = T, 
+	pch = 20,
+	col = 'darkgreen')
+plot(flow_calib_pts[flow_calib_pts@data$Keep == 0,], 
+	add = T, 
+	pch = 3,
+	col = 'red')
 title(main = "SWAT Reaches\nwith Flow Calibration Sites")
 legend('bottomright', 
 	legend = c("Included",	"Excluded"),
 	pch = c(20, 3),
-	col = c("darkgreen", "red"))
+	col = c("darkgreen", "red"),
+	bty = 'n')
 dev.off()
 
 ##### ##### ##### ##### ##### #####
@@ -184,7 +184,7 @@ png(paste(dir_out, map_groundwater_p, sep = "/"),
 pal_gwp = brewer.pal(num_classes_gwp, "YlGnBu")
 classes_gwp = classIntervals(subbasins@data$gw_p, num_classes_gwp)
 colrs_gwp = findColours(classes_gwp, pal_gwp)
-newTxt = properLegend(colrs_gwp)
+newTxt = properLegend(colrs_gwp, sig_figs = 3)
 
 plot(subbasins, 
 	col = colrs_gwp, 
@@ -217,7 +217,7 @@ png(paste(dir_out, map_alpha_bf, sep = "/"),
 pal_abf = brewer.pal(num_classes_abf, "YlOrRd")
 classes_abf = classIntervals(subbasins@data$alpha_bf, num_classes_abf)
 colrs_abf = findColours(classes_abf, pal_abf)
-newTxt = properLegend(colrs_abf)
+newTxt = properLegend(colrs_abf, sig_figs = 3)
 
 plot(subbasins, 
 	col = colrs_abf, 
@@ -237,9 +237,11 @@ dev.off()
 ##### ##### ##### ##### ##### #####
 # Precip and Temp stations
 for (v in c("pcp", "tmp")) {
-	pdf(paste(dir_out, "/", v, "_na_count.pdf", sep = ""), 
+	png(paste(dir_out, "/", v, "_na_count.png", sep = ""), 
 		width = wdth, 
-		height = hght)
+		height = hght,
+		units = unts,
+		res = reso)
 	if (v == "pcp") {
 		ttl = "Precipitation Stations"
 		stations = subpcp@data$Station
@@ -269,11 +271,11 @@ for (v in c("pcp", "tmp")) {
 	col = findColours(classes, pal=pal)
 
 	plot(basin, add = F)
-	plot(subbasins, axes=T, border="white", bty = 'n')
+	plot(subbasins, axes=F, border="white", bty = 'n')
 	plot(subbasins, border="grey50", col="grey80", add=T)
 	plot(stationShape_sel, bg=col, cex=2, add=T, pch=21)
 	leg_txt = properLegend(col)
-	legend("bottomright", legend=leg_txt, fill=pal, cex=0.9,
+	legend("bottomright", legend=leg_txt, pt.bg=pal, cex=0.9, bty = 'n',
 		title="Days missing")
 	title(main=paste(ttl))
 	dev.off()
@@ -290,12 +292,15 @@ png(paste(dir_out, map_wetlands_and_ponds, sep = "/"),
 plot(basin, add = F)
 plot(sinks_bin, 
 	col = "#9ecae1",
-	ext = basin, 
 	axes = F,
 	legend = F,
-	bty = 'n',
-	add = F)
-plot(ponds, col = "#08519c", add = T, legend = F)
+	add = T)
+plot(ponds, 
+	col = "#08519c", 
+	add = T, 
+	legend = F,
+	axes = F)
+plot(basin, add = T)
 plot(basin, add = T)
 title(main = "SWAT Ponds\nand Wetlands")
 
@@ -343,15 +348,15 @@ for (met in c("pbias", "nashsut")){
     toClass <- et_uncertainty[,dat_cols[met_cols]]
     toClass = as.matrix(toClass)
     prop_int = classIntervals(toClass, 9)
-#     prop_colr = findColours(prop_int, pal)
+
     brks <- prop_int$brks
     for (i in met_cols){  
         toplot <- dat_cols[i]
-		png(paste(dir_out,'/',toplot,'.png',sep=''),
-			width = wdth, 
-			height = hght, 
-			units = unts, 
-			res = reso)
+		# png(paste(dir_out,'/',toplot,'.png',sep=''),
+			# width = wdth, 
+			# height = hght, 
+			# units = unts, 
+			# res = reso)
         plot(basin)
         plot(flow_calib_pts_keep[not_na,], 
             bg=pal_et[findInterval(flow_calib_pts_keep@data[, toplot],
@@ -359,11 +364,7 @@ for (met in c("pbias", "nashsut")){
                 all.inside = T)],
              add=T, pch=21, cex =2)
 
-#         text(flow_calib_pts_keep@coords[,1],pal
-#             flow_calib_pts_keep@coords[,2],
-#             na.omit(flow_calib_pts_keep@data$USGS_ID[nas]),
-#             pos = 2)
-		dev.off()
+		# dev.off()
     }
 	png(paste(dir_out,'/',met,"_legend.png",sep=''),
 		width = wdth, 
@@ -371,11 +372,13 @@ for (met in c("pbias", "nashsut")){
 		units = unts, 
 		res = reso)
 	plot.new()
-	
+	if (met == 'pbias'){
+		legTitle = "Percent Bias"
+	} else if (met == 'nashsut'){legTitle = "Nash-Sutcliffe"}
 	txt <- properLegend(findColours(prop_int, pal_et), sig_figs=2)
     legend('right', legend = txt, bg = 'white', bty = 'n', pch = 21,
-		pt.bg = pal_et, cex=2, pt.cex = 2.5)#,
-        #title = paste(toplot))
+		pt.bg = pal_et, cex=2, pt.cex = 3.5,
+        title = paste(legTitle))
 	dev.off()
 }
 
