@@ -6,12 +6,17 @@
 	
 	
 	\begin{eqnarray}
-	Log_{10}(P) = \beta_a + \beta_bAg\% + \beta_cUrb\% + \beta_dlog_{10}(PtS)      \\
-	
-	Log_{10}(P) = \beta_a 
+	\bm{P} = e^{\beta_0 + \beta_1 \bm{A} + \beta_2 \bm{U} + \beta_3 log_{10}(\bm{O})}
+	%Log_{10}(P) = \beta_a + \beta_bAg\% + \beta_cUrb\% + \beta_dlog_{10}(PtS)      \\
 	\end{eqnarray}
 		
-	Here, $Ag\%$, $Urb\%$ and $PtS$ are the percent of the watershed in agricultural and urban landuse and the number of point sources, respectively. When these are set to zero, the equation reduces to the second line, and the intercept is taken as the value predicting $log_{10}(P)$. The resulting distribution of the groundwater phosphorus in the WRB can be found in Figure \ref{fig:groundwater_p}.
+	Here, $\bm{A}$, $\bm{U}$, and $\bm{O}$ are the percent of the watershed in agricultural and urban landuse and the number of point source outfalls, respectively. When these are set to zero, the equation reduces to simply:
+	
+	\begin{equation}
+	\bm{P} = e^{\beta_0}
+	\end{equation}
+	
+	The resulting distribution of the groundwater phosphorus in the WRB can be found in Figure \ref{fig:groundwater_p}.
 	
 	\citet{robertson_wadeable_2006} intend their background phosphorus values to estimate median phosphorus concentration in streams when there is no human impact in the watershed. They do not specifically estimate the groundwater or baseflow contribution to reference phosphorus concentration. We assume that the median reference phosphorus estimate is an accurate estimate of baseflow phosphorus concentration because a landscape under natural conditions (that is one without human impact) will experience much less runoff, and that the median estimate represents low-runoff conditions \citepalias{nrcs_tr55_1986}.
 	
