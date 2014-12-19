@@ -1,7 +1,9 @@
 % \section{Model Configuration}
 	\input{./tex/model_setup/model_datafiles.tex}
-\section{Model Configuration}
+\pagebreak
+\section{Model Configuration}\label{sec:basic_model_config}
 	The section details the configuration and data processing steps necessary for a working SWAT project.
+	\input{./tex/model_setup/climate.tex}
 	\input{./tex/model_setup/subbasin_delineation.tex}
 	
 	% \input{./tex/model_setup/point_sources.tex}
@@ -9,21 +11,21 @@
 	\input{./tex/model_setup/soils.tex}
 	\input{./tex/model_setup/topographic_slope.tex}
 	\input{./tex/model_setup/hru_definition.tex}
-	\input{./tex/model_setup/climate.tex}
+	
 \pagebreak
-\subsection{Agricultural Land Management}\label{sec:ag_land_mgt}
-	\input{./tex/model_setup/agricultural_practices.tex}
+
 
 %		\input{./tex/model_setup/rotation_randomization.tex}
 	
 \pagebreak
-\section{Additonal Model Configurations}
+\section{Additonal Model Configuration}
 	This section details some of the additional data configuration that was done in the WRB SWAT model. This configuration is not necessary for the model to run but were done to better represent actual conditions in the Wisconsin River basin.
-	
+	\input{./tex/model_setup/agricultural_practices.tex}
 	\input{./tex/model_setup/soil_phosphorus.tex}
 	\input{./tex/model_setup/urban_delineation.tex}
 	\input{./tex/model_setup/ponds.tex}
 	\input{./tex/model_setup/internally_draining_areas.tex}
+	\input{./tex/model_setup/evap_transp.tex}
 \subsection{Groundwater}
 	\input{./tex/model_setup/groundwater.tex}
 	\input{./tex/model_setup/baseflow_p.tex}

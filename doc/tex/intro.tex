@@ -2,8 +2,9 @@
 This document is intended to describe the configuration of the Soil and
 Watershed Assessment Model (SWAT) for the estimation of streamflow and sources
 of sediment and phosphorus in the Wisconsin River basin. It is a technical
-document that presumes the reader has a high level of familiarity with SWAT and
-the Wisconsin River TMDL. In fact, it is written specifically to water quality
+document that presumes the reader has a high level of familiarity with SWAT\footnote{\url{http://swat.tamu.edu/}} and
+the Wisconsin River Basin (WRB) Total Maximum Daily Load (TMDL)\footnote{\url{http://dnr.wi.gov/topic/TMDLs/WisconsinRiver/}}.
+In fact, it is written specifically to water quality
 modelers to invite a critical review and ensure the quality of the resulting
 estimations. The document was written after the model was configured, but before
 it has been calibrated. Therefore, the methods described here may change prior
@@ -11,6 +12,58 @@ to the release of the final model given new developments during the calibration
 phase of the project. The model itself is available for download at the following URL: \\
 
 \url{ftp://dnrftp01.wi.gov/geodata/wrb_swat/} \\
+
+Due to the large amount of data required to configure The Wisconsin River SWAT model, the
+products and data described in this document were created using a series of data 
+processing scripts
+that can be executed using either the Python or R programming languages. These scripts
+are described in Section \ref{sec:model_data}. To the
+extent possible, these scripts have been written in a way that makes
+the data processing transparent and reproducible. However, because the model is
+not complete in configuration or documentation, in some cases the scripts are not
+annotated to assist in interpretation. Therefore, the reader needs to have a
+strong understanding of computer programming, Python and R syntax, statistics,
+and processing of spatial data in order to completely understand these scripts. These scripts are publicly available on the
+website GitHub owned by the username
+\texttt{dnrwaterqualitymodeling}\footnote{\url{https://github.com/dnrwaterqualitymodeling}}. 
+These scripts can be viewed and downloaded
+across the history of their development. However, it must be noted that the
+original datasets used in the processing are not available with the scripts due
+to limitations in data storage and transfer.
+
+The basic model configuration is described in Section \ref{sec:basic_model_config}. 
+This section describes the methods and procedures used in setting up the necessary data for a SWAT project. 
+The ArcSWAT program was used to create the Wisconsin River SWAT project;
+this program facilitated many of the tasks necessary for the creation of a working SWAT model.
+These steps included the overlay of the land use, soils and slope layers to create the hydrologic response units (HRUs), and the creation of the input files needed to run SWAT. 
+The items described in Section \ref{sec:basic_model_config} describe decisions made within ArcSWAT regarding configuration as well as additional data processing and configuration steps that were taken before inputting the data into ArcSWAT. 
+These steps include 
+\begin{itemize}
+\item climate data processing (Section \ref{sec:climate_data})
+\item SWAT subbasin delineation (Section \ref{sec:sub_delineation})
+\item HRU definition (Section \ref{sec:hru_definition}), and the components of the HRU definition:
+	\begin{itemize}
+		\item land cover data specification (Section \ref{sec:land_cover})
+		\item soil data aggregation (Section \ref{sec:soils})
+		\item slope classification (Section \ref{sec:slope})
+	\end{itemize}
+\end{itemize}
+
+The Wisconsin Department of Natural Resources SWAT project team has developed and configured datasets additional to those necessary to create and run a SWAT model. These additional datasets were created for several different and overlapping reasons, as listed below. 
+\begin{itemize}
+\item The WRB drains an area of 23,713 km$^2$ and has significant variation in soils, geologic history, vegetation, and land use. To create the most accurate model possible, we tried to tailor parameters to local conditions (a process known as regionalization).  Thus additional datasets were created to describe regionally specific physical and chemical processes (Sections \ref{sec:ag_land_mgt}, \ref{sec:soil_phosphorus}, \ref{sec:gwp}, and \ref{sec:baseflow}).
+
+\item The WRB TMDL is a large modeling effort and contains several other modeling components and we adjusted and accommodated the SWAT project to other aspects of the WRB TMDL modeling process (Section \ref{sec:urban}).
+
+\item The calibration phase is a the process of the project whereby parameters are adjusted so that simulated variables match observed variables as best as possible. This phase is not completely distinct from the calibration phase; input data will likely be revised once more is known from the calibration process and during the configuration process we started the calibration phase by processing observed data (Sections \ref{sec:reservoirs} and \ref{sec:streamflow_calibration_sites}).
+ 
+\item Some model parameters were set during the configuration phase of the model development; 
+this was done for reasons already mentioned and to save time during the calibration phase. 
+These set parameters may be adjusted during the calibration process, but the estimates set during the configuration phase likely represent better starting points than the default values of the parameters (Sections \ref{sec:reservoirs}, \ref{sec:streamflow_calibration_sites},\ref{sec:et_methods}, \ref{sec:baseflow}, and \ref{sec:gwp}).
+\end{itemize}
+
+It must be noted that the SWAT modeling component of the WRB TMDL remains a work in progress and the methods and data described and distributed at this stage may change at a future data because of issues and concerns that may develop during the calibration phase.
+
 
 % At a minimum, the basic SWAT configuration includes data for the following:
 
@@ -21,39 +74,13 @@ phase of the project. The model itself is available for download at the followin
 	% \item Topographic slope
 % \end{enumerate}
 
-These elements are used to define discrete model components. Combinations of
-these elements form discrete units in the model that SWAT defines as hydrologic
-response units, or HRUs. Each of these elements have been configured for the
-Wisconsin River SWAT model, and HRUs have been classified---both of these
-processes are described in this document. HRUs only provide a simple, physical
-representation of water-quality drivers, and therefore a number of additional
-datasets were compiled to provide supplemental information to aid the accurate estimatation
-and calibration of the model to streamflow, sediment, and phosphorus.
+%
 
-The additional datasets beyond just those for classifying HRUs supply
-information that are considered \textit{a priori} to describe regionally
-specific physical and chemical processes that impact streamflow and water quality.
-First, we compiled daily weather data for a large number of climate
-stations across the basin---although there is not enough topography within the
-basin to significantly impact weather, the Wisconsin River flows across enough
-latitude that the climate in the northern part of the basin is significantly
-different than that in the southern part. Therefore, a dense network of weather
-observations was necessary to adequately represent climatic geography.
 
-Additionally, the Wisconsin River spans several regions with very different
-hydrologic properties, mainly related to the surficial geology of the landscape.
-Specifically, internally draining areas on formerly glaciated topography
-were characterized using a terrain-based methodology. Groundwater flow
-contribution related to either highly permeable soils or hydrologic springs were
-characterized by modeling site-specific baseflow contribution with respect to a
-suite of watershed characteristics. 
 
-Finally, the Wisconsin River is a highly
-managed system with many impoundments created for either water storage or
-generating electricity. Most reservoirs within the basin have monitoring
-stations located at their outfall---we used these data as well as reservoir
-geometric properties (e.g., surface areas and volumes) to more accurately model
-streamflow, sediment, and phosphorus.
+\pagebreak
+
+%%%% old
 
 %The above datasets are those that are described in this document. Additional
 %datasets will be added before the final calibrated model, particularly those
@@ -68,19 +95,36 @@ streamflow, sediment, and phosphorus.
 %final calibration of phosphorus loads, are soil phosphorus concentration
 %estimates and instream baseflow phosphorus concentrations.
 
-Due to the large amount of data required to configure The Wisconsin River SWAT model, the
-products described above were created using a series of data processing scripts
-that can be executed using either the Python or R programming languages. To the
-extent possible, these scripts have been written in a way that makes
-the data processing transparent and reproducible. However, because the model is
-not complete in configuration or documentation, in some cases the scripts are not
-annotated to assist in interpretation. Therefore, the reader needs to have a
-strong understanding of computer programming, Python and R syntax, statistics,
-and processing of spatial data in order to completely understand these scripts. These scripts are publicly available on the
-website GitHub owned by the username
-\texttt{dnrwaterqualitymodeling}\footnote{\url{https://github.com/dnrwaterqualitymodeling}}. These scripts can be viewed and downloaded
-across the history of their development. However, it must be noted that the
-original datasets used in the processing are not available with the scripts due
-to limitations in data storage and transfer.
+%%These elements are used to define discrete model components. Combinations of
+% these elements form discrete units in the model that SWAT defines as hydrologic
+% response units, or HRUs. Each of these elements have been configured for the
+% Wisconsin River SWAT model, and HRUs have been classified---both of these
+% processes are described in this document. HRUs only provide a simple, physical
+% representation of water-quality drivers, and therefore a number of additional
+% datasets were compiled to provide supplemental information to aid the accurate estimatation
+% and calibration of the model to streamflow, sediment, and phosphorus.
 
-\pagebreak
+% The additional datasets beyond just those for classifying HRUs supply
+% information that are considered \textit{a priori} to describe regionally
+% specific physical and chemical processes that impact streamflow and water quality.
+% First, we compiled daily weather data for a large number of climate
+% stations across the basin---although there is not enough topography within the
+% basin to significantly impact weather, the Wisconsin River flows across enough
+% latitude that the climate in the northern part of the basin is significantly
+% different than that in the southern part. Therefore, a dense network of weather
+% observations was necessary to adequately represent climatic geography.
+
+% Additionally, the Wisconsin River spans several regions with very different
+% hydrologic properties, mainly related to the surficial geology of the landscape.
+% Specifically, internally draining areas on formerly glaciated topography
+% were characterized using a terrain-based methodology. Groundwater flow
+% contribution related to either highly permeable soils or hydrologic springs were
+% characterized by modeling site-specific baseflow contribution with respect to a
+% suite of watershed characteristics. 
+
+% Finally, the Wisconsin River is a highly
+% managed system with many impoundments created for either water storage or
+% generating electricity. Most reservoirs within the basin have monitoring
+% stations located at their outfall---we used these data as well as reservoir
+% geometric properties (e.g., surface areas and volumes) to more accurately model
+% streamflow, sediment, and phosphorus.

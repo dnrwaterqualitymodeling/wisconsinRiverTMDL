@@ -1,21 +1,6 @@
-\subsection{Climate}	\label{sec:climate}
-
-\subsubsection{Climate and Weather Data}
+\subsection{Climate and Weather Data}\label{sec:climate_data}
 %Provided are data concerning temperature (found in the "tmp" folder) and precipitation	(found in the "pcp" folder). The data are in two different formats, text files (.txt) and data base files (.dbf),	note that these files are, to some extent, redundant. The data in the database files are the raw data from the climate stations formatted for input to the SWAT model. The naming convention for the DBF file names is the weather station ID followed by a 'tmp' for temperature or 'pcp' for precipitation.	Similarly, the naming convention for the text files is a 't' for temperature or 'p' for precipitation, followed by the station ID. The files pcp.txt and tmp.txt contain the station names, and the latitude and longitude in WGS84 coordinate reference system.
 
 Daily weather and climate data used in the SWAT model were downloaded from the National Climate Data Center (NCDC) - Global Historic Climate Data Network website. Weather data include precipitation and temperature.  Data sets from 120 different stations were downloaded, from which precipitation data was taken from 74 stations, and temperature from 46. Climate data included solar radiation, wind speed, and relative humidity.   
 
 Not all stations had complete data records covering the entire timeframe being modeled.  For time periods missing precipitation or temperature data, the record was supplemented with data from the nearest weather station that did have data for that time period, see Figure \ref{fig:climate_missing} for locations of precipitation and temperature stations and the number of missing days for each station.   For time periods missing data at all stations, weather data was generated automatically by SWAT's internal weather generator.  SWAT's weather generator was was used for all missing solar radiation, wind speed, and relative humidity records. 
-
-\subsubsection{Evapotranspiration Equation}
-
-The method selected to model potential evapotranspiration is used across all subbasins within the model.  The three methods to choose from include the Hargreaves, the Penman-Monteith, and the Priestley-Taylor equations.  We determined which method would work best by evaluating the percent bias and the Nash-Sutcliffe model efficiency coefficient  when comparing modeled water yield to observed water yield at 20 sites across the basin. The three methods compared were Hargreaves, Penman-Monteith, and Priestley-Taylor. Without calibrating the initial model, Penman-Monteith outperformed the other two methods in both Nash-Sutcliffe coefficient and percent bias, table \ref{table:et_method}. See Figure \ref{fig:et_methods} for maps of the quality metrics for each of the different evapotranspiration equations.
-
-The Penman-Monteith equation is an energy balance and aerodynamic formula that computes water evaporation from vegetated surfaces.  The equation estimates evapotranspiration rates based on solar radiation, temperature, wind speed, and relative humidity.
-
-%\begin{equation}
-%	\gamma E = \frac{\delta(H_{net}-G) + \rho_{air} \cdot c_p \cdot [e_z^o-e_z]/r_a}
-%	{\delta + \gamma \cdot (1 + r_c/r_a)}
-%\end{equation}
-
-%where λE is the latent heat flux density (Mj m^-2 d^-1), E is the depth rate evaporation (mm d^-1), DELTA is the slope of the saturation vapor pressure-temperature curve, de/dT (kPa degree C^-1), Hnet is the net radiation (Mj m^-2 d^-1), G is the heat flux density to the ground (MJ m^-2 d^-1), RHOair is the air density (kg m^-3), cp is the specific heat at constant pressure (MJ kg^-1 degree C^-1), ez^o is the saturation vapor pressure of air at height z (kPa), ez is the water vapor pressure of air at height z (kPa), GAMMA is the psychometric constant (kPa degree C^-1), rc is the plan canopy resistance (s m^-1), and ra is the diffusion resistance of the air layer (aerodynamic resistance) (s m^-1).
