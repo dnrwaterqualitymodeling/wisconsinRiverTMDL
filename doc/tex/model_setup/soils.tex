@@ -56,7 +56,7 @@ then it was assumed to not be drained and the ``D'' designation was chosen.
 
 The first aggregation step was to aggregate components by map unit to conform to
 the SWAT soils data structure. The data structure for soils in SWAT does not
-directly conform to SSURGO data structure, mainly that there is no analog to the
+directly conform to SSURGO data structure, mainly that there is no analogue to the
 SSURGO \textit{component} level in SWAT---in other words, soils in SWAT cannot
 be subdivided, see Figure \ref{fig:component_schematic}. We aggregated components by computing
 component-weighted averages of each soil property for any given depth of soil from the soil surface to the average depth \cite{gatzke_aggregation_2011, beaudette_algorithms_2013}.
@@ -121,7 +121,7 @@ property and so in this way it is represented but does not dominate the clusteri
 algorithm.
 
 Not every map unit was included in the clustering procedure. Several of the soil property fields of the SSURGO dataset were not populated or commonly had ``no data'' values, these properties were not used in the
-clustering process so the spurious zeros would not influence the algorithm (Table \ref{table:soil_attr_in_swat}). These properties were coarse fragments, calcium carbonate, and electrical conductivity. Albedo and pH were also excluded from the clustering algorithm. Mapunits that had no HSG designation were not included, nor were map units that did not have information on the soil properties of the horizons. Examining these excluded map units revealed that they were generally disturbed landscapes or those without a significant soil layer such as pits, landfills, urban or made land, rock outcrops, and water. These miscellaneous map units were all grouped together as one cluster with the exception of water, which we did not use in the cluster analysis.
+clustering process so the spurious zeros would not influence the algorithm (Table \ref{table:soil_attr_in_swat}). These properties were coarse fragments, calcium carbonate, and electrical conductivity. Albedo and pH were also excluded from the clustering algorithm. Map units that had no HSG designation were not included, nor were map units that did not have information on the soil properties of the horizons. Examining these excluded map units revealed that they were generally disturbed landscapes or those without a significant soil layer such as pits, landfills, urban or made land, rock outcrops, and water. These miscellaneous map units were all grouped together as one cluster with the exception of water, which we did not use in the cluster analysis.
 
 After each map unit had been assigned to a cluster, the map units within each cluster were
 aggregated together to form a composite or average soil profile. 

@@ -15,7 +15,7 @@
 		\label{eq:bflow}
 	\end{equation}
 	
-	Where $ALPHA\_BF$ is the parameter controlling baseflow, $Perm$ is average surface permeability of the watershed, $Slope$ is the average slope of the watershed, while the letter subscript denotes the specific ecoregion and the $\beta$s are the empirical coefficients.
+	Where $ALPHA\_BF$ is the parameter controlling baseflow, $Perm$ is average surface permeability of the watershed, $Slope$ is the average slope of the watershed, while the letter subscript denotes the specific ecoregion and the $\beta$s are the empirical coefficients. The resulting model was found to perform satisfactorily when observed values were compared to predicted values \ref{fig:alpha_bf_obs_pred}.
 	
 	This model was used to predict the ALPHA\_BF for every small watershed in the WHDPlus dataset. An area weighted average of these small watersheds was taken for each SWAT subbasin to aggregate the ALPHA\_BF predictions. These values were used to update ALPHA\_BF in the groundwater files for each subbasin. The resulting distribution of the ALPHA\_BFLOW parameter in the WRB can be found in Figure \ref{fig:alpha_bf}.
 	
