@@ -4,7 +4,7 @@ Watershed Assessment Model (SWAT) for the estimation of streamflow and sources
 of sediment and phosphorus in the Wisconsin River basin. It is a technical
 document that presumes the reader has a high level of familiarity with SWAT and
 the Wisconsin River TMDL. In fact, it is written specifically to water quality
-modelers to invite a critical review to ensure the quality of the resulting
+modelers to invite a critical review and ensure the quality of the resulting
 estimations. The document was written after the model was configured, but before
 it has been calibrated. Therefore, the methods described here may change prior
 to the release of the final model given new developments during the calibration
@@ -23,7 +23,7 @@ phase of the project. The model itself is available for download at the followin
 
 These elements are used to define discrete model components. Combinations of
 these elements form discrete units in the model that SWAT defines as hydrologic
-response units, or HRUs. Each of these elements has been configured for the
+response units, or HRUs. Each of these elements have been configured for the
 Wisconsin River SWAT model, and HRUs have been classified---both of these
 processes are described in this document. HRUs only provide a simple, physical
 representation of water-quality drivers, and therefore a number of additional
@@ -32,20 +32,23 @@ and calibration of the model to streamflow, sediment, and phosphorus.
 
 The additional datasets beyond just those for classifying HRUs supply
 information that are considered \textit{a priori} to describe regionally
-specific physical and chemical process that impact streamflow and water quality.
-First and foremost, we compiled daily weather data for a large number of climate
+specific physical and chemical processes that impact streamflow and water quality.
+First, we compiled daily weather data for a large number of climate
 stations across the basin---although there is not enough topography within the
 basin to significantly impact weather, the Wisconsin River flows across enough
 latitude that the climate in the northern part of the basin is significantly
 different than that in the southern part. Therefore, a dense network of weather
 observations was necessary to adequately represent climatic geography.
+
 Additionally, the Wisconsin River spans several regions with very different
 hydrologic properties, mainly related to the surficial geology of the landscape.
-Specifically, internally draining areas due to recently glaciated landscapes
-were characterized using a terrain-based methodology, and groundwater flow
+Specifically, internally draining areas on formerly glaciated topography
+were characterized using a terrain-based methodology. Groundwater flow
 contribution related to either highly permeable soils or hydrologic springs were
 characterized by modeling site-specific baseflow contribution with respect to a
-suite of watershed characteristics. Finally, the Wisconsin River is a highly
+suite of watershed characteristics. 
+
+Finally, the Wisconsin River is a highly
 managed system with many impoundments created for either water storage or
 generating electricity. Most reservoirs within the basin have monitoring
 stations located at their outfall---we used these data as well as reservoir
@@ -65,12 +68,12 @@ streamflow, sediment, and phosphorus.
 %final calibration of phosphorus loads, are soil phosphorus concentration
 %estimates and instream baseflow phosphorus concentrations.
 
-Due to the extent of data required to configure The Wisconsin River SWAT model, the
+Due to the large amount of data required to configure The Wisconsin River SWAT model, the
 products described above were created using a series of data processing scripts
 that can be executed using either the Python or R programming languages. To the
-extent possible, these scripts have been written in a way that intends to make
+extent possible, these scripts have been written in a way that makes
 the data processing transparent and reproducible. However, because the model is
-not complete in configuration or documentation, in some cases they are not
+not complete in configuration or documentation, in some cases the scripts are not
 annotated to assist in interpretation. Therefore, the reader needs to have a
 strong understanding of computer programming, Python and R syntax, statistics,
 and processing of spatial data in order to completely understand these scripts. These scripts are publicly available on the

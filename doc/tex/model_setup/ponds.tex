@@ -18,7 +18,7 @@ If maximum depth was not available, we fitted a separate regression using only s
 \bm{V} = e^{0.7 + 1.3 \cdot \ln(\bm{A})} 
 \end{equation}
 
-In the above equations, $\bm{V}$ is the volume of any given lake in $acre \cdot feet$, $\bm{A}$ is its surface area in acres, and $\bm{D}$ is its maximum depth in feet.
+In the above equations, $\bm{V}$ is the volume of any given lake in $acre \cdot feet$, $\bm{A}$ is surface area in acres, and $\bm{D}$ is maximum depth in feet.
 
 The contributing area of each pond was estimated using WHDPlus. WHDPlus includes a polygon feature class of watersheds of each hydrographic unit in the Wisconsin Hydrography Geodatabase. Stream-type hydrographic units are confluence-bounded reaches that are further subdivided by changes in hydrology ``type'' (e.g., transition from stream to wetland gap). Lake-type hydrographic units are any lake greater than five acres. The watersheds of all lake-type hydrographic units defined as ``landlocked'' were selected, and the sums of the areas of these watersheds were used to define the percent of each subbasin that flows to a pond.
 
