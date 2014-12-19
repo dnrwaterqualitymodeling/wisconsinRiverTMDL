@@ -1,7 +1,7 @@
 \subsubsection{Groundwater Inflow (Baseflow)}\label{sec:baseflow}
 	In SWAT, the relative contribution of streamflow as baseflow is determined by the ALPHA\_BF parameter and can be adjusted for each subbasin. An effort was made to regionalize this variable to account for the wide variations in baseflow conditions across the WRB. A model was constructed relating baseflow to local watershed characteristics and then this model was used to create a local value of ALPHA\_BF based upon local conditions.\footnote{The code used to carry out these and the following tasks is available here: \url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/tree/master/groundWater/baseFlow}}
 	
-	In order to construct a model relating baseflow contribution to watershed characteristics it was necessary to obtain observed values of baseflow. Bflow, a baseflow separation program, \citep{arnold_automated_1995} was used to estimate baseflow from daily streamflow data. The observed streamflow data were retrieved on 27 August, 2014 from the USGS National Water Information System (NWIS) \citep{usgs_nwis_2014}. All monitoring stations in Wisconsin that met the requirements of the Bflow separation program were used, excluding sites with upstream watersheds less than 50 km$^2$ or greater than 1,000 km$^2$ \citep{arnold_regional_2000}.
+	In order to construct a model relating baseflow contribution to watershed characteristics it was necessary to obtain observed values of baseflow. Bflow, a baseflow separation program, \citep{arnold_automated_1995} was used to estimate baseflow from daily streamflow data. The observed streamflow data were retrieved on 27 August, 2014 from the USGS National Water Information System (NWIS) \citepalias{usgs_nwis_2014}. All monitoring stations in Wisconsin that met the requirements of the Bflow separation program were used, excluding sites with upstream watersheds less than 50 km$^2$ or greater than 1,000 km$^2$ \citep{arnold_regional_2000}.
 
 	This algorithm requires continuous daily observations of streamflow for at least one year, from which it determines the baseflow contribution from the hydrograph.	After the observed data were downloaded, they were processed to ensure that only contiguous periods of streamflow of at least one year were used in the routine. For this analysis gaps of up to nine days were allowed in the record and still considered contiguous. If a monitoring site had a gap, or gaps, of longer than nine days, it was split at the gaps into separate records and each part assessed as to whether it contained at least a year of data. Therefore, it was possible for a monitoring site to have several periods of contiguous streamflow records. If a record spanned less than one year of data it was not used in the analysis.
 	
@@ -15,13 +15,12 @@
 		\beta_2 \bm{E_2} \bm{S} + 
 		\beta_3 \bm{E_3} \bm{S} +
 		\beta_4 \bm{E_4} \bm{S} +
-		\beta_4 \bm{P} + 
-		\epsilon
+		\beta_4 \bm{P}
 		\label{eq:bflow}
 	\end{equation}
 	
 	Where $\bm{A}$ represents the SWAT ALPHA\_BF parameter controlling baseflow, $\bm{P}$ is average surface permeability of the watershed, $\bm{S}$ is the average slope of the watershed, while $\bm{E_x}$ are dummy variables denoting one of four ecoregion within the WRB (i.e., the slope term of $\bm{S}$ varies by ecoregion).
 	
-	This model was used to predict the ALPHA\_BF for every small watershed in the WHDPlus dataset. An area weighted average of these small watersheds was taken for each SWAT subbasin to aggregate the ALPHA\_BF predictions. These values were used to update ALPHA\_BF in the groundwater files for each subbasin. The resulting distribution of the ALPHA\_BFLOW parameter in the WRB can be found in Figure \ref{fig:alpha_bf}.
+	This model was used to predict the ALPHA\_BF for every small watershed in the WHDPlus dataset. An area weighted average of these small watersheds was taken for each SWAT subbasin to aggregate the ALPHA\_BF predictions. These values were used to update ALPHA\_BF in the groundwater files for each subbasin. The resulting distribution of the ALPHA\_BF parameter in the WRB can be found in Figure \ref{fig:alpha_bf}.
 	
 	The regionalized parameters of ALPHA\_BF do not necessarily represent the final values of ALPHA\_BF as this parameter will be included in the calibration phase of the model. This modeling effort was meant as a first step in creating accurate and useful values of ALPHA\_BF.

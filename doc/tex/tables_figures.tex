@@ -2,6 +2,8 @@
 
 \section{Tables}
 
+\input{./tab/landcover_mgt_table.tex}
+
 %%%% soil attributes table
 \begin{landscape}
 \input{./tab/soil_attributes_used_in_SWAT.tex}
@@ -40,7 +42,7 @@
 	\begin{tabular}{l l}
 	\hline
 		Model Area	      &	Dataset \\
-	\hline	\hline\\[0.25]
+	\hline	\hline\\[0.25ex]
 		City and Village Municipal limits        &	\parbox[l]{0.6\textwidth}{TIGER 2010 Minor Civil Divisions (``State--based'') with PL 94-171 Attributes}		\\
 		 & \\
 		Urbanized Areas	  &	TIGER 2010 Urban Areas Western Great Lakes	 	\\
@@ -159,6 +161,14 @@
 %%Alpha BF
 \begin{figure}[h!]
 	\centering
+	\includegraphics[width=\textwidth]{./img/alpha_bf_obs_v_pred.png}
+	\caption{Graph showing the observed versus predicted values of the model predicting ALPHA\_BF.}
+	\label{fig:alpha_bf_obs_pred}
+\end{figure}
+
+
+\begin{figure}[h!]
+	\centering
 	\includegraphics[width=\textwidth]{./img/alpha_bf.png}
 	\caption{Map showing the predicted ALPHA\_BF for each SWAT subbasin. Higher (darker) values indicate a high response of groundwater to recharge.}
 	\label{fig:alpha_bf}
@@ -176,8 +186,8 @@
 %Streamflow calib sites
 \begin{figure}[h]
 	\centering
-	\includegraphics[]{./img/flow_calib_sites_changed}
-	\caption{Flow monitoring sites. The sites marked ``Included'' are currently considered calibration sites. Those marked ``Excluded'' are downstream of reservoirs or other structures that regulate flow and so are not used for calibration. For more detailed information see Table \ref{tab:streamflow_calibration_sites}.}}
+	\includegraphics{./img/flow_calib_sites_changed}
+	\caption{Flow monitoring sites. The sites marked ``Included'' are currently considered calibration sites. Those marked ``Excluded'' are downstream of reservoirs or other structures that regulate flow and so are not used for calibration. For more detailed information see Table \ref{tab:streamflow_calibration_sites}.}
 	\label{fig:calibration_site_map}
 \end{figure}
 \clearpage
