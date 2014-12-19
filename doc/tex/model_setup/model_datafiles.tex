@@ -1,4 +1,5 @@
 %\subsubsection{Model Data}
+\section{Model Data Files}
 \label{sec:model_data}
 The Wisconsin River Basin (WRB) SWAT model distributed for review contains all the files necessary to run the model. The ArcSWAT program was used to set up the SWAT project and so the file structure was determined by this program. 
 
@@ -17,7 +18,7 @@ Much of the model configuration was done with the R statistical package (files w
 
 \item ``hydrology'' --- \texttt{calculateRunoffUsingBaseflowSeparation.R} is a script for developing a basin-wide water balance estimates and formatting the outflows from the basin reservoirs
 
-\item ``landCover'' --- the script \texttt{mergeWwiWithNass2011.py} was used to reclassify and rasterize the Wisconsin Wetlands Inventory (WWI) into two classes: woody wetlands and herbaceous wetlands. The script \texttt{mergeCdlWithWetlandsCrpCranberries.py} merged the 2011 Cropland Data Layer (CDL) with the rasterized wetlands, a layer of CRP attributed field boundaries within the 2007 Common Land Unit dataset, and a layer of cranberry land developed by the Wisconsin DNR (see Section \ref{sec:land_cover}.
+\item ``landCover'' --- the script \texttt{mergeWwiWithNass2011.py} was used to reclassify and rasterize the Wisconsin Wetlands Inventory (WWI) into two classes: woody wetlands and herbaceous wetlands. The script \texttt{mergeCdlWithWetlandsCrpCranberries.py} merged the 2011 Cropland Data Layer (CDL) with the rasterized wetlands, a layer of CRP attributed field boundaries within the 2007 Common Land Unit dataset, and a layer of cranberry bogs developed by the Wisconsin DNR (see Section \ref{sec:land_cover}.
 
 \item ``ponds'' --- these scripts were used in the processing and modeling to derive pond parameters for SWAT (see Section \ref{sec:ponds} 
 

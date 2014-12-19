@@ -1,5 +1,5 @@
-\subsubsection{Urban Delineation}\label{sec:urban}
-The simulation of urban areas within the WRB will be completed using the Source Loading and Management Model for Windows (WinSLAMM v10.0). Urban runoff volumes, total suspended solid (TSS) loads and total phosphorus (TP) loads exported from WinSLAMM will be incorporated into the watershed response model (SWAT) as point source discharges. Areas within the WRB modeled in WinSLAMM comprise the urban model area. The urban model area was not modeled used SWAT, that is these areas were removed from the data layers input into SWAT. The extent of the urban model area is defined as 
+\subsection{Urban Delineation}\label{sec:urban}
+The simulation of urban areas within the WRB will be completed using the Source Loading and Management Model for Windows (WinSLAMM v10.0). Urban runoff volumes, total suspended solid (TSS) loads and total phosphorus (TP) loads exported from WinSLAMM will be incorporated into the watershed response model (SWAT) as point source discharges. Areas within the WRB modeled in WinSLAMM comprise the urban model area. The urban model area was not modeled used SWAT, that is these areas were removed from the data layers input into SWAT. See Table \ref{tab:urban_model_boundary_data} and Table \ref{tab:specific_urban_areas_limits} for the specific data files from which boundaries were derived. The extent of the urban model area is defined as 
 
 \begin{enumerate}
 	\item Cities and villages, excluding the following areas:
@@ -13,40 +13,7 @@ The simulation of urban areas within the WRB will be completed using the Source 
 	\item Department of Transportation right-of-ways
 \end{enumerate}
 
-Data sets used to define the urban model area layer include the published statewide data listed below and data provided by individual permitted MS4s.
+Data sets used to define the urban model area layer include the published statewide data listed in Table \ref{tab:urban_model_boundary_data} and data provided by individual permitted MS4s.
 
-\begin{table}
-\begin{center}
-	\caption{Statewide datasets used to define urban model area extent.}
-	\begin{tabular}{c c}
-	\hline
-		Model Area	      &	Dataset \\
-	\hline	\hline\\[0.25]
-		City and Village Municipal limits        &	\parbox[l]{0.6\textwidth}{TIGER 2010 Minor Civil Divisions (``State--based'') with PL 94-171 Attributes}		\\
-		 & \\
-		Urbanized Areas	  &	TIGER 2010 Urban Areas Western Great Lakes	 	\\
-		& \\
-		Open Water  &	\parbox[l]{0.6\textwidth}{Open water features (i.e. lakes, reservoirs, wide streams and rivers) as defined by the USGS 1:24,000 National Hydrography Dataset} \\
-		\hline
-	\end{tabular}
-\label{tab:urban_model_boundary_data}
-\end{center}
-\end{table}
 
-\begin{table}
-\begin{center}
-	\caption{Municipal limits used to define the extent of major urban areas in the urban model area.}
-	\begin{tabular}{c c}
-	\hline
-		Model Area	      &	Dataset \\
-	\hline	\hline
-		Marathon County        &	Marathon County Planning and Zoning \\
-		Baraboo	  &	City of Baraboo Public Works/Engineering	 	\\
-		Marshfield  &	City of Marshfield Engineering \\
-		Wisconsin Rapids & City of Wisconsin Rapids Engineering\\
-		\hline
-	\end{tabular}
-\label{tab:specific_urban_areas_limits}
-\end{center}
-\end{table}
 

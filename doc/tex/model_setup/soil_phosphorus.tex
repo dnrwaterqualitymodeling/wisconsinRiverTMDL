@@ -1,0 +1,16 @@
+\subsection{Soil Phosphorus}\label{sec:soil_phosphorus}
+Soil Phosphorus concentrations were obtained through the University of Wisconsin
+Soil Testing Laboratory \footnote{\url{http://uwlab.soils.wisc.edu/}}. Soil
+phosphorus concentrations were aggregated by county by the soil laboratory for
+each year from 1974 to the present. We chose the annual average soil
+concentration nearest the beginning of the model spin-up period, 1995, to
+establish prior concentrations. Subbasin-level soil phosphorus concentrations
+were estimated by calculating an area-weighted average of intersecting counties
+within a subbasin.
+The soil testing laboratory receives almost exclusively agricultural soils so to reflect this bias in the soil phosphorus data, only agricultural HRUs were given the subbasin average concentration, while the non-agricultural HRUs were given SWAT's default concentration (5 mg P/Kg). This default concentration is assumed to equilibrate over the 6-year model spin-up period. 
+Soluble phosphorus
+concentrations were estimated as half of the reported phosphorus using the
+Bray-1 method measured with a spectrophotometer \citep{vadas_validating_2010}.
+Organic phosphorus concentrations were estimated by assuming that phosphorus
+constitutes 0.85\% of organic material measured by loss of weight upon ignition
+\citep{havlin_soilfertility_2005}. Soil phosphorus estimates are not included in the SWAT model provided---they will be included during the phosphorus calibration phase.

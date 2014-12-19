@@ -1,17 +1,22 @@
 %%%%%%%%%%%%%%%%%%%%%   TABLES     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Tables}
 
+%%%% soil attributes table
 \begin{landscape}
 \input{./tab/soil_attributes_used_in_SWAT.tex}
 \end{landscape}
 
+%%% soil clusters table
 \input{./tab/soil_clusters_table.tex}
 
+%%% soil property table
 \input{./tab/soil_property_table.tex}
 
+%%% climate table
 \input{./tab/climTable.tex}
 
-
+%%% ET table
 \begin{table}[h!]
 	\caption[Different evapotranspiration equations ]{Different evapotranspiration equations and their percent bias and Nash-Sutcliffe coefficients.}
 	\centering
@@ -27,6 +32,43 @@
 	\label{table:et_method}
 \end{table}	
 
+%%%%%%% urban delineation tables
+%%% urban tables
+\begin{table}
+\begin{center}
+	\caption{Statewide datasets used to define urban model area extent.}
+	\begin{tabular}{l l}
+	\hline
+		Model Area	      &	Dataset \\
+	\hline	\hline\\[0.25]
+		City and Village Municipal limits        &	\parbox[l]{0.6\textwidth}{TIGER 2010 Minor Civil Divisions (``State--based'') with PL 94-171 Attributes}		\\
+		 & \\
+		Urbanized Areas	  &	TIGER 2010 Urban Areas Western Great Lakes	 	\\
+		& \\
+		Open Water  &	\parbox[l]{0.6\textwidth}{Open water features (i.e. lakes, reservoirs, wide streams and rivers) as defined by the USGS 1:24,000 National Hydrography Dataset} \\
+		\hline
+	\end{tabular}
+\label{tab:urban_model_boundary_data}
+\end{center}
+\end{table}
+
+\begin{table}
+\begin{center}
+	\caption{Municipal limits used to define the extent of major urban areas in the urban model area.}
+	\begin{tabular}{l lc}
+	\hline
+		Model Area	      &	Dataset \\
+	\hline	\hline
+		Marathon County        &	Marathon County Planning and Zoning \\
+		Baraboo	  &	City of Baraboo Public Works/Engineering	 	\\
+		Marshfield  &	City of Marshfield Engineering \\
+		Wisconsin Rapids & City of Wisconsin Rapids Engineering\\
+		\hline
+	\end{tabular}
+\label{tab:specific_urban_areas_limits}
+\end{center}
+\end{table}
+
 \begin{landscape}
 	\input{./tab/reservoir_geometries.tex}
 	\input{./tab/streamflow_calibration_sites_table.tex}
@@ -34,6 +76,7 @@
 %%%%%%%%%%%%%%%%  FIGURES    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Figures}
 
+%% soil aggregation process flow diagram
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\textwidth]{./img/aggregation_flow_diagram}
@@ -41,6 +84,7 @@
 	\label{fig:agg_flow_diagram}
 \end{figure}
 
+%%% SSURGO data structure
 \begin{figure}[h]
 \centering
  \includegraphics[width=0.5\textwidth]{./img/ssurgo_data_structure_schematic.jpeg}
@@ -48,13 +92,14 @@
 	\label{fig:ssurgo_schematic}
 \end{figure}
 
+%% SSURGO profile figures
 \begin{figure}[h]
   \centering
     \includegraphics[width=0.5\textwidth]{./img/component_schematic.png}
 	\caption[Schematic diagram of SSURGO map unit]{Schematic diagram of SSURGO map unit. Antigo and Houghton are each components within the map unit. Within each map unit are varying numbers of components with varying horizon depths (e.g., Ap and O1 are the surface horizons for Antigo and Houghton respectively. Components were aggregated to map units by averaging soil properties (e.g., percent sand) horizontally across horizons.}
 	\label{fig:component_schematic}
 \end{figure}
-
+%%Soil cluster variability
 \clearpage
 \begin{figure}[H]
 	\centering
@@ -76,8 +121,10 @@
 \end{figure}
 \end{landscape}
 
+%%% ET figures
 \input{./img/et_figures.tex}
 
+%%Observed vs pred Ponds
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.6\textwidth]{./img/area_model_observed_predicted.pdf}
@@ -85,6 +132,7 @@
 	\label{fig:volume_regressions}
 \end{figure}
 
+%%%%   Filled DEM
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.6\textwidth]{./img/maximum_pond_volume.png}
@@ -121,7 +169,7 @@
 \begin{figure}[h]
 	\centering
 	\includegraphics[]{./img/flow_calib_sites_changed}
-	\caption{Flow monitoring sites. The sites marked ``Included'' are currently considered calibration sites. Those marked ``Excluded'' are downstream of reservoirs or other structures that regulate flow and so are not used for calibration.}
+	\caption{Flow monitoring sites. The sites marked ``Included'' are currently considered calibration sites. Those marked ``Excluded'' are downstream of reservoirs or other structures that regulate flow and so are not used for calibration. For more detailed information see Table \ref{tab:streamflow_calibration_sites}.}}
 	\label{fig:calibration_site_map}
 \end{figure}
-\pagebreak
+\clearpage
