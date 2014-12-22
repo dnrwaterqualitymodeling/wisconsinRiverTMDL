@@ -4,11 +4,9 @@ Soils are a critical part of the SWAT modeling framework; they determine many
 surface hydraulic properties such as texture, hydraulic conductivity, and
 available water capacity. We used the county-scale Soil Survey Geographical
 Database (SSURGO) \citepalias{staff_gridded_2014}. For more information about SSURGO
-
 data see the SSURGO metadata\footnote{\url{http://www.nrcs.usda.gov/wps/portal/nrcs/detail/soils/survey}}.
 The SSURGO database is structured in three levels of information: map units,
-components, and horizons (Figure \ref{fig:ssurgo_schematic}). Horizons are the fundamental unit of soil in SSURGO, and are
-therefore where the majority of soil information is stored in the database.
+components, and horizons (Figure \ref{fig:ssurgo_schematic}). Horizons are the fundamental unit of soil in SSURGO, and are therefore where the majority of soil information is stored in the database.
 Components are aggregations of horizons that represent a full soil profile,
 typically conforming to the Official Series Description (OSD). Map units
 are discrete polygons drawn on a map (originally mapped at scales from 1:12,000
@@ -31,9 +29,9 @@ simpler model, we aggregated
 soils together based on similarity of several key properties that impact the
 hydrologic cycle. This was a two step process: first, components within map
 units were aggregated
-together,\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/blob/master/soils/step1_aggregate_gSSURGO.R} } 
+together,\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/blob/model_setup_public/soils/step1_aggregate_gSSURGO.R} } 
 and second, map units were aggregated together based on
-similarity\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/blob/master/soils/step2_aggregate_gSSURGO.R}} (Figure \ref{fig:agg_flow_diagram}).
+similarity\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/blob/model_setup_public/soils/step2_aggregate_gSSURGO.R}} (Figure \ref{fig:agg_flow_diagram}).
 
 Several changes were made to the dataset before aggregation, in order to
 facilitate processing. Soil organic carbon content is required by SWAT, but is
