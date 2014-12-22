@@ -5,6 +5,8 @@ library(rgeos)
 library(RColorBrewer)
 library(classInt)
 library(foreign)
+library(xtable)
+# library(ggmap)
 source("./Code/figures/function_proper_legend.r")
 ################################
 # map titles
@@ -18,7 +20,7 @@ map_wetlands = "max_surface_area_wetlands.png"
 map_ponds = "ponds.png"
 map_wetlands_and_ponds = "wetlands_and_ponds.png"
 map_evapo_transp = "et_error.png"
-
+tab_lnd_cvr_mgt = "./Code/doc/tab/landcover_mgt_table.tex"
 # paths
 dir_out = "./Code/doc/img"
 
@@ -123,6 +125,30 @@ unts 	= "in"
 reso 	= 800
 
 ##########################
+# ggmap test
+# bsn_wgs84 = spTransform(basin, CRS("+proj=longlat +ellps=WGS84"))
+# bsn_ext = extent(bsn_wgs84)
+# lon = mean(c(bsn_ext@xmin, bsn_ext@xmax))
+# lat = mean(c(bsn_ext@ymin, bsn_ext@ymax))
+
+ # bsn_image =
+# for (i in 3:21){
+	# file_name = paste("map_zoom_",i,".png",sep ='')
+	# png(file_name)#,
+		# width = wdth, 
+		# height = hght, 
+		# units = unts, 
+		# res = reso,
+	)
+	# tst =ggmap(get_map(
+		# location = c(lon = lon, lat = lat),
+		# source = "google",
+		# maptype = "hybrid",
+		# zoom = 9))
+	# dev.off()
+# }
+
+
 ##### ##### ##### ##### ##### #####
 # Subbasins with reaches 
 png(paste(dir_out, map_sub_reaches, sep = "/"), 
@@ -131,7 +157,7 @@ png(paste(dir_out, map_sub_reaches, sep = "/"),
 	units = unts, 
 	res = reso)
 plot(subbasins)
-title(main="SWAT\nSubbasins")
+title(main="SWAT/nSubbasins")
 dev.off()
 ##### ##### ##### ##### ##### #####
 # Subbasins with reaches and calib points
@@ -162,7 +188,7 @@ plot(flow_calib_pts[flow_calib_pts@data$Keep == 0,],
 	add = T, 
 	pch = 3,
 	col = 'red')
-title(main = "SWAT Reaches\nwith Flow Calibration Sites")
+title(main = "SWAT Reaches/nwith Flow Calibration Sites")
 legend('bottomright', 
 	legend = c("Included",	"Excluded"),
 	pch = c(20, 3),
@@ -198,7 +224,7 @@ legend("bottomright",
 	fill = pal_gwp,
 	bty = 'n')
 
-title(main = "Groundwater\nPhosphorus")
+title(main = "Groundwater/nPhosphorus")
 dev.off()
 # adjust scalebar based on specific image size
 # scalebar(100000, label = c('0','50','100 km'), lwd = 1.5, div = 4, type = 'bar', cex = 1)
@@ -231,7 +257,7 @@ legend("bottomright",
 	fill = pal_abf,
 	bty = 'n')
 
-title(main = "ALPHA_BF\nParameter")
+title(main = "ALPHA_BF/nParameter")
 dev.off()
 
 ##### ##### ##### ##### ##### #####
@@ -302,7 +328,7 @@ plot(ponds,
 	axes = F)
 plot(basin, add = T)
 plot(basin, add = T)
-title(main = "SWAT Ponds\nand Wetlands")
+title(main = "SWAT Ponds/nand Wetlands")
 
 legend('bottomright', legend = c("Wetlands", "Ponds"), fill = c("#9ecae1", "#08519c"), bty = 'n')
 dev.off()
@@ -381,5 +407,39 @@ for (met in c("pbias", "nashsut")){
         title = paste(legTitle))
 	dev.off()
 }
+#############################################
+# tables
+file_swat_lu = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/SWAT_lookup.csv"
+file_landcover_mgt = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/WRB_TMDL_LndCvr_Mgt_07152014.img.vat.dbf"
+
+swat_lu = read.csv(file_swat_lu)
+lnd_cvr_mgt = read.dbf(file_landcover_mgt)
+
+lnd_cvr_mgt_tbl = merge(swat_lu, lnd_cvr_mgt, by.x = 'VALUE', by.y = "Value")
+
+lnd_cvr_mgt_tbl = subset(lnd_cvr_mgt_tbl, select=c("LANDUSE", "Type", "Definition", "Gen_Code"))
+
+lbl = "tab:lnd_mgt_def"
+cap = "The land cover classes represented within ArcSWAT are shown here with the class of land use and land management. The rotation codes are: Cg--corn grain, Cs--corn silage, So-soybean, Po--potato, Vg--vegetable, A--Alfalfa, O/A--oats/alfalfa. Tons are English tons."
+x_lnd = xtable(
+	lnd_cvr_mgt_tbl,
+	label = lbl, 
+	caption = cap)
+
+print(
+	file = tab_lnd_cvr_mgt,
+	x_lnd, 
+	tabular.environment = "longtable",
+	NA.string = "NA",
+	include.rownames = FALSE,
+	floating =FALSE)
+
+
+
+
+
+
+
+
 
 
