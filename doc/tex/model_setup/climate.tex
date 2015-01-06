@@ -1,4 +1,6 @@
-\subsection{Climate and Weather Data}\label{sec:climate_data}
+\subsection{Climate Station Data}\label{sec:climate_data}
+
+The WRB SWAT model will eventually be calibrated to reduce the error between model estimates and measured data. Measured data of streamflow, sediment concentrations, and phosphorus concentrations were collected between the years of 2002 and 2013. Therefore, we compiled daily climate station data between that period so that measured climate station data would temporally align with streamflow, sediment, and phosphorus measurements. We configured the model to print monthly output for this time period. 
 
 Daily weather and climate data used in the SWAT model were downloaded from the National Climate Data Center (NCDC) - Global Historic Climate Data Network website\footnote{\url{ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily}} \citep{ncdc_ghcn_2012}. 
 Weather data include precipitation and temperature.  
@@ -7,3 +9,5 @@ In addition to temperature and precipitation records, we retrieve daily solar ra
 For both of these sources, the data have gone through quality assurance and quality control procedures.
 
 Not all stations had complete data records covering the entire timeframe being modeled.  For time periods missing precipitation or temperature data, the record was supplemented with data from the nearest weather station with data for that time period (Figure \ref{fig:climate_missing}). Data from neighboring stations was used to fill gaps iteratively until each station had a continuous record of daily observations for the whole model period. For solar radiation, wind speed and relative humidity missing data was generated automatically by the SWAT weather generator which stochastically generates data based on historic weather patterns.
+
+Deterministic models such as SWAT usually perform better with a spin-up period of several years to allow the water budget and other physical and chemical processes of the system to equilibrate. We chose a spin-up period equal in length to the model period of 12 years. For these 12 years, weather was simulated by SWAT using patterns of historic weather between the years of 1961 and 2010. Therefore, the model runs for a total of 24 years (12 spin-up years, and 12 years using measured data). However, as stated above, only the 12 years using measured data are printed.
