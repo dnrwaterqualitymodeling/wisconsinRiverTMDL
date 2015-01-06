@@ -1,15 +1,16 @@
-param,minVal,maxVal             need a column for method (i.e., relative, absolute)
-SFTMP,-5,5
-SMTMP,-5,5
-SMFMX,0,10
-SMFMN,0,10
-TIMP,0,1
-ESCO,0.01,1
-EPCO,0.01,1
-EVLAI,0,10
-FFCB,0,1
-SURLAG,0.05,12
-ADJ_PRK,0.5,2
-PRF_BSN,0,2
-SPEXP,1,2
-SPCON,0.0001,0.01
+param,ext,minVal,maxVal           ,method
+SFTMP,bsn,-5,5,
+SMTMP,bsn,-5,5,
+SMFMX,bsn,0,10,
+SMFMN,bsn,0,10,
+TIMP,bsn,0,1,
+ESCO,bsn,0.01,1,
+EPCO,bsn,0.01,1,
+EVLAI,bsn,0,10,
+FFCB,bsn,0,1,
+SURLAG,bsn,0.05,12,
+ADJ_PRK,bsn,0.5,2,
+PRF_BSN,bsn,0,2,
+SPEXP,bsn,1,2,
+SPCON,bsn,0.0001,0.01,
+SLSUBBSN,hru,-0.5,0.5,r
