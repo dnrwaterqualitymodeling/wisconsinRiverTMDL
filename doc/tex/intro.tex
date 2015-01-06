@@ -1,9 +1,10 @@
 \section{Introduction}
 This document is intended to describe the configuration of the Soil and
-Watershed Assessment Model (SWAT) \citep{arnold_swat_1994} for the estimation of streamflow and sources
-of sediment and phosphorus in the Wisconsin River basin. It is a technical
+Water Assessment Tool (SWAT) \citep{arnold_swat_1994} for the estimation of streamflow and sources
+of sediment and phosphorus in the Wisconsin River basin and serves to further define the watershed response model 
+outlined in the Wisconsin River TMDL scope of work \citepalias{wdnr_wrtmdl_2013}. It is a technical
 document that presumes the reader has a high level of familiarity with SWAT\footnote{\url{http://swat.tamu.edu/}} and
-the WRB Total Maximum Daily Load (TMDL)\footnote{\url{http://dnr.wi.gov/topic/TMDLs/WisconsinRiver/}}.
+the Wisconsin River Basin (WRB) Total Maximum Daily Load (TMDL)\footnote{\url{http://dnr.wi.gov/topic/TMDLs/WisconsinRiver/}}.
 It is written specifically to water quality
 modelers to invite a critical review and ensure the quality of the resulting
 estimations. The document was written after the model was configured, but before
@@ -23,7 +24,7 @@ the data processing transparent and reproducible. However, because the model is
 not complete in configuration or documentation, in some cases the scripts are not
 annotated to assist in interpretation. Therefore, the reader needs to have a
 strong understanding of computer programming, Python and R syntax, statistics,
-and processing of spatial data in order to completely understand these scripts. These scripts are publicly available on the
+and spatial data processing in order to completely understand these scripts. These scripts are publicly available on the
 website GitHub owned by the username
 \texttt{dnrwaterqualitymodeling}\footnote{\url{https://github.com/dnrwaterqualitymodeling}}. 
 These scripts can be viewed and downloaded
@@ -47,7 +48,7 @@ These steps included the overlay of the land use, soils, and slope layers to cre
 	\end{itemize}
 \end{itemize}
 
-The Wisconsin Department of Natural Resources SWAT project team has developed and configured datasets additional to those necessary to create and run a SWAT model. These additional datasets were created for a number of different, often overlapping, reasons as listed below. 
+The Wisconsin Department of Natural Resources (WDNR) SWAT project team has developed and configured datasets additional to those necessary to create and run a SWAT model. These additional datasets were created for a number of different, often overlapping, reasons as listed below. 
 \begin{itemize}
 \item The WRB drains an area of 23,700 km$^2$ and has significant variation in soils, geologic history, vegetation, and land use. Therefore, additional datasets were created to describe regionally specific physical and chemical processes (Sections \ref{sec:ag_land_mgt}, \ref{sec:soil_phosphorus}, \ref{sec:gwp}, and \ref{sec:baseflow}).
 
@@ -60,7 +61,8 @@ this was done for reasons already mentioned and to save time during the calibrat
 These set parameters may be adjusted during the calibration process, but the estimates set during the configuration phase likely represent better starting points than the default values of the parameters (Sections \ref{sec:reservoirs}, \ref{sec:et_methods}, \ref{sec:baseflow}, and \ref{sec:gwp}).
 \end{itemize}
 
-It must be noted that the SWAT modeling component of the WRB TMDL remains a work in progress and the methods and data described and distributed at this stage may change at a future data because of issues and concerns that may develop during the calibration phase.
+This document represents a description of the configuration for the SWAT model being used in the Wisconsin River Basin TMDL. 
+It must be noted that the SWAT modeling component of the WRB TMDL remains a work in progress and the methods and data described and distributed at this stage may change at a future date because of issues and concerns that may develop during the calibration phase.
 
 
 % At a minimum, the basic SWAT configuration includes data for the following:

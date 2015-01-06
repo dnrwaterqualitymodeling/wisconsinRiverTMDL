@@ -17,8 +17,7 @@ composition of the map unit is given.
 We chose to use the gSSURGO distribution of SSURGO. gSSURGO is a form of the SSURGO database that is packaged in a more convenient form for coarse scale projects such as the WRB TMDL. The tabular data representing the components and
 horizons were joined together so that each component had the data required for
 the SWAT model (Table \ref{table:soil_attr_in_swat}). For all these properties, the representative value given by
-SSURGO was used. For more information about these parameters see the SSURGO
-metadata\footnote{\url{http://www.nrcs.usda.gov/wps/portal/nrcs/detail/soils/survey/?cid=nrcs142p2_053631}}.
+SSURGO was used.
 
 HRU definition in a SWAT model is a balance of incorporating the most important
 pieces of information without overloading it with redundant or insignificant
@@ -55,8 +54,10 @@ The first aggregation step was to aggregate components by map unit to conform to
 the SWAT soils data structure. The data structure for soils in SWAT does not
 directly conform to SSURGO data structure, mainly that there is no analogue to the
 SSURGO \textit{component} level in SWAT---in other words, soils in SWAT cannot
-be subdivided (Figure \ref{fig:component_schematic}). We aggregated components by computing
-component-weighted averages of each soil property for any given depth of soil from the soil surface to the average depth \citep{gatzke_aggregation_2011, beaudette_algorithms_2013}.
+be subdivided (Figure \ref{fig:component_schematic}). 
+Similar to \citet{gatzke_aggregation_2011}, who aggregated SSURGO data for a SWAT model, 
+we aggregated components by computing
+component-weighted averages of each soil property for any given depth of soil from the soil surface to the average depth.
 These averages were computed using the \texttt{slab} function in the \texttt{aqp} package in R \citep{beaudette_algorithms_2013}. We
 used this algorithm to apply a depth weighted average to each horizon, while
 also weighting the percent composition of each component. The depth and number of horizons of
