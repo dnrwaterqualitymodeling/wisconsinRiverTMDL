@@ -10,14 +10,16 @@ method = arguments[7]
 iter = as.integer(arguments[8])
 ####
 
-txtinout = "H:\\WRB\\Scenarios\\Default\\TxtInOut"
-dir_out = "H:\\WRB_sensitivity"
+txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
+dir_out = "H:/WRB_sensitivity"
 p = "SLSUBBSN"
 ext = "hru"
 mn = -0.5
 mx = 0.5
 method = "r"
-iter = 2
+iter = 5
+
+library(ncdf)
 
 options(stringsAsFactors=F)
 
@@ -27,8 +29,11 @@ unlink(output.files)
 
 # Move txintout to a parameter-specific folder
 td = paste(tempdir(), p, sep="\\")
+# td = "C:/Users/evansdm/AppData/Local/Temp/Rtmpm45Zcz/SLSUBBSN"
 if (!file.exists(td)) {dir.create(td)} # else {unlink(td, recursive=T)}
 wd = paste(td, basename(txtinout), sep="\\")
+# wd = "C:/Users/evansdm/AppData/Local/Temp/Rtmpm45Zcz/SLSUBBSN/TxtInOut"
+
 file.copy(txtinout, td, recursive=T)
 
 setwd(wd)
@@ -62,10 +67,24 @@ for (p.file in p.files){
 	p.file.list[[p.file]] = pf
 }
 
+# processing to find which line parameter of interest is on
 p.ind = strsplit(p.file.list[[1]], '\\||:')
 p.ind = lapply(p.ind, function(x,p){grepl(p, x[2])}, p=p)
 p.ind = unlist(p.ind)
 p.ind = which(p.ind)
+
+# Finding out how many characters in param value
+#	 only necessary for relative adjustment...right?
+vl = p.file.list[[1]][p.ind]
+	# grabbing only the places where the values are
+vl = substr(vl, 9, 16)
+vl = strsplit(vl, split = '.', fixed = T)[[1]][2]
+
+if (is.na(vl)){
+	dec.places = 0
+} else { 
+	dec.places = nchar(vl)
+}
 # Scale parameters according to range and save as a matrix
 	# Need to do differently for each method (i.e., relative, absolute)
 if (method == "r"){
@@ -87,25 +106,38 @@ p.rg = cbind(p.mn, p.mx)
 p.mat = apply(p.rg, 1, function(x,iter) {seq(x[1], x[2], length.out=iter)}, iter=iter)
 p.mat = t(p.mat)
 
+dimI = dim.def.ncdf( "iteration", "unitless", 1:iter)
+dimS = dim.def.ncdf( "subbasin", "ID", 1:338)
+dimT = dim.def.ncdf( "Time", "days since 2002-01-01", 1:4383)
+
+# Make varables of various dimensionality, for illustration purposes
+mv = 1.e30 # missing value to use
+q.var = var.def.ncdf( "streamflow", "cms", list(dimT,dimS,dimI), mv)
+s.var = var.def.ncdf( "sediment", "metric tons", list(dimT,dimS,dimI), mv)
+p.var = var.def.ncdf( "phosphorus", "kilograms", list(dimT,dimS,dimI), mv)
+
+nc = create.ncdf(
+	paste(dir_out, "/", p, ".nc", sep=""),
+	list(q.var,s.var,p.var))
+
+# For each iteration, rewrite all necessary files,
+#	then run swat, and collect the data from each run.
 for (i in 1:iter){
+	# rewrite input files with new params
 	for (fl in 1:length(p.file.list)) {
 		new.val = p.mat[fl, i]
-		substr(p.file.list[[fl]][p.ind], 16-nchar(new.val), 16)
+		new.val = formatC(
+			new.val,
+			digits = dec.places,
+			width = 9,
+			format = 'f')
+		substr(p.file.list[[fl]][p.ind], 8, 16) = new.val
+		writeLines(p.file.list[[fl]], names(p.file.list)[fl])
 	}
-}
-	# grab column with scaled values and replace input files with them
-	par.ind = which(substr(basins.bsn, 23, 27) == p)
-	substr(basins.bsn[par.ind], 11, 16) = 
-	format(val, digits=3, nsmall=3, width = 6)
-				
-	writeLines(basins.bsn, paste(wd, "basins.bsn", sep="\\"))
-
-	
-    # Run swat
 	bat = tempfile(pattern="runswat_", fileext=".bat")
-	writeLines(paste("cd ", wd, "\nSWAT_64rel.exe", sep=""), bat) 
+	writeLines(paste("cd ", wd, "\nswat.exe", sep=""), bat) 
 	system(bat)
-	# collect results
+	
 	dat = readLines(paste(wd, "output.rch", sep="\\"))
 	dat = dat[10:length(dat)]
 	dat = gsub("\\s+", ",", dat)
@@ -116,17 +148,32 @@ for (i in 1:iter){
 	dat = unlist(dat)
 	dat = matrix(dat, nrow=nrows, ncol=ncols, byrow=T)
 	dat = apply(dat, 2, as.numeric)
+	dat = subset(dat, select=c(1, 3, 5:7))
+	colnames(dat) = c("sub", "mon", "flow", "sed", "totpkg")
 	
-	tf = tempfile(fileext=".csv")
-	writeLines(dat, tf)
-	dat = read.table(tf, sep=",")
-	dat = dat[,c(1,3,5,6,7)]
-	names(dat) = c("sub", "mon", "flow", "sed", "totp")
+	dat = dat[order(dat[,1]),]
 	
-	# add data to netcdf file
+	q = matrix(
+		dat[,3], 
+		nrow=4383, 
+		ncol=338)
+	sed = matrix(
+		dat[,4], 
+		nrow=4383, 
+		ncol=338)
+	pho = matrix(
+		dat[,5], 
+		nrow=4383, 
+		ncol=338)
+	
+	dim(q) = c(4383, 338, 1)
+	dim(sed) = c(4383, 338, 1)
+	dim(pho) = c(4383, 338, 1)
+	
+	put.var.ncdf(nc, q.var, q, start=c(1,1,i), count=c(-1,-1,1))
+	put.var.ncdf(nc, s.var, sed, start=c(1,1,i), count=c(-1,-1,1))
+	put.var.ncdf(nc, p.var, pho, start=c(1,1,i), count=c(-1,-1,1))
 }
-# Collect result from each iteration and save
-
-
+close.ncdf(nc)
 
 
