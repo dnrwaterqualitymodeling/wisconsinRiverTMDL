@@ -9,15 +9,24 @@ mx = as.numeric(arguments[6])
 method = arguments[7]
 iter = as.integer(arguments[8])
 ####
-
 txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
 dir_out = "H:/WRB_sensitivity"
-p = "SLSUBBSN"
-ext = "hru"
-mn = -0.5
-mx = 0.5
-method = "r"
-iter = 5
+p = "SFTMP"
+ext = "bsn"
+mn = -5
+mx = 5
+method = "a"
+iter = 2
+
+
+
+
+logfile = paste(dir_out, '/',p,'.log',sep='')
+write(
+	paste("Log file for", p),
+	logfile
+)
+
 
 library(ncdf)
 
@@ -33,12 +42,13 @@ td = paste(tempdir(), p, sep="\\")
 if (!file.exists(td)) {dir.create(td)} # else {unlink(td, recursive=T)}
 wd = paste(td, basename(txtinout), sep="\\")
 # wd = "C:/Users/evansdm/AppData/Local/Temp/Rtmpm45Zcz/SLSUBBSN/TxtInOut"
-
+print("Beginning to copy files...")
 file.copy(txtinout, td, recursive=T)
+print("Copying complete.")
 
 setwd(wd)
 # move swat executable
-file.copy("C:/SWAT/ArcSWAT/SWAT_64rel.exe", "swat.exe")
+# file.copy("D:/TxtInOut/SWAT_64rel.exe", "swat.exe")
 
 ########### 
 # Format file.cio
@@ -108,7 +118,7 @@ p.mat = t(p.mat)
 
 dimI = dim.def.ncdf( "iteration", "unitless", 1:iter)
 dimS = dim.def.ncdf( "subbasin", "ID", 1:338)
-dimT = dim.def.ncdf( "Time", "days since 2002-01-01", 1:4383)
+dimT = dim.def.ncdf( "Time", "days since 2001-12-31", 1:4383)
 
 # Make varables of various dimensionality, for illustration purposes
 mv = 1.e30 # missing value to use
@@ -135,9 +145,9 @@ for (i in 1:iter){
 		writeLines(p.file.list[[fl]], names(p.file.list)[fl])
 	}
 	bat = tempfile(pattern="runswat_", fileext=".bat")
-	writeLines(paste("cd ", wd, "\nswat.exe", sep=""), bat) 
+	writeLines(paste("cd ", wd, "\nSWAT_64rel.exe", sep=""), bat) 
 	system(bat)
-	
+	print("Processing SWAT output...")
 	dat = readLines(paste(wd, "output.rch", sep="\\"))
 	dat = dat[10:length(dat)]
 	dat = gsub("\\s+", ",", dat)
@@ -169,10 +179,14 @@ for (i in 1:iter){
 	dim(q) = c(4383, 338, 1)
 	dim(sed) = c(4383, 338, 1)
 	dim(pho) = c(4383, 338, 1)
-	
+	print("Writing output to netCDF...")
 	put.var.ncdf(nc, q.var, q, start=c(1,1,i), count=c(-1,-1,1))
 	put.var.ncdf(nc, s.var, sed, start=c(1,1,i), count=c(-1,-1,1))
 	put.var.ncdf(nc, p.var, pho, start=c(1,1,i), count=c(-1,-1,1))
+	write(
+		paste("Completed iteration", i, "at", Sys.time()),
+		logfile,
+		append = T)
 }
 close.ncdf(nc)
 
