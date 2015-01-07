@@ -1,6 +1,6 @@
 
-\subsection{Urban Delineation}\label{sec:urban}
-The simulation of urban areas within the WRB will be completed using the Source Loading and Management Model for Windows (WinSLAMM v10.0). Urban runoff volumes, total suspended solid (TSS) loads and total phosphorus (TP) loads exported from WinSLAMM will be incorporated into the watershed response model (SWAT) as point source discharges. Areas within the WRB modeled in WinSLAMM comprise the urban model area. The urban model area was not modeled used SWAT, that is these areas were removed from the data layers input into SWAT. See Table \ref{tab:urban_model_boundary_data} and Table \ref{tab:specific_urban_areas_limits} for the specific data files from which boundaries were derived. The extent of the urban model area is defined as 
+\subsection{Urban Area Model}\label{sec:urban}
+The simulation of urban areas within the WRB will be completed using the Source Loading and Management Model for Windows (WinSLAMM v10.0). Urban runoff volumes, total suspended solid (TSS) loads and total phosphorus (TP) loads exported from WinSLAMM will be incorporated into the watershed response model (SWAT) as point source discharges. Areas within the WRB modeled in WinSLAMM comprise the urban model area. The urban model area was not modeled using SWAT, that is these areas were removed from the data layers input into SWAT. See Table \ref{tab:urban_model_boundary_data} and Table \ref{tab:specific_urban_areas_limits} for the specific data files from which boundaries were derived. The extent of the urban model area is defined as 
 
 \begin{enumerate}
 	\item Cities and villages, excluding the following areas:
@@ -15,6 +15,11 @@ The simulation of urban areas within the WRB will be completed using the Source 
 \end{enumerate}
 
 Data sets used to define the urban model area layer include the published statewide data listed in Table \ref{tab:urban_model_boundary_data} and data provided by individual permitted MS4s.
+
+\subsubsection{Urban Model Area Reach-shed Delineation}
+
+The urban model area draining to each TMDL reach was delineated according to outfall and outfall shed mapping, rather than SWAT subbasin boundaries, for urban model areas located within permitted MS4s that provided the WDNR with the aforementioned mapping data. 
+For unpermitted MS4s, and permitted MS4s that provided the aforementioned mapping data, SWAT subbasin boundaries were used to delineate urban model reach-sheds, table \ref{tab:reachshed_data} lists all mapping data provided by permitted MS4s that was used to delineate reach-sheds within the urban model area.  
 
 
 
