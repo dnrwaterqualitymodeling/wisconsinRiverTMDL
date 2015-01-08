@@ -26,10 +26,10 @@ for (p.i in 1:nrow(par_inf_tbl)){
 	# Write a start command on one line of the above batch file, appended
 	cmd = paste(
 		"start",
-		"'",
+		'"',
 		p,
-		"'",
-		"C:\\Program Files\\R\\R-3.1.2\\bin\\x64\\Rscript.exe",
+		'"',
+		'"C:\\Program Files\\R\\R-3.1.2\\bin\\x64\\Rscript.exe"',
 		script_sensitivity,
 		txtinout,
 		dir_out,
