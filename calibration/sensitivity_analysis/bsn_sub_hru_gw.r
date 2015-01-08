@@ -9,14 +9,14 @@ mx = as.numeric(arguments[6])
 method = arguments[7]
 iter = as.integer(arguments[8])
 ####
-txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
-dir_out = "H:/WRB_sensitivity"
-p = "SFTMP"
-ext = "bsn"
-mn = -5
-mx = 5
-method = "a"
-iter = 2
+# txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
+# dir_out = "H:/WRB_sensitivity"
+# p = "SFTMP"
+# ext = "bsn"
+# mn = -5
+# mx = 5
+# method = "a"
+# iter = 2
 
 
 
