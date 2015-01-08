@@ -24,7 +24,7 @@ pieces of information without overloading it with redundant or insignificant
 information---a modeler should represent every process that controls the system,
 however an overloaded model requires more computational resources, which may not
 be feasible to acquire. To reduce the number of HRUs in the model and generally create a 
-simpler model, we aggregated
+simpler and more efficient model, we aggregated
 soils together based on similarity of several key properties that impact the
 hydrologic cycle. This was a two step process: first, components within map
 units were aggregated
@@ -64,7 +64,7 @@ also weighting the percent composition of each component. The depth and number o
 the aggregated soil profile produced by this algorithm must be specified before
 processing. The depth was calculated as a weighted mean of the full depths of
 soil profile in each of the components, with the weights equal to the percent composition of each
-component. As the number of horizons was not seen to matter as much as the
+component. As the number of horizons was assumed not to matter as much as the
 maximum depth, an arbitrary number of five horizons was chosen for the
 aggregation algorithm.
 
