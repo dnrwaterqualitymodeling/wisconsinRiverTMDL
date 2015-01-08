@@ -1,25 +1,25 @@
 # to run a sensitivity analysis for basin parameters
 arguments = commandArgs(trailingOnly = T)
-# txtinout = arguments[1]
-# dir_out = arguments[2]
-# temp_dir = arguments[3]
-# p = arguments[4]
-# ext = arguments[5]
-# mn = as.numeric(arguments[6])
-# mx = as.numeric(arguments[7])
-# method = arguments[8]
-# iter = as.integer(arguments[9])
+txtinout = arguments[1]
+dir_out = arguments[2]
+temp_dir = arguments[3]
+p = arguments[4]
+ext = arguments[5]
+mn = as.numeric(arguments[6])
+mx = as.numeric(arguments[7])
+method = arguments[8]
+iter = as.integer(arguments[9])
 # run = as.integer(arguments[9])
 ####
-txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
-dir_out = "H:/WRB_sensitivity"
-temp_dir = "D:/temp_dir"
-p = "CHW2"
-ext = "rte"
-mn = -0.5
-mx = 0.5
-method = "r"
-iter = 2
+# txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
+# dir_out = "H:/WRB_sensitivity"
+# temp_dir = "D:/temp_dir"
+# p = "ALPHA_BF"
+# ext = "rte"
+# mn = -0.5
+# mx = 0.5
+# method = "r"
+# iter = 2
 
 logfile = paste(dir_out, '/',p,'.log',sep='')
 write(
@@ -28,8 +28,16 @@ write(
 )
 
 library(ncdf)
-
 options(stringsAsFactors=F)
+
+# matrix of begining and ending values for where values are in text files
+# for
+# 	bsn, hru, gw, rte
+# 
+place_vals = data.frame(
+	file_ext = c('bsn', 'hru', 'gw','rte'),
+	beginnings = c(9,8,8,7),
+	endings = c(16,16,16,14))
 
 # Delete outputs from txtinout if they exist
 output.files = list.files(txtinout, pattern="^output", full.names=T)
@@ -41,7 +49,7 @@ if (!file.exists(temp_dir)){dir.create(temp_dir)}
 
 td = paste(temp_dir, "\\", p, "_", ext, sep="")
 # td = "C:/Users/evansdm/AppData/Local/Temp/Rtmpm45Zcz/SLSUBBSN"
-if (!file.exists(td)) {create.dir(td)} 
+if (!file.exists(td)) {dir.create(td)} 
 wd = paste(td, basename(txtinout), sep="\\")
 # wd = "C:/Users/evansdm/AppData/Local/Temp/Rtmpm45Zcz/SLSUBBSN/TxtInOut"
 print("Beginning to copy files...")
@@ -88,8 +96,10 @@ p.ind = which(p.ind)
 # Finding out how many characters in param value
 #	 only necessary for relative adjustment...right?
 vl = p.file.list[[1]][p.ind]
-	# grabbing only the places where the values are
-vl = substr(vl, 9, 16)
+	# grabbing only the places where the values might exist
+begin_loc = place_vals$beginnings[which(place_vals$file_ext == ext)]
+endin_loc = place_vals$endings[which(place_vals$file_ext == ext)]
+vl = substr(vl, begin_loc, endin_loc)
 vl = strsplit(vl, split = '.', fixed = T)[[1]][2]
 
 if (is.na(vl)){
@@ -141,9 +151,10 @@ for (i in 1:iter){
 		new.val = formatC(
 			new.val,
 			digits = dec.places,
-			width = 9,
+			# to find how wide the data val needs to be
+			width = endin_loc-begin_loc+1,
 			format = 'f')
-		substr(p.file.list[[fl]][p.ind], 8, 16) = new.val
+		substr(p.file.list[[fl]][p.ind], begin_loc, endin_loc) = new.val
 		writeLines(p.file.list[[fl]], names(p.file.list)[fl])
 	}
 	bat = tempfile(pattern="runswat_", fileext=".bat")
