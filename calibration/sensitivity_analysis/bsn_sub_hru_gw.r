@@ -1,32 +1,31 @@
 # to run a sensitivity analysis for basin parameters
 arguments = commandArgs(trailingOnly = T)
-txtinout = arguments[1]
-dir_out = arguments[2]
-p = arguments[3]
-ext = arguments[4]
-mn = as.numeric(arguments[5])
-mx = as.numeric(arguments[6])
-method = arguments[7]
-iter = as.integer(arguments[8])
+# txtinout = arguments[1]
+# dir_out = arguments[2]
+# temp_dir = arguments[3]
+# p = arguments[4]
+# ext = arguments[5]
+# mn = as.numeric(arguments[6])
+# mx = as.numeric(arguments[7])
+# method = arguments[8]
+# iter = as.integer(arguments[9])
+# run = as.integer(arguments[9])
 ####
-# txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
-# dir_out = "H:/WRB_sensitivity"
-# p = "SFTMP"
-# ext = "bsn"
-# mn = -5
-# mx = 5
-# method = "a"
-# iter = 2
-
-
-
+txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
+dir_out = "H:/WRB_sensitivity"
+temp_dir = "D:/temp_dir"
+p = "CHW2"
+ext = "rte"
+mn = -0.5
+mx = 0.5
+method = "r"
+iter = 2
 
 logfile = paste(dir_out, '/',p,'.log',sep='')
 write(
 	paste("Log file for", p),
 	logfile
 )
-
 
 library(ncdf)
 
@@ -37,9 +36,12 @@ output.files = list.files(txtinout, pattern="^output", full.names=T)
 unlink(output.files)
 
 # Move txintout to a parameter-specific folder
-td = paste(tempdir(), p, sep="\\")
+
+if (!file.exists(temp_dir)){dir.create(temp_dir)}
+
+td = paste(temp_dir, "\\", p, "_", ext, sep="")
 # td = "C:/Users/evansdm/AppData/Local/Temp/Rtmpm45Zcz/SLSUBBSN"
-if (!file.exists(td)) {dir.create(td)} # else {unlink(td, recursive=T)}
+if (!file.exists(td)) {create.dir(td)} 
 wd = paste(td, basename(txtinout), sep="\\")
 # wd = "C:/Users/evansdm/AppData/Local/Temp/Rtmpm45Zcz/SLSUBBSN/TxtInOut"
 print("Beginning to copy files...")
@@ -47,7 +49,7 @@ file.copy(txtinout, td, recursive=T)
 print("Copying complete.")
 
 setwd(wd)
-# move swat executable
+# move swat executable, already in TxtInout...not needed
 # file.copy("D:/TxtInOut/SWAT_64rel.exe", "swat.exe")
 
 ########### 
@@ -127,7 +129,7 @@ s.var = var.def.ncdf( "sediment", "metric tons", list(dimT,dimS,dimI), mv)
 p.var = var.def.ncdf( "phosphorus", "kilograms", list(dimT,dimS,dimI), mv)
 
 nc = create.ncdf(
-	paste(dir_out, "/", p, ".nc", sep=""),
+	paste(dir_out, "/", p, "_", ext, ".nc", sep=""),
 	list(q.var,s.var,p.var))
 
 # For each iteration, rewrite all necessary files,

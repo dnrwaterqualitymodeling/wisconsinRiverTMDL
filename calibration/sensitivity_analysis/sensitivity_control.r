@@ -6,6 +6,7 @@ par_inf_tbl = read.csv("https://raw.githubusercontent.com/dnrwaterqualitymodelin
 # unchanging parameters
 txtinout = "D:/TxtInOut"
 dir_out = "D:/WRB_sensitivity"
+temp_dir = "D:/temp_directory"
 script_sensitivity = "D:/wisconsinRiverTMDL/calibration/sensitivity_analysis/bsn_sub_hru_gw.r"
 iter = 25
 
@@ -18,6 +19,13 @@ for (p.i in 1:nrow(par_inf_tbl)){
 		bat_lines = NULL
 		bat_files = c(bat_files, tmp_bat)
 	}
+	
+	# test to see if the parameter should be included
+	#	in the run (if 1 in 'run' column then yes, else zero)
+	should.run = par_inf_tbl$run[p.i]
+	if (!should.run){next}
+
+	# Grabbing the parameters
 	p = par_inf_tbl$param[p.i]
 	ext = par_inf_tbl$ext[p.i]
 	mn = par_inf_tbl$minVal[p.i]
@@ -33,6 +41,7 @@ for (p.i in 1:nrow(par_inf_tbl)){
 		script_sensitivity,
 		txtinout,
 		dir_out,
+		temp_dir,
 		p,
 		ext,
 		mn,

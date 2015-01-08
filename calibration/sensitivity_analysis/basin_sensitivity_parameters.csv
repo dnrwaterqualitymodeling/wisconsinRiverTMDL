@@ -1,16 +1,33 @@
-param,ext,minVal,maxVal,method
-SFTMP,bsn,-5,5,a
-SMTMP,bsn,-5,5,a
-SMFMX,bsn,0,10,a
-SMFMN,bsn,0,10,a
-TIMP,bsn,0,1,a
-ESCO,bsn,0.01,1,a
-EPCO,bsn,0.01,1,a
-EVLAI,bsn,0,10,a
-FFCB,bsn,0,1,a
-SURLAG,bsn,0.05,12,a
-ADJ_PRK,bsn,0.5,2,a
-PRF_BSN,bsn,0,2,a
-SPEXP,bsn,1,2,a
-SPCON,bsn,0.0001,0.01,a
-SLSUBBSN,hru,-0.5,0.5,r
+param,ext,minVal,maxVal,method,note,run
+EPCO,bsn,0.01,1,a,no response,0
+ESCO,bsn,0.01,1,a,no response,0
+EVLAI,bsn,0,10,a,no response,0
+FFCB,bsn,0,1,a,little to no response,0
+PRF_BSN,bsn,0,2,a,no response,0
+SFTMP,bsn,-5,5,a,some response,0
+SLSUBBSN,hru,-0.5,0.5,r,responsive,0
+SMFMN,bsn,0,10,a,some response,0
+SMFMX,bsn,0,10,a,some response,0
+SMTMP,bsn,-5,5,a,some response,0
+SPCON,bsn,0.0001,0.01,a,no response,0
+SPEXP,bsn,1,2,a,no response,0
+SURLAG,bsn,0.05,12,a,no response,0
+TIMP,bsn,0,1,a,some response,0
+ADJ_PKR,bsn,0.5,2,a,,1
+EPCO,hru,0.01,1,a,,1
+ESCO,hru,0.01,1,a,,1
+OV_N,hru,,,,,
+CHW2,rte,,,,,
+CHD,rte,,,,,
+CH_S2,rte,,,,,
+CH_N2,rte,,,,,
+CH_K2,rte,,,,,
+CH_WDR,rte,,,,,
+,,,,,,
+,,,,,,
+GW_DELAY,gw,,,,,
+ALPHA_BF,gw,-0.5,0.5,r,,1
+GWQMN,gw,,,,,
+GW_REVAP,gw,,,,,
+RCHRG_DP,gw,,,,,
+GWHT,gw,,,,,
