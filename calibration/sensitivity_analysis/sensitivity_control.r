@@ -6,7 +6,7 @@ par_inf_tbl = read.csv("https://raw.githubusercontent.com/dnrwaterqualitymodelin
 # unchanging parameters
 txtinout = "D:/TxtInOut"
 dir_out = "D:/WRB_sensitivity"
-temp_dir = "D:/temp_directory"
+temp_dir = "Y:/temp_directory"
 script_sensitivity = "D:/wisconsinRiverTMDL/calibration/sensitivity_analysis/bsn_sub_hru_gw.r"
 iter = 25
 
