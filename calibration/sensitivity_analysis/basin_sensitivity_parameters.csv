@@ -13,21 +13,21 @@ SPCON,bsn,0.0001,0.01,a,no response,0
 SPEXP,bsn,1,2,a,no response,0
 SURLAG,bsn,0.05,12,a,no response,0
 TIMP,bsn,0,1,a,some response,0
-ADJ_PKR,bsn,0.5,2,a,,1
-EPCO,hru,0.01,1,a,,1
-ESCO,hru,0.01,1,a,,1
+ADJ_PKR,bsn,0.5,2,a,,0
+EPCO,hru,0.01,1,a,,0
+ESCO,hru,0.01,1,a,,0
 OV_N,hru,-0.5,0.5,r,,1
 HRU_SLP,hru,-0.5,0.5,r,,1
-SURLAG,hru,0,10,a,,1
-CANMX,hru,0,10,a,,1
-CHW2,rte,-0.5,0.5,r,,1
-CHD,rte,-0.5,0.5,r,,1
-CH_S2,rte,-0.5,0.5,r,,1
-CH_N2,rte,0.01,0.5,a,,1
-CH_K2,rte,-0.01,150,a,,1
-GW_DELAY,gw,0,50,a,,1
-ALPHA_BF,gw,-0.5,0.5,r,,1
-GWQMN,gw,0,5000,a,,1
-GW_REVAP,gw,0.02,0.2,a,,1
-RCHRG_DP,gw,0,1,a,,1
-REVAPMN,gw,0,500,a,,1
+SURLAG,hru,0,10,a,,0
+CANMX,hru,0,10,a,,0
+CHW2,rte,-0.5,0.5,r,,0
+CHD,rte,-0.5,0.5,r,,0
+CH_S2,rte,-0.5,0.5,r,,0
+CH_N2,rte,0.01,0.5,a,,0
+CH_K2,rte,-0.01,150,a,,0
+GW_DELAY,gw,0,50,a,,0
+ALPHA_BF,gw,-0.5,0.5,r,,0
+GWQMN,gw,0,5000,a,,0
+GW_REVAP,gw,0.02,0.2,a,,0
+RCHRG_DP,gw,0,1,a,,0
+REVAPMN,gw,0,500,a,,0
