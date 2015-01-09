@@ -1,5 +1,5 @@
 library(ncdf)
-file_subbasin_region_lu = "./../subbasin_region_lookup.txt"
+
 setwd("D:/WRB_sensitivity")
 vars = list(
 	c("streamflow", "Annual Average streamflow (cms)"),
