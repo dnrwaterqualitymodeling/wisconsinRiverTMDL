@@ -14,11 +14,11 @@ iter = as.integer(arguments[9])
 # txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
 # dir_out = "H:/WRB_sensitivity"
 # temp_dir = "D:/temp_dir"
-# p = "ALPHA_BF"
-# ext = "rte"
-# mn = -0.5
-# mx = 0.5
-# method = "r"
+# p = "ESCO"
+# ext = "hru"
+# mn = 0.01
+# mx = 1
+# method = "a"
 # iter = 2
 
 logfile = paste(dir_out, '/',p,'.log',sep='')
@@ -121,8 +121,8 @@ if (method == "r"){
 	p.mn = dflts * (1 + mn)
 	p.mx = dflts * (1 + mx)
 } else {
-	p.mn = mn
-	p.mx = mx
+	p.mn = rep(mn, length(p.file.list))
+	p.mx = rep(mx, length(p.file.list))
 }
 p.rg = cbind(p.mn, p.mx)
 p.mat = apply(p.rg, 1, function(x,iter) {seq(x[1], x[2], length.out=iter)}, iter=iter)
