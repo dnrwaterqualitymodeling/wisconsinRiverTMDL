@@ -1,11 +1,16 @@
 library(ncdf)
-
+file_subbasin_region_lu = "./Code/subbasin_region_lookup.txt"
 setwd("D:/WRB_sensitivity")
 vars = list(
 	c("streamflow", "Annual Average streamflow (cms)"),
 	c("sediment", "Average Daily Sediment Load (tons)"),
 	c("phosphorus", "Average Daily P Load (kg)")
 )
+aggregate_by_region = T
+
+if (aggregate_by_region){
+	sb_region_lu = read.delim(file_subbasin_region_lu)
+}
 
 nc_files = list.files(pattern="\\.nc$")
 
