@@ -16,7 +16,7 @@ TIMP,bsn,0,1,a,some response,0
 ADJ_PKR,bsn,0.5,2,a,,0
 EPCO,hru,0.01,1,a,,0
 ESCO,hru,0.01,1,a,,0
-OV_N,hru,-0.5,0.5,r,,1
+OV_N,hru,-0.15,0.15,r,,1
 HRU_SLP,hru,-0.5,0.5,r,,1
 SURLAG,hru,0,10,a,,0
 CANMX,hru,0,10,a,,0
