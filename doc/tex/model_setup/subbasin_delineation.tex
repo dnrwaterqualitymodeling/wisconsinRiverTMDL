@@ -2,11 +2,11 @@
 The first step in configuring a SWAT is delineating subbasins. The size of each subbasin is critical to water quality improvement following model development---they should be small enough that water quality improvement plans can address specific pollutant sources, while large enough that model results appropriately match the scale of model inputs and calibration data. Ultimately, the size of each subbasin depends on what the project is intending to achieve by simulating water quality, and therefore requires communication with water quality policy staff and watershed planners.
 
 
-The Wisconsin River is a relatively large area for a TMDL project. Consequently, much of the point and non-point load-reduction efforts will occur as nested projects within the overall TMDL framework. Each subbasin was scaled to a size that watershed managers and stakeholder groups can realistically account for and assess downstream improvements in water quality related to implementation of upstream best management practices.
+The Wisconsin River is a relatively large area for a TMDL project. Consequently, much of the point and non-point load-reduction efforts will occur as nested projects within the overall TMDL framework. Subbasins were scaled to a small enough size that watershed managers and stakeholder groups can realistically assess improvements in water quality related to implementation of best management practices.
 
 In addition to the above guidelines, hydrologic and regulatory transitions were used to guide placement of subbasin transitions. TMDL subbasins were delineated: 
 \begin{enumerate}
-	\item to address specific water quality impairments where local water quality does not meet codified standards; this is an EPA mandate for de-listing of water quality impairments. Consideration was given to streams that were estimated to be impaired, but where monitoring data do not exist to prove it.
+	\item to address specific water quality impairments where local water quality does not meet codified standards. Consideration was given to streams that are likely to be impaired, but where sufficient monitoring data do currently not exist.
 	\item near point source outfalls; delineations were not required to be at precisely the location of the outfall, but rather close enough that flow could be accurately estimated by proportionally scaling modeled flow by upstream contributing area.
 	\item at locations where water quantity and quality were measured during the model period for use in model calibration.
 	\item at major transitions of water quality standards, for instance at river impoundments that receive lake criteria.
@@ -15,7 +15,7 @@ In addition to the above guidelines, hydrologic and regulatory transitions were 
 
 After the locations of subbasin outfalls were identified, we delineated the contributing area upstream of each.
 ArcSWAT will automatically delineate model subbasins, but because of our specific reasons for creating subbasins outlined above, we manually created the SWAT subbasins by aggregating the WHDPlus dataset \citep{wdnr_whdplus_2013}, which contains subcatchments within HUC12 basins (which are standard watersheds created and maintained by USGS). 
-We delineated 338 subbasins with an average size of 68 km$^2$ (standard deviation = 80 km$^2$) where larger subbasins were located in areas with fewer water quality impairments and points sources. This size is smaller than the average HUC12 watershed (84 km$^2$), which is the scale at which TMDL implementation strategies are typically evaluated.
+We delineated 338 subbasins with an average size of 68 km$^2$ (standard deviation = 80 km$^2$); larger subbasins were located in areas with fewer water quality impairments and points sources. This size is smaller than the average HUC12 watershed (84 km$^2$), which is the scale at which TMDL implementation strategies are typically evaluated.
 
 
 

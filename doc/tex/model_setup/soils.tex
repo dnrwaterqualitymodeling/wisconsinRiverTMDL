@@ -1,8 +1,8 @@
 \subsection{Soil Data Aggregation}\label{sec:soils}
 
-Soils are a critical part of the SWAT modeling framework; they determine many
-surface hydraulic properties such as texture, hydraulic conductivity, and
-available water capacity. We used the county-scale Soil Survey Geographical
+Soils are a critical part of the SWAT modeling framework; properties such as texture, hydraulic conductivity, and
+available water capacity play a critical role in determining system hydrology
+. We used the county-scale Soil Survey Geographical
 Database (SSURGO) \citepalias{staff_gridded_2014}. For more information about SSURGO
 data see the SSURGO metadata\footnote{\url{http://www.nrcs.usda.gov/wps/portal/nrcs/detail/soils/survey}}.
 The SSURGO database is structured in three levels of information: map units,
@@ -35,11 +35,10 @@ similarity\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiv
 Several changes were made to the dataset before aggregation, in order to
 facilitate processing. Soil organic carbon content is required by SWAT, but is
 given by SSURGO as soil organic matter. The percent organic matter value given in SSURGO
-was converted to percent organic carbon by multiplying by 50\% which is the generally accepted average carbon content of soil organic matter \citep{brady_elements_2004}. The HSG is
-denoted as a letter in SSURGO, either A through D, or if the soil has different
-characteristics when drained, as two letters, A/D, B/D or C/D, the latter of
-which is the natural state of the soil if not artificially drained (i.e.,
-through tiling or ditching) while the former is if the soil is drained.
+was converted to percent organic carbon by multiplying by 50\% which is the generally accepted average carbon content of soil organic matter \citep{brady_elements_2004}. 
+The HSG is denoted as a letter in SSURGO, either A through D, or if the soil has different characteristics when drained,
+as two letters, A/D, B/D or C/D, the former is if the soil is drained (i.e. through tiling or ditching), 
+while the latter is the drainage class of soil in its natural state.
 In order to average the different components it was necessary to convert these letters
 into numbers; groups A through D were converted to 1 through 4 to correspond
 with increasingly wetter drainage conditions. Once a number was obtained for the
@@ -69,8 +68,8 @@ maximum depth, an arbitrary number of five horizons was chosen for the
 aggregation algorithm.
 
 Using the above aggregation method 48,585 individual soil components were
-aggregated to 1,603 map units. Because the HRU used in
-SWAT is derived using unique combinations of land use, slope and soil types,
+aggregated to 1,603 map units. Because the HRUs used in
+SWAT were derived using unique combinations of land use, slope and soil types,
 this number of soil map units is still too many for efficient computation  and so
 the second step of the soils data configuration was necessary to further reduce
 the number of soil types.

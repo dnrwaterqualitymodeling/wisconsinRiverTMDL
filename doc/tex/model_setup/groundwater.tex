@@ -4,9 +4,21 @@
 
 	This algorithm requires continuous daily observations of streamflow for at least one year, from which it determines the baseflow contribution from the hydrograph.	After the observed data were downloaded, they were processed to ensure that only contiguous periods of streamflow of at least one year were used in the routine. For this analysis gaps of up to nine days were allowed in the record and still considered contiguous. If a monitoring site had a gap(s), of longer than nine days, it was split at the gaps into separate records and each part assessed as to whether it contained at least a year of data. Therefore, it was possible for a monitoring site to have several periods of contiguous streamflow records. If a record spanned less than one year of data it was not used in the analysis.
 	
-	The Baseflow Program was run at each USGS gage site and a Bflow measure (analogous to the ALPHA\_BF parameter in SWAT) was computed \citep{arnold_automated_1995}. This smoothing algorithm produces several Bflows, one for each successive pass of a smoothing filter. The final pass (third and smoothest) was used in the regression model. For sites with multiple records, the Bflow values were averaged, weighting the values by the length of the record. The end result was a Bflow value for each monitoring station that satisfied the requirements for the Baseflow Program filtering algorithm.  
+	The Baseflow Program was run at each USGS gage site and a Bflow measure (analogous to the ALPHA\_BF parameter in SWAT) was computed \citep{arnold_automated_1995}. 
+	This smoothing algorithm produces several Bflows, one for each successive pass of a smoothing filter. 
+	The final pass (third and smoothest) was used in the regression model.
+	For sites with multiple records, the Bflow values were averaged, weighting the values by the length of the record.
+	The end result was a Bflow value for each monitoring station that satisfied the requirements for the Baseflow Program filtering algorithm. 
 
-	To estimate ALPHA\_BF for all SWAT subbasins in the WRB, we fit a multiple linear regression model to predict Bflow using upstream watershed characteristics. Data regarding the landscape characteristics of the watershed for each monitoring station were retrieved from WHDPlus \citep{wdnr_whdplus_2013}. Additionally, the EPA's Ecoregion boundaries level III were used as a categorical predictor. We tested a suite of geologic, soil, and topographic watershed characteristics that could potentially affect baseflow by calculating Pearson correlation coefficients and visually analyzing scatterplots. We made an effort to avoid overfitting and multicollinearity by excluding collinear predictors. The final model was selected based on $R^2$ (Figure \ref{fig:alpha_bf_scatterplot}). We used residual plots to examine evidence of model bias. The best model (eq. \ref{eq:bflow}) used average slope of watershed, average permeability, and the EPA ecoregion boundaries. The ecoregion boundaries were used as a factor on the watershed slope term. The ecoregion term with slope was meant to allow for the expression of the effect of slope on the baseflow contribution in different regions in the WRB ()e.g., different slope terms for the Driftless Area and the Central Sands).
+	To estimate ALPHA\_BF for all SWAT subbasins in the WRB, we could have run the Bflow program on the gage sites within the WRB but we wanted to have an estimate for every subbasin. 
+	To this end we fit a multiple linear regression model to predict Bflow using upstream watershed characteristics. 
+	Data regarding the landscape characteristics of the watershed for each monitoring station were retrieved from WHDPlus \citep{wdnr_whdplus_2013}.
+	Additionally, the EPA's Ecoregion boundaries level III were used as a categorical predictor. 
+	We tested a suite of geologic, soil, and topographic watershed characteristics that could potentially affect baseflow by calculating Pearson correlation coefficients and visually analyzing scatterplots.
+	We made an effort to avoid overfitting and multicollinearity by excluding collinear predictors. The final model was selected based on $R^2$ (Figure \ref{fig:alpha_bf_scatterplot}). 
+	We used residual plots to examine evidence of model bias. 
+	The best model (eq. \ref{eq:bflow}) used average slope of watershed, average permeability, and the EPA ecoregion boundaries. The ecoregion boundaries were used as a factor on the watershed slope term. 
+	The ecoregion term with slope was meant to allow for the expression of the effect of slope on the baseflow contribution in different regions in the WRB ()e.g., different slope terms for the Driftless Area and the Central Sands).
 
 	\begin{equation}
 	\bm{A} = \beta_0 + 
