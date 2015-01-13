@@ -8,16 +8,16 @@ the Wisconsin River Basin (WRB) Total Maximum Daily Load (TMDL)\footnote{\url{ht
 It is written specifically to water quality
 modelers to invite a critical review and ensure the quality of the resulting
 estimations. The document was written after the model was configured, but before
-it has been calibrated. Therefore, the methods described here may change prior
+it has been calibrated. Therefore, the methods described here will likely change prior
 to the release of the final model given new developments during the calibration
 phase of the project. The model itself is available for download at the following URL: \\
 
 \url{ftp://dnrftp01.wi.gov/geodata/wrb_swat/WRB.zip} (512 MB)\footnote{If the download does not automatically begin or if you are prompted for a password, copy and paste the link into your browser.}\\
 
-Due to the large amount of data required to configure The Wisconsin River SWAT model, the
+Due to the large amount of data required to configure the Wisconsin River SWAT model, the
 products and data described in this document were created using a series of data 
 processing scripts
-that can be executed using either the Python or R programming languages. These scripts
+that can be executed using either the Python or R programming languages, depending upon the script. These scripts
 are described in Section \ref{sec:model_data}. To the
 extent possible, these scripts have been written in a way that makes
 the data processing transparent and reproducible. However, because the model is
@@ -34,7 +34,7 @@ to limitations in data storage and transfer.
 
 The basic model configuration is described in Section \ref{sec:basic_model_config}. 
 This section describes the methods used to set up the minimum data requirements for a SWAT project. 
-The ArcSWAT program was used to set up the basic SWAT model. It facilitated many of the preliminary GIS tasks that are otherwise difficult to configure manually.
+The ArcSWAT program was used to set up the basic SWAT model. It facilitated many of the preliminary spatial data processing tasks that are otherwise difficult to configure manually.
 These steps included the overlay of the land use, soils, and slope layers to create the hydrologic response units (HRUs), and the creation of the input HRU files needed to run SWAT. Section \ref{sec:basic_model_config} outlines the data processing steps prior to HRU definition including the following:
 
 \begin{itemize}
@@ -54,12 +54,12 @@ The Wisconsin Department of Natural Resources (WDNR) SWAT project team has devel
 
 \item The WRB TMDL is a large modeling effort that integrates multiple modeling platforms. We discuss the delineation of urban boundaries that will be modeled separately using the WinSLAMM model (Section \ref{sec:urban}).
 
-\item We are incorporating monitored data where available. Specifically, we incorporated daily flows monitored at reservoir outlets.
+\item We are incorporating observed data where available. Specifically, we incorporated daily flows monitored at reservoir outlets.
 We will also describe how we have selected monitoring sites for streamflow calibration. (Sections \ref{sec:reservoirs} and \ref{sec:streamflow_calibration_sites}).
  
 \item Some model parameters were set during the configuration phase of the model development; 
 this was done to save time during the calibration phase and to open these decisions for external review. 
-These set parameters may be adjusted during the calibration process, but the estimates set during the configuration phase likely represent better starting points than the default values of the parameters (Sections \ref{sec:reservoirs}, \ref{sec:et_methods}, \ref{sec:baseflow}, and \ref{sec:gwp}).
+These parameters may be adjusted during the calibration process, but the estimates set during the configuration phase likely represent better starting points than the default values of the parameters (Sections \ref{sec:reservoirs}, \ref{sec:et_methods}, \ref{sec:baseflow}, and \ref{sec:gwp}).
 \end{itemize}
 
 This document represents a description of the configuration for the SWAT model being used in the Wisconsin River Basin TMDL. 
