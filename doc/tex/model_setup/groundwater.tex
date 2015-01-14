@@ -4,11 +4,11 @@
 
 	This algorithm requires continuous daily observations of streamflow for at least one year, from which it determines the baseflow contribution from the hydrograph.	After the observed data were downloaded, they were processed to ensure that only contiguous periods of streamflow of at least one year were used in the routine. For this analysis gaps of up to nine days were allowed in the record and still considered contiguous. If a monitoring site had a gap(s), of longer than nine days, it was split at the gaps into separate records and each part assessed as to whether it contained at least a year of data. Therefore, it was possible for a monitoring site to have several periods of contiguous streamflow records. If a record spanned less than one year of data it was not used in the analysis.
 	
-	The Baseflow Program was run at each USGS gage site and a Bflow measure (analogous to the ALPHA\_BF parameter in SWAT) was computed \citep{arnold_automated_1995}. 
-	This smoothing algorithm produces several Bflows, one for each successive pass of a smoothing filter. 
+	The Baseflow Program was run at each USGS gage site and the program output, which is the ALPHA\_BF parameter in SWAT, was computed \citep{arnold_automated_1995}. 
+	This smoothing algorithm produces several outputs, one for each successive pass of the smoothing filter. 
 	The final pass (third and smoothest) was used in the regression model.
-	For sites with multiple records, the Bflow values were averaged, weighting the values by the length of the record.
-	The end result was a Bflow value for each monitoring station that satisfied the requirements for the Baseflow Program filtering algorithm. 
+	For sites with multiple records, the Baseflow program values were averaged, weighting the values by the length of the record.
+	The end result was an ALPHA\_BF value for each monitoring station that satisfied the requirements for the Baseflow Program filtering algorithm. 
 
 	The resulting ALPHA\_BF estimates from the Baseflow Program were site-specific, and thus were only valid for upstream subbasins. To parameterize ALPHA\_BF for ungaged subbasins, we fit a multiple linear regression model to predict Bflow using upstream watershed characteristics. 
 	Data regarding the landscape characteristics of the watershed for each monitoring station were retrieved from WHDPlus \citep{wdnr_whdplus_2013}.
