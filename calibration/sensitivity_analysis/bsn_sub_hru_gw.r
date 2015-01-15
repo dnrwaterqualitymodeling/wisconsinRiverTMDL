@@ -14,12 +14,13 @@ iter = as.integer(arguments[9])
 txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
 dir_out = "H:/WRB_sensitivity"
 temp_dir = "D:/temp_dir"
-p = "OV_N"
-ext = "hru"
-mn = -0.05
-mx = 0.05
+p = "CN2"
+ext = "mgt"
+mn = -0.5
+mx = 0.5
 method = "r"
 iter = 2
+horizon_number = c(1)#c(1,2,3,4,5)
 
 logfile = paste(dir_out, '/',p,'.log',sep='')
 write(
@@ -30,14 +31,60 @@ write(
 library(ncdf)
 options(stringsAsFactors=F)
 
+# these are all the codes in SWAT_lookup.csv that are above 9, assuming 9 = cranberries
+ag_codes = c(
+		"SWHT",
+		"WWHT",
+		"DWHT",
+		"RYE",
+		"BARL",
+		"OATS",
+		"RICE",
+		"PMIL",
+		"TIMO",
+		"BROS",
+		"BROM",
+		"FESC",
+		"BLUG",
+		"BERM",
+		"CWGR",
+		"WWGR",
+		"SWGR",
+		"RYEG",
+		"RYER",
+		"RYEA",
+		"SIDE",
+		"BBLS",
+		"LBLS",
+		"SWCH",
+		"INDN",
+		"ALFA",
+		"CLVS",
+		"CLVR",
+		"CLVA",
+		"SOYB",
+		"CWPS",
+		"MUNG",
+		"LIMA",
+		"LENT",
+		"PNUT",
+		"FPEA",
+		"PEAS",
+		"SESB",
+		"COTS",
+		"COTP",
+		"SGBT",
+		"POTA",
+		"SPOT")
+
 # matrix of begining and ending values for where values are in text files
 # for
 # 	bsn, hru, gw, rte
 # 
 place_vals = data.frame(
-	file_ext = c('bsn', 'hru', 'gw','rte'),
-	beginnings = c(9,8,8,7),
-	endings = c(16,16,16,14))
+	file_ext = c('bsn', 'hru', 'gw','rte','mgt'),
+	beginnings = c(9,8,8,7,12),
+	endings = c(16,16,16,14,16))
 
 # Delete outputs from txtinout if they exist
 output.files = list.files(txtinout, pattern="^output", full.names=T)
@@ -84,46 +131,98 @@ p.files = list.files(pattern = ext.re)
 p.file.list = list()
 for (p.file in p.files){
 	pf = readLines(p.file)
+	if (ext == 'mgt'){
+		strting = regexpr("Luse", pf[1])[1]
+		strting = strting + 5
+		luse=substr(pf[1], strting, strting+3)
+		if (!luse %in% ag_codes){next}
+	}
 	p.file.list[[p.file]] = pf
 }
 
 # processing to find which line parameter of interest is on
-p.ind = strsplit(p.file.list[[1]], '\\||:')
-p.ind = lapply(p.ind, function(x,p){grepl(p, x[2])}, p=p)
-p.ind = unlist(p.ind)
-p.ind = which(p.ind)
-
-# Finding out how many characters in param value
-#	 only necessary for relative adjustment...right?
-vl = p.file.list[[1]][p.ind]
-	# grabbing only the places where the values might exist
-begin_loc = place_vals$beginnings[which(place_vals$file_ext == ext)]
-endin_loc = place_vals$endings[which(place_vals$file_ext == ext)]
-vl = substr(vl, begin_loc, endin_loc)
-vl = strsplit(vl, split = '.', fixed = T)[[1]][2]
-
-if (is.na(vl)){
-	dec.places = 0
+###### For soil files
+if (ext == 'sol'){
+	sol_par_lu = data.frame(
+		par.name=c("SOL_BD","SOL_AWC","SOL_Ksat","SOL_OC","SOL_ALB","SOL_K"),
+		#name.in.sol=c(),
+		# the line at which it occurs in the .sol file
+		par.indx=c(9,10,11,12,17,18))
+	#find index
+	p.ind = sol_par_lu$par.indx[which(sol_par_lu$par.name == p)]
+	
+	# finding beginning and ending location for values
+	# horizon_number = c(1,2,3,4,5)
+	horz_col_position = data.frame(
+		horz.num = 1:5,
+		ending.poz = c(39,51,63,75,88))
+	
+	endin_loc = horz_col_position$ending.poz[which(horz_col_position$horz.num %in% horizon_number)]
+	begin_loc = endin_loc - 6
+	# begin_loc = 33
+	# endin_loc = 39
+	
+	dec.places = 2
+	
+	#collecting parameter values for soils files
+	if (method == "r"){
+		dflts = lapply(p.file.list, 
+			FUN = function(x, p.ind){
+				ln = x[p.ind]
+				val = as.numeric(substr(ln, begin_loc, endin_loc))
+				return(val)
+			},
+			p.ind = p.ind)
+		dflts = unlist(dflts)
+		p.mn = dflts * (1 + mn)
+		p.mx = dflts * (1 + mx)
+	} else {
+		p.mn = rep(mn, length(p.file.list))
+		p.mx = rep(mx, length(p.file.list))
+	}
+#################################
+#####    for not soil parameters
 } else { 
-	dec.places = nchar(vl)
-}
+	p.ind = strsplit(p.file.list[[1]], '\\||:')
+	p.ind = lapply(p.ind, function(x,p){grepl(p, x[2])}, p=p)
+	p.ind = unlist(p.ind)
+	p.ind = which(p.ind)
+
+	# Finding out how many characters in param value
+	#	 only necessary for relative adjustment...right?
+	vl = p.file.list[[1]][p.ind]
+		# grabbing only the places where the values might exist
+	begin_loc = place_vals$beginnings[which(place_vals$file_ext == ext)]
+	endin_loc = place_vals$endings[which(place_vals$file_ext == ext)]
+	vl = substr(vl, begin_loc, endin_loc)
+	vl = strsplit(vl, split = '.', fixed = T)[[1]][2]
+
+	if (is.na(vl)){
+		dec.places = 0
+	} else { 
+		dec.places = nchar(vl)
+	}
+
 # Scale parameters according to range and save as a matrix
 	# Need to do differently for each method (i.e., relative, absolute)
-if (method == "r"){
-	dflts = lapply(p.file.list, 
-		FUN = function(x, p.ind){
-			ln = x[p.ind]
-			val = as.numeric(strsplit(ln, split = "\\||:")[[1]][1])
-			return(val)
-		},
-		p.ind = p.ind)
-	dflts = unlist(dflts)
-	p.mn = dflts * (1 + mn)
-	p.mx = dflts * (1 + mx)
-} else {
-	p.mn = rep(mn, length(p.file.list))
-	p.mx = rep(mx, length(p.file.list))
+	if (method == "r"){
+		dflts = lapply(p.file.list, 
+			FUN = function(x, p.ind){
+				ln = x[p.ind]
+				val = as.numeric(strsplit(ln, split = "\\||:")[[1]][1])
+				return(val)
+			},
+			p.ind = p.ind)
+		dflts = unlist(dflts)
+		p.mn = dflts * (1 + mn)
+		p.mx = dflts * (1 + mx)
+	} else {
+		p.mn = rep(mn, length(p.file.list))
+		p.mx = rep(mx, length(p.file.list))
+	}
 }
+
+
 p.rg = cbind(p.mn, p.mx)
 p.mat = apply(p.rg, 1, function(x,iter) {seq(x[1], x[2], length.out=iter)}, iter=iter)
 p.mat = t(p.mat)
