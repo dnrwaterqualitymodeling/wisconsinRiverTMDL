@@ -144,10 +144,10 @@ for (p.file in p.files){
 ###### For soil files
 if (ext == 'sol'){
 	sol_par_lu = data.frame(
-		par.name=c("SOL_BD","SOL_AWC","SOL_Ksat","SOL_OC","SOL_ALB","SOL_K"),
+		par.name=c("SOL_BD","SOL_AWC","SOL_K","SOL_OC","SOL_ALB","USLE_K", "SOL_Z"),
 		#name.in.sol=c(),
 		# the line at which it occurs in the .sol file
-		par.indx=c(9,10,11,12,17,18))
+		par.indx=c(9,10,11,12,17,18,4))
 	#find index
 	p.ind = sol_par_lu$par.indx[which(sol_par_lu$par.name == p)]
 	
