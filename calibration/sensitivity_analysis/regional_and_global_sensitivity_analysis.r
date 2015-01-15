@@ -11,8 +11,8 @@ options(stringsAsFactors = FALSE)
 	# dsn="T:/Projects/Wisconsin_River/GIS_Datasets/Water_Budget",
 	# layer="WRB_Budget_Divisions")
 
-file_subbasin_region_lu = "C:/Users/evansdm/Documents/Code/subbasin_region_lookup.txt"
-setwd("H:/WRB_sensitivity")
+file_subbasin_region_lu = "D:/Water_Budget/subbasin_region_lookup.txt"
+setwd("D:/WRB_sensitivity")
 vars = list(
 	c("streamflow", "Annual Average streamflow (cms)"),
 	c("sediment", "Average Daily Sediment Load (tons)"),
@@ -20,9 +20,8 @@ vars = list(
 )
 
 sb_region_lu = read.delim(file_subbasin_region_lu)
-
+nc_files = list.files(pattern="\\.nc$")
 regional_all = NULL
-
 for (nc_file in nc_files) {
 	nc = open.ncdf(nc_file)
 	p = strsplit(nc_file, "\\.")[[1]][1]
@@ -56,13 +55,13 @@ for (nc_file in nc_files) {
 		regional_means = data.frame(
 			Region=regional_means$region,
 			Parameter=p,
-			Variable=v,
+			Variable=v[1],
 			delta_mean=regional_means$delta[,1],
 			delta_sd=regional_means$delta[,2])
 		regional_means = rbind(regional_means, data.frame(
 			Region="Global",
 			Parameter=p,
-			Variable=v,
+			Variable=v[1],
 			delta_mean=mean(p_change),
 			delta_sd=sd(p_change)))
 		regional_all = rbind(regional_all, regional_means)
@@ -70,9 +69,9 @@ for (nc_file in nc_files) {
 	}
 	subbasin_all = cbind(1:338, subbasin_all)
 	subbasin_all = data.frame(subbasin_all)
-	names(subbasin_all) = c(vars[[1]][1], vars[[2]][1], vars[[3]][1])
+	names(subbasin_all) = c("subbasin", vars[[1]][1], vars[[2]][1], vars[[3]][1])
 	
-	file_name = paste("subbasin_", p, "_sensitivity.txt")
+	file_name = paste("subbasin_", p, "_sensitivity.txt", sep="")
 	write.table(
 		subbasin_all,
 		file_name,
