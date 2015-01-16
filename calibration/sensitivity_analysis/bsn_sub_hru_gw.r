@@ -11,15 +11,15 @@ method = arguments[8]
 iter = as.integer(arguments[9])
 # run = as.integer(arguments[9])
 ##
-txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
-dir_out = "H:/WRB_sensitivity"
-temp_dir = "D:/temp_dir"
-p = "CN2"
-ext = "mgt"
-mn = -0.5
-mx = 0.5
-method = "r"
-iter = 2
+# txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
+# dir_out = "H:/WRB_sensitivity"
+# temp_dir = "D:/temp_dir"
+# p = "CN2"
+# ext = "mgt"
+# mn = -0.5
+# mx = 0.5
+# method = "r"
+# iter = 2
 horizon_number = c(1)#c(1,2,3,4,5)
 
 logfile = paste(dir_out, '/',p,'.log',sep='')
