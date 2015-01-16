@@ -18,7 +18,7 @@
 
 %%% ET table
 \begin{table}[h!]
-	\caption[Different evapotranspiration equations ]{Different evapotranspiration equations and their percent bias and Nash-Sutcliffe coefficients.}
+	\caption[Different evapotranspiration equations]{Different evapotranspiration equations and their percent bias and Nash-Sutcliffe coefficients.}
 	\centering
 	\begin{tabular}{ l c r }
 		\hline
@@ -41,7 +41,7 @@
 %%% urban tables
 \begin{table}
 \begin{center}
-	\caption{Statewide datasets used to define urban model area extent.}
+	\caption[Different evapotranspiration equations]{Statewide datasets used to define urban model area extent.}
 	\begin{tabular}{l l}
 	\hline
 		Model Area	      &	Dataset \\
@@ -59,7 +59,7 @@
 
 \begin{table}
 \begin{center}
-	\caption{Municipal limits used to define the extent of major urban areas in the urban model area.}
+	\caption[Municipal limits used to define the extent of major urban areas]{Municipal limits used to define the extent of major urban areas in the urban model area.}
 	\begin{tabular}{l lc}
 	\hline
 		Model Area	      &	Dataset \\
@@ -77,7 +77,7 @@
 \begin{landscape}
 \begin{table}
 \begin{center}
-	\caption{Mapping data provided by permitted Municipal Separate Sewer System (MS4s) used to delineate urban model area reach-sheds.}
+	\caption[Mapping data provided by permitted Municipal Separate Sewer System]{Mapping data provided by permitted Municipal Separate Sewer System (MS4s) used to delineate urban model area reach-sheds.}
 	\begin{tabular}{l p{3.5cm} p{3.5cm} p{4cm} p{3cm}}
 	\hline
 	MS4 Name	&	Outfall Mapping	&	Outfall Drainage Area Mapping	&	Source of Mapping Data	&	Contact	\\
@@ -120,7 +120,7 @@ Wisconsin Rapids	 						 & 	 	WIRapids\_Outfalls.shp	 	 & 	 	MajorDrainageBasin.
 	\begin{tabular}{c c}
 		\includegraphics[scale = 0.5]{./img/tmp_na_counts} &	\includegraphics[scale=0.5]{./img/pcp_na_counts} \\
 	\end{tabular}
-	\caption{Maps displaying the climate stations used for in the SWAT model. Stations are colored according the number of days missing in the record.}
+	\caption[Maps displaying the climate stations used in the SWAT model]{Maps displaying the climate stations used in the SWAT model. Stations are colored according the number of days missing in the record.}
 	\label{fig:climate_missing}
 
 \end{figure}
@@ -146,18 +146,16 @@ Wisconsin Rapids	 						 & 	 	WIRapids\_Outfalls.shp	 	 & 	 	MajorDrainageBasin.
 \begin{figure}[h]
   \centering
     \includegraphics[width=0.5\textwidth]{./img/component_schematic.pdf}
-	\caption[Schematic diagram of SSURGO map unit]{Schematic diagram of SSURGO map unit. Antigo* and Houghton are each components within the map unit. 
+	\caption[Schematic diagram of SSURGO map unit]{Schematic diagram of SSURGO map unit. Antigo and Houghton are each components within the map unit. 
 	Within each map unit are varying numbers of components with varying horizon depths (e.g., Ap and O1 are the surface horizons for Antigo and Houghton respectively. 
-	Components were aggregated to map units by averaging soil properties (e.g., percent sand) horizontally across horizons.
-	
-	\small{*\url{https://www.youtube.com/watch?v=Qe6I5GB_5iI}}}
+	Components were aggregated to map units by averaging soil properties (e.g., percent sand) horizontally across horizons.}
 	\label{fig:component_schematic}
 \end{figure}
 %%Soil cluster variability
 \clearpage
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=\textwidth]{./img/cluster_variability.png}
+	\includegraphics[width=0.9\textwidth]{./img/cluster_variability.png}
 	\caption[Boxplots showing the variability of soil properties]{Boxplots showing the variability of soil properties within the final set of soil clusters. The letter above each plot denotes hydrologic soil group (HSG). Each color represents a cluster of map units. The Z score for each soil property is reported as $Z = X - \mu / \sigma$ where $X$ is the value of the soil property, $\mu$ and $\sigma$ are the population mean and standard deviation of a soil property. Outliers were excluded. The x-axis shows soil properties where tot\_depth is the soil depth, sand/silt/clay are the percent composition of each texture class, bd is bulk density, k is saturated conductivity, awc is available water capacity, cbn is organic carbon concentration, and usle\_k is soil erodibility.}
 	\label{fig:soil_boxplots}
 \end{figure}
@@ -182,7 +180,7 @@ Wisconsin Rapids	 						 & 	 	WIRapids\_Outfalls.shp	 	 & 	 	MajorDrainageBasin.
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=\textwidth]{./img/wetlands_and_ponds.png}
-	\caption{Map showing the contributing area of the SWAT ponds and wetlands in the Wisconsin River Basin.}
+	\caption[Map showing the contributing area of the SWAT ponds and wetlands]{Map showing the contributing area of the SWAT ponds and wetlands in the Wisconsin River Basin.}
 	\label{fig:wetlands_and_ponds}
 \end{figure}
 
@@ -193,14 +191,14 @@ Wisconsin Rapids	 						 & 	 	WIRapids\_Outfalls.shp	 	 & 	 	MajorDrainageBasin.
 \begin{figure}
 	\centering
 	\includegraphics[width=0.5\textwidth]{./img/alpha_bf_scatterplot.png}
-	\caption{Observed versus predicted ALPHA\_BF SWAT parameter. Observed ALPHA\_BF was calculated for each USGS gage site \citepalias{usgs_nwis_2014} by the Baseflow Program \citep{arnold_automated_1995}.}
+	\caption[Observed versus predicted ALPHA\_BF SWAT parameter]{Observed versus predicted ALPHA\_BF SWAT parameter. Observed ALPHA\_BF was calculated for each USGS gage site \citepalias{usgs_nwis_2014} by the Baseflow Program \citep{arnold_automated_1995}.}
 	\label{fig:alpha_bf_scatterplot}
 \end{figure}
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=\textwidth]{./img/alpha_bf.png}
-	\caption{Map showing the predicted ALPHA\_BF for each SWAT subbasin. Higher (darker) values indicate a slower response of groundwater to recharge and lighter
+	\caption[Map showing the predicted ALPHA\_BF for each SWAT subbasin]{Map showing the predicted ALPHA\_BF for each SWAT subbasin. Higher (darker) values indicate a slower response of groundwater to recharge and lighter
 	values indicate greater baseflow.}
 	\label{fig:alpha_bf}
 \end{figure}
@@ -209,7 +207,7 @@ Wisconsin Rapids	 						 & 	 	WIRapids\_Outfalls.shp	 	 & 	 	MajorDrainageBasin.
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=\textwidth]{./img/groundwater_phosphorus.png}
-	\caption{Map showing the estimated concentration of groundwater phosphorus in the Wisconsin River Basin. Values were obtained from \citet{robertson_phosphoruszones_2006}}
+	\caption[Map showing estimated concentration of groundwater phosphorus]{Map showing the estimated concentration of groundwater phosphorus in the Wisconsin River Basin. Values were obtained from \citet{robertson_phosphoruszones_2006}}
 	\label{fig:groundwater_p}
 \end{figure}
 
@@ -218,7 +216,7 @@ Wisconsin Rapids	 						 & 	 	WIRapids\_Outfalls.shp	 	 & 	 	MajorDrainageBasin.
 \begin{figure}[h]
 	\centering
 	\includegraphics{./img/flow_calib_sites_changed}
-	\caption{Flow monitoring sites. The sites marked ``Included'' are currently considered calibration sites. Those marked ``Excluded'' are downstream of reservoirs or other structures that regulate flow and so are not used for calibration. For more detailed information see Table \ref{tab:streamflow_calibration_sites}.}
+	\caption[Flow monitoring sites]{Flow monitoring sites. The sites marked ``Included'' are currently considered calibration sites. Those marked ``Excluded'' are downstream of reservoirs or other structures that regulate flow and so are not used for calibration. For more detailed information see Table \ref{tab:streamflow_calibration_sites}.}
 	\label{fig:calibration_site_map}
 \end{figure}
 \clearpage
