@@ -28,34 +28,34 @@ SMFMX,bsn,0,10,a,some response,0
 SMTMP,bsn,-2,10,a,some response,0
 SPCON,bsn,0,0.01,a,no response,0
 SPEXP,bsn,1,1.5,a,no response,0
-SURLAG,bsn,0,10,a,no response,0
+SURLAG,bsn,0.05,24,a,no response,1
 SURLAG,hru,0,10,a,,0
 TIMP,bsn,0.01,1,a,some response,0
-CN2,mgt,-0.5,0.5,r,,1
-SOL_AWC,sol,-0.5,0.5,r,,1
-SOL_ALB,sol,0,0.25,a,,1
-SOL_K,sol,-0.5,0.5,r,,1
-HRU_SLP,hru,-0.5,0.5,r,,1
-USLE_P,mgt,-0.5,0.5,r,,1
-BIOMIX,mgt,0,1,a,,1
-CH_COV1,rte,0,0.6,a,,1
-CH_COV2,rte,-0.001,1,a,,1
-CH_N1,rte,-0.5,0.5,r,,1
+CN2,mgt,-0.5,0.5,r,,0
+SOL_AWC,sol,-0.5,0.5,r,,0
+SOL_ALB,sol,0,0.25,a,,0
+SOL_K,sol,-0.5,0.5,r,,0
+HRU_SLP,hru,-0.5,0.5,r,,0
+USLE_P,mgt,-0.5,0.5,r,,0
+BIOMIX,mgt,0,1,a,,0
+CH_COV1,rte,0,0.6,a,,0
+CH_COV2,rte,-0.001,1,a,,0
+CH_N1,rte,-0.5,0.5,r,,0
 CH_EROD,rte,-0.05,0.6,a,,0
-SOL_Z,sol,-0.5,0.5,r,,1
-SOL_BD,sol,-0.5,0.5,r,,1
-USLE_K,sol,0,0.65,a,,1
+SOL_Z,sol,-0.5,0.5,r,,0
+SOL_BD,sol,-0.5,0.5,r,,0
+USLE_K,sol,0,0.65,a,,0
 USLE_C,crop.dat,-0.5,0.5,r,,0
 CH_S1,rte,-0.5,0.5,r,,0
-CH_S2,rte,-0.5,0.5,r,,1
-FILTERW,mgt,0,10,a,,1
-PPERCO,bsn,10,17.5,a,,1
-PRF_BSN,bsn,0,2,a,,1
-ALPHA_BNK,rte,0,1,a,,1
+CH_S2,rte,-0.5,0.5,r,,0
+FILTERW,mgt,0,10,a,,0
+PPERCO,bsn,10,17.5,a,,0
+PRF_BSN,bsn,0,2,a,,0
+ALPHA_BNK,rte,0,1,a,,0
 CH_K1,rte,-0.5,0.5,r,,0
-ERORGP,hru,0,5,a,,1
-EVRCH,bsn,0.5,1,a,,1
-PHOSKD,bsn,100,200,a,,1
-PSP,bsn,0.01,0.7,a,,1
-RSDCO,bsn,0.02,0.1,a,,1
-SLSOIL,hru,0,150,a,,1
+ERORGP,hru,0,5,a,,0
+EVRCH,bsn,0.5,1,a,,0
+PHOSKD,bsn,100,200,a,,0
+PSP,bsn,0.01,0.7,a,,0
+RSDCO,bsn,0.02,0.1,a,,0
+SLSOIL,hru,0,150,a,,0

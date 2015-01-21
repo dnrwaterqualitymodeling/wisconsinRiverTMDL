@@ -20,8 +20,11 @@ files_nc = list.files("H:/netCDF_files", "*.nc")
 
 for (fl in files_nc){
 	nc_file = paste("H:/netCDF_files/", fl, sep='')
+
 	nc_file = "D:/WRB_sensitivity/SURLAG_bsn.nc"
+
 	nc = open.ncdf(nc_file)
+	
 	param = strsplit(nc_file, "\\.")[[1]][1]
 	param = basename(param)
 	d = get.var.ncdf(nc, varid="streamflow", start=c(1,1,1), count=c(-1,-1,-1))
