@@ -11,6 +11,27 @@ lu_op_xwalk_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCov
 background_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/phosphorus/background_P_from_EPZ.txt"
 soil_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Soil_Phosphorus/soil_phosphorus_by_subbasin.txt"
 
+# UPDATE SLOPE LENGTH BASED ON RECCS IN BAUMGART, 2005
+
+projectDir = "C:/Users/ruesca/Desktop/WRB"
+inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
+con = odbcConnectAccess(inDb)
+
+hru_data = sqlQuery(con, "SELECT * from hru")
+
+for (row in 1:nrow(hru_data)) {
+	sl = 91.4 / ((hru_data$HRU_SLP[row] * 100) + 1)^0.4 # Baumgart, 2005
+	query = paste(
+		"UPDATE hru ",
+		"SET SLSUBBSN = ", sl, " ",
+		"WHERE SUBBASIN = ", hru_data$SUBBASIN[row],
+		" AND HRU = ", hru_data$HRU[row], ";",
+		sep=""
+	)
+	stdout = sqlQuery(con, query)
+}
+close(con)
+
 #UPDATE SWAT RESERVOIR PARAMETERS 
 reservoir_parameters = read.csv(reservoir_parameter_file)
 
