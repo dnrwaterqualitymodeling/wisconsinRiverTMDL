@@ -1,25 +1,26 @@
 library(ncdf)
-library(rgdal)
-library(raster)
+# library(rgdal)
+# library(raster)
 library(RColorBrewer)
 library(classInt)
-library(rgeos)
+# library(rgeos)
 library(zoo)
 
 options(stringsAsFactors = FALSE)
 
-setwd("H:/WRB_sensitivity")
+# setwd("H:/WRB_sensitivity")
 # only interested in streamflow currently...
 vars = list(
 	c("streamflow", "Annual Average streamflow (cms)")#,
 	# c("sediment", "Average Daily Sediment Load (tons)"),
 	# c("phosphorus", "Average Daily P Load (kg)")
 )
-pal = brewer.pal(6, 'Set1')
+pal = brewer.pal(2, 'Set1')
 files_nc = list.files("H:/netCDF_files", "*.nc")
 
 for (fl in files_nc){
 	nc_file = paste("H:/netCDF_files/", fl, sep='')
+	nc_file = "D:/WRB_sensitivity/SURLAG_bsn.nc"
 	nc = open.ncdf(nc_file)
 	param = strsplit(nc_file, "\\.")[[1]][1]
 	param = basename(param)
@@ -31,14 +32,16 @@ for (fl in files_nc){
 	pb = txtProgressBar(0,1)
 	for (sub in 1:338){
 		setTxtProgressBar(pb, sub/338)
-		# print(paste("working on subbasin",sub))
+		print(paste("working on subbasin",sub))
 		sb = d[,sub,]
+
 		# file_name = paste(param,"subbasin",sub,sep='_')
 		
 		# pdf(paste(file_name, "_entire_record.pdf",sep = ''))
 		for (i in 1:6){
 			
 			iter = c(1,5,10,15,20,25)[i]
+
 			iter = sb[,iter]
 			
 			iter = zoo(iter, 
@@ -79,7 +82,8 @@ for (fl in files_nc){
 			
 			time_period = seq(from=as.Date(yr), by='day',length.out=365)
 			for (i in 1:6){
-				iter = c(1,5,10,15,20,25)[i]
+				 iter = c(1,5,10,15,20,25)[i]
+
 				iter = sb[,iter]
 				iter = iter = zoo(iter, 
 					seq(as.Date("2002-01-01"), 

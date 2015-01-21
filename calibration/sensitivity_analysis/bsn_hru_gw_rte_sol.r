@@ -12,17 +12,17 @@ iter = as.integer(arguments[9])
 # run = as.integer(arguments[9])
 ##
 # directory to read text files
-txtinout = "D:/WRB/Scenarios/Default/TxtInOut"
-# location of output
-dir_out = "D:/WRB_sensitivity"
-temp_dir = "Y:/temp_dir"
-p = "SURLAG"
-ext = "bsn"
-mn = 0
-mx = 15
-method = "a"
-iter = 2
-horizon_number = c(1)#c(1,2,3,4,5)
+# txtinout = "D:/WRB/Scenarios/Default/TxtInOut"
+location of output
+# dir_out = "D:/WRB_sensitivity"
+# temp_dir = "Y:/temp_dir"
+# p = "SURLAG"
+# ext = "bsn"
+# mn = 0
+# mx = 15
+# method = "a"
+# iter = 2
+# horizon_number = c(1)#c(1,2,3,4,5)
 
 logfile = paste(dir_out, '/',p,'.log',sep='')
 write(
@@ -297,10 +297,10 @@ for (i in 1:iter){
 	put.var.ncdf(nc, q.var, q, start=c(1,1,i), count=c(-1,-1,1))
 	put.var.ncdf(nc, s.var, sed, start=c(1,1,i), count=c(-1,-1,1))
 	put.var.ncdf(nc, p.var, pho, start=c(1,1,i), count=c(-1,-1,1))
-	# write(
-		# paste("Completed iteration", i, "at", Sys.time()),
-		# logfile,
-		# append = T)
+	write(
+		paste("Completed iteration", i, "at", Sys.time()),
+		logfile,
+		append = T)
 }
 close.ncdf(nc)
 
