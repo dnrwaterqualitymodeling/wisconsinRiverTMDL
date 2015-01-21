@@ -23,9 +23,8 @@ chfr_file = paste(net_soil_dir, "SSURGO_wi_mi_2014/chfrags.txt", sep="/")
 wrb_mukeys = unique(read.table(wrb_mukeys_file, header=T, sep=',')[["MUKEY"]])
 wrb_mukeys = wrb_mukeys[!is.na(wrb_mukeys)]
 # read in gSSURGO tables and process
-mupolygon = readOGR(paste(net_soil_dir, "WRB_Soils_2mile_Buffer_gSSURGO.gdb", sep="/"),
-    "MUPOLYGON__2mile_buffer_wMich_2014")
-mupolygon = subset(mupolygon, MUKEY %in% wrb_mukeys$MUKEY)
+mupolygon = readOGR(net_soil_dir, "MUPOLYGON__2mile_buffer_wMich_2014", verbose=T)
+mupolygon = subset(mupolygon, MUKEY %in% wrb_mukeys)
 ##############
 dat_cols = c(
     "dbovendry_r",
@@ -94,6 +93,15 @@ mupoly_dual_ex <- extract(lc, mupoly_dual, fun = mean, na.rm = T, sp = T)
 #     driver = 'ESRI Shapefile')
 # # 
 # mupoly_dual_df <- mupoly_dual_ex@data
+
+p = aggregate(layer ~ MUKEY, data=mupoly_dual_ex, weighted.mean(x, w), w=mupoly_dual_ex@data$Shape_Area)
+
+nmrtr = aggregate(layer * Shape_Area ~ MUKEY, data=mupoly_dual_ex, sum)
+dnmntr = aggregate(Shape_Area ~ MUKEY, data=mupoly_dual_ex, sum)
+
+wa = merge(nmrtr, dnmntr)
+wa$wa = wa[["layer * Shape_Area"]] / wa[["Shape_Area"]]
+
 drained_mukeys <- mupoly_dual_ex@data$MUKEY[mupoly_dual_df$layer > 0.5] 
 drained_mukeys <- unique(drained_mukeys)
 write.table(drained_mukeys, 
