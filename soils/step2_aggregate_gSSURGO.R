@@ -12,7 +12,7 @@ agg_prof_tbl = paste(net_soil_dir, 'aggregated_profiles.txt', sep = '')
 agg_soil_unit_tbl = paste(net_soil_dir, "aggregated_soil_units.txt", sep = '')
 agg_unit_mukey_lu_tbl = paste(net_soil_dir, "agg_unit_mukey_lu.txt", sep = '')
 # mupolygon = readOGR(paste(net_soil_dir, "WRB_Soils_2mile_Buffer_gSSURGO.gdb", sep=""),
-# 	"MUPOLYGON__2mile_buffer_wMich_2014")
+	# "MUPOLYGON__2mile_buffer_wMich_2014")
 mupolygon = readOGR(
     gsub('/$','',net_soil_dir), 
     "MUPOLYGON__2mile_buffer_wMich_2014")
@@ -22,8 +22,6 @@ mupolygon = subset(mupolygon, MUKEY %in% wrb_mukeys$MUKEY)
 # wtm CRS
 wtm = "+proj=tmerc +lat_0=0 +lon_0=-90 +k=0.9996 +x_0=520000 +y_0=-4480000 +ellps=GRS80 +units=m +no_defs"
 
-# for updating swat soils db
-f_swat_soils_db = "C:/SWAT/ArcSWAT/Databases/SWAT_US_SSURGO_Soils.mdb"
 # These will need to be changed to reflect the new trash baskets.
 excld = c(
     "Aquents",
@@ -76,7 +74,9 @@ caco3_cols = grep("SOL_CAL[0-9]$", names(soil_tbl), value=T)
 
 # Calculate depth-weighted mean of hydrologic characteristics,
 # and collect into numeric array for mclust processing
-agg_tbl = array(NA, dim=c(nrow(soil_tbl),9)) # or 13 if all included
+
+# set to how many variables will be included in the clustering
+agg_tbl = array(NA, dim=c(nrow(soil_tbl),5)) 
 mukeys = array(NA, dim=nrow(soil_tbl))
 pb = txtProgressBar(0,1)
 for (i in 1:nrow(soil_tbl)) {
@@ -91,22 +91,24 @@ for (i in 1:nrow(soil_tbl)) {
 	    depths = depths - c(0, depths[1:(n-1)])
     }
     sand = sum(d[sand_cols][1:n] * depths, na.rm=T) / sum(depths, na.rm=T)
-	silt = sum(d[silt_cols][1:n] * depths, na.rm=T) / sum(depths, na.rm=T)
+	# silt = sum(d[silt_cols][1:n] * depths, na.rm=T) / sum(depths, na.rm=T)
 	clay = sum(d[clay_cols][1:n] * depths, na.rm=T) / sum(depths, na.rm=T)
-	bd = sum(d[bd_cols][1:n] * depths, na.rm=T) / sum(depths, na.rm=T)
+	# bd = sum(d[bd_cols][1:n] * depths, na.rm=T) / sum(depths, na.rm=T)
 	k = sum(d[k_cols][1:n] * depths, na.rm=T) / sum(depths, na.rm=T)
 	awc = sum(d[awc_cols][1:n] * depths, na.rm=T) / sum(depths, na.rm=T)
-	cbn = sum(d[cbn_cols][1:n] * depths, na.rm=T) / sum(depths, na.rm=T)
+	# cbn = sum(d[cbn_cols][1:n] * depths, na.rm=T) / sum(depths, na.rm=T)
 	usle_k = d$USLE_K1
-	tot_depth = d$SOL_ZMX
-	agg_tbl[i,] = as.numeric(c(tot_depth,
+	# tot_depth = d$SOL_ZMX
+	agg_tbl[i,] = as.numeric(
+		c(
+		# tot_depth,
 		sand,
-		silt,
+		# silt,
 		clay,
-		bd,
+		# bd,
 		k,
 		awc,
-		cbn,
+		# cbn,
 		usle_k))
 }
 close(pb)
@@ -120,7 +122,7 @@ for (hsg in LETTERS[1:4]) {
 	clus_d_scld = scale(clus_d)
 	# For each HSG, find clusters
 	# using default cluster settings: 1 to 9.
-	clusters = Mclust(clus_d_scld) #, G=3
+	clusters = Mclust(clus_d_scld, G=1:100) #, G=3
 	print(table(clusters$classification))
 	soil_tbl[ind, "hru_grp"] = paste(hsg, clusters$classification, sep="")
 }
@@ -130,7 +132,7 @@ q = soil_tbl$SNAM %in% excld[!(excld %in% c("Water", "Water greater than 40 acre
 soil_tbl$hru_grp[q] = "X"
 soil_tbl$MUID = as.character(soil_tbl$MUID)
 write.table(soil_tbl[,c("MUID", "hru_grp", "SNAM")], agg_unit_mukey_lu_tbl, sep="\t", row.names=F)
-# Hell yeah.
+
 water_mus <- subset(soil_tbl, hru_grp == 'W')
 soil_tbl <- subset(soil_tbl, hru_grp != "W")
 
@@ -242,8 +244,11 @@ for (i in unique(agg_profs$hru_grp)){
         next
     }
     indx = which(LETTERS == strsplit(i, split = '')[[1]][1])
-    cde = gsub("[A-Z]", indx, i)
+	indx = indx*100
+    cde = gsub("[A-Z]", '', i)
+	cde = as.numeric(indx) + as.numeric(cde)
     rw = c(i, cde)
+	print(rw)
     hru_grp_code_lu = rbind(hru_grp_code_lu, rw)
 }
 hru_grp_code_lu = rbind(hru_grp_code_lu, c("W", "1"))
@@ -261,7 +266,7 @@ for (rw in 1:length(unique(soil_tbl$hru_grp))){
 	agg_soil_data[rw, 'SOL_ZMX'] = max_depths[max_depths$hru_grp == hruGrp, "SOL_ZMX"] * 10
 	agg_soil_data[rw, 'ANION_EXCL'] = 0.5
 	agg_soil_data[rw, 'SOL_CRK'] = 0.5
-	agg_soil_data[rw, 'HYDGRP'] = strsplit(hruGrp, '[0-9]')[[1]]
+	agg_soil_data[rw, 'HYDGRP'] = strsplit(hruGrp, '[0-9]')[[1]][1]
 	agg_soil_data[rw, c('SNAM','SEQN','S5ID')] = hruGrp
     agg_soil_data[rw, 'MUID'] = hru_grp_code_lu[which(hru_grp_code_lu$hru_grp == hruGrp), 'hru_code']
 	# grabbing hz depths
@@ -337,6 +342,7 @@ for (grp in 1:nrow(hru_grp_code_lu)){
     soil_tbl[which(soil_tbl$hru_grp==hru_grp),'hru_code'] <- hru_code 
 }
 agg_soil_data <- subset(agg_soil_data, select = -hru_grp)
+agg_soil_data$SEQN = agg_soil_data$MUID
 write.table(agg_soil_data, agg_soil_unit_tbl, sep="\t", row.names = F)
 
 #----
@@ -353,3 +359,24 @@ mupolygon_remap_mukey = merge(mupolygon,
 mupolygon_remap_mukey@data$MUKEY = mupolygon_remap_mukey@data$hru_code
 writeOGR(mupolygon_remap_mukey, gsub("/$", "", net_soil_dir),
 	"MUPOLYGON_remap_mukey", driver = "ESRI Shapefile")
+
+#### for updating SWAT database
+# for updating swat soils db
+# necessary because RODBC only runs on 32 bit R
+update_soils_tbl = tempfile(fileext='.bat')
+
+writeLines("C:\\Users\\evansdm\\Documents\\R\\R-3.1.1\\bin\\i386\\Rscript.exe C:\\Users\\evansdm\\Documents\\Code\\soils\\step2_5_updateSWAT_soils_table.R", update_soils_tbl)
+
+system(update_soils_tbl)
+
+
+
+
+
+
+
+
+
+
+
+
