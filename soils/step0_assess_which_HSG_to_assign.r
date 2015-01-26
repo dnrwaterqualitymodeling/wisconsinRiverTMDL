@@ -10,6 +10,7 @@
 
 library(raster)
 library(rgdal)
+library(rgeos)
 options(stringsAsFactors = F, warn = 1)
 net_soil_dir = "T:/Projects/Wisconsin_River/GIS_Datasets/Soils"
 dual_hsgs = paste(net_soil_dir, 'dual_hsgs_to_single.txt', sep="/")
@@ -23,9 +24,11 @@ chfr_file = paste(net_soil_dir, "SSURGO_wi_mi_2014/chfrags.txt", sep="/")
 wrb_mukeys = unique(read.table(wrb_mukeys_file, header=T, sep=',')[["MUKEY"]])
 wrb_mukeys = wrb_mukeys[!is.na(wrb_mukeys)]
 # read in gSSURGO tables and process
-mupolygon = readOGR(paste(net_soil_dir, "WRB_Soils_2mile_Buffer_gSSURGO.gdb", sep="/"),
+mupolygon = readOGR(net_soil_dir,
     "MUPOLYGON__2mile_buffer_wMich_2014")
-mupolygon = subset(mupolygon, MUKEY %in% wrb_mukeys$MUKEY)
+
+mupolygon = subset(mupolygon, MUKEY %in% wrb_mukeys)
+mupolygon@data["objID"] = as.integer(rownames(mupolygon@data))
 ##############
 dat_cols = c(
     "dbovendry_r",
@@ -74,9 +77,12 @@ chfr = aggregate(fragvol_r ~ chkey, chfr, sum, na.rm=T) # Sum rock volumes by hr
 comp = merge(comp, chfr, by="chkey", all.x=T) # Join component/horizon with chfrags
 comp$fragvol_r[is.na(comp$fragvol_r)] = 0 # Force NA rock fragments to zero
 ##############
-lc = raster("T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/WRB_TMDL_LndCvr_Mgt_07152014.img")
-lc[lc <= 9 | lc >= 55] = 0
-lc[lc > 9 & lc < 55] = 1
+file_lc = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/WRB_TMDL_LndCvr_Mgt_07152014.img"
+lc = raster(file_lc)
+lcMat = getValues(lc)
+lcMat[lcMat <= 9 | lcMat >= 55] = 0
+lcMat[lcMat > 9 & lcMat < 55] = 1
+lc = setValues(lc, lcMat)
 
 wtm <- proj4string(lc)
 mupolygon <- spTransform(mupolygon, CRS(wtm))
@@ -87,21 +93,125 @@ mupoly_dual <- subset(mupolygon, MUKEY %in% dual_mukeys)
 
 # This step takes a long time, the resulting data frame from the extract() function 
 #   was written out to a table
-mupoly_dual_ex <- extract(lc, mupoly_dual, fun = mean, na.rm = T, sp = T)
-# writeOGR(obj = mupoly_dual_ex, 
-#     dsn= net_soil_dir,
-#     layer = 'mupolygon_proportion_ag',
-#     driver = 'ESRI Shapefile')
-# # 
-# mupoly_dual_df <- mupoly_dual_ex@data
-drained_mukeys <- mupoly_dual_ex@data$MUKEY[mupoly_dual_df$layer > 0.5] 
-drained_mukeys <- unique(drained_mukeys)
-write.table(drained_mukeys, 
-    paste(net_soil_dir, 'drained_mukeys.txt',sep='/'),
-    sep = '\t',
-    row.names = F)
-# write.table(mupoly_dual_df, 
-#             paste(net_soil_dir, 'mupolygon_ag_analysis.txt',sep='/'),
-#             sep = '\t',
-#             row.names = F)
+# mupoly_dual_ex <- extract(lc,
+	# mupoly_dual, 
+	# fun=mean, 
+	# na.rm=T,
+	# df=T,
+	# sp=F)
+# mupoly_dual_ex = subset(mupoly_dual_ex, WRB_TMDL_LndCvr_Mgt_07152014 > 0.1)
+# write.table(mupoly_dual_ex,
+	# paste(net_soil_dir, "polygons_greater_than_10perc_ag.txt",sep='/'),
+	# sep='\t',
+	# row.names=F)
+### Table with those polygons ObJIDs with more than 10% Ag 
+mupoly_dual_ex = read.delim(paste(net_soil_dir, "polygons_greater_than_10perc_ag.txt",sep='/'))
+
+mupoly_ag = subset(mupolygon, objID %in% mupoly_dual_ex$ID)
+
+writeOGR(
+	obj = mupoly_ag,
+	dsn = net_soil_dir,
+	layer = file_mupoly_ag,
+	driver= "ESRI Shapefile")
+### create script to polygonize land use
+file_mupoly_ag = "mupolygons_greater_10perc_ag"
+out_landcover_rast = "wrb_tmdl_agric_landuse.tif"
+out_landcover_poly = "wrb_tmdl_agric_landuse.shp"
+out_lndcvr_soilpoly_intersect = "agric_lndcvr_dualhsg_intersect.shp"
+out_lndcvr_soilpoly_intersect_dissolved = "agric_lndcvr_dualhsg_intersect_dissolved.shp"
+
+input_list = paste(
+	'["',
+	out_landcover_poly,
+	'", "',
+	file_mupoly_ag,".shp",
+	'"]',
+	sep='') 
+# in_sql_state = "Value < 56 & Value > 9"
+
+
+tmpf = tempfile("polygonize_", fileext= ".py")
+ln1 = "import arcpy"
+checkout_line = 'arcpy.CheckOutExtension("Spatial")'
+ln2 = "from arcpy.sa import *"
+ln3 = "arcpy.env.workspace = r'T:/Projects/Wisconsin_River/GIS_Datasets/Soils'"
+
+
+##### to extract the agg polygons
+ln4 = paste(
+	'extract_lyr = ExtractByAttributes("',
+	file_lc,
+	'", ',
+	'"Value > 9"',
+	')',
+	sep='')
+ln5 = paste(
+	'extract_lyr = ExtractByAttributes(extract_lyr, ',
+	'"Value < 56"',
+	')',
+	sep='')
+ln6 = paste(
+	'extract_lyr.save("',
+	out_landcover_rast,
+	'")',
+	sep='')
+
+#### raster to poly conversion
+ln7 = paste(
+	'arcpy.RasterToPolygon_conversion(r"',
+	out_landcover_rast,
+	'", "',
+	out_landcover_poly,
+	'", ',
+	'"NO_SIMPLIFY"',
+	",",
+	'"Value"',
+	")",
+	sep='')
+
+## Intersection 
+ln8 = paste(
+	"arcpy.Intersect_analysis(",
+	input_list,
+	', "',
+	out_lndcvr_soilpoly_intersect,
+	'")',
+	sep='')
+	
+##### Dissolve to remove slivers
+ln9 = paste(
+	"arcpy.Dissolve_management(",
+	'"',
+	out_lndcvr_soilpoly_intersect,
+	'", ',
+	'"',
+	out_lndcvr_soilpoly_intersect_dissolved,
+	'", ', 
+	'"objID")',
+	sep='')
+
+writeLines(
+	paste(
+		ln1,
+		checkout_line,
+		ln2,
+		ln3,
+		ln4,
+		ln5,
+		ln6,
+		ln7,
+		ln8,
+		ln9,
+		sep='\n'),
+	tmpf)
+
+py_cmd = paste("C:\\Python27\\ArcGIS10.1\\python.exe", tmpf)
+system(py_cmd)
+
+
+
+
+
+
 

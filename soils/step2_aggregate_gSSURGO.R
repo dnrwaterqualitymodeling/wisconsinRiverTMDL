@@ -347,7 +347,7 @@ write.table(agg_soil_data, agg_soil_unit_tbl, sep="\t", row.names = F)
 
 #----
 mupolygon = spTransform(mupolygon, CRS(wtm))
-        
+
 mupolygon_remap_mukey = merge(mupolygon, 
     soil_tbl[,c("MUID", "hru_grp","hru_code")], 
     by.x="MUKEY", 
@@ -369,14 +369,4 @@ writeLines("C:\\Users\\evansdm\\Documents\\R\\R-3.1.1\\bin\\i386\\Rscript.exe C:
 
 system(update_soils_tbl)
 
-
-
-
-
-
-
-
-
-
-
-
+######

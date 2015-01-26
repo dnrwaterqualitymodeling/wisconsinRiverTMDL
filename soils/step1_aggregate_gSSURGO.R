@@ -17,13 +17,15 @@ hrzn_file = paste(net_soil_dir, "SSURGO_wi_mi_2014/chorizon.txt", sep="/")
 chfr_file = paste(net_soil_dir, "SSURGO_wi_mi_2014/chfrags.txt", sep="/")
 check_on_these_file = paste(net_soil_dir, 'check_on_these.txt',sep = '/')
 
+## outputs
+out_default_dual_hsgs = paste(net_soil_dir, "default_dual_hsgs.txt",sep='/')
 #########
 # template output table
 agg_mky_tbl = read.table(tmplate, nrows=1, header=T)
 # mukeys only within the WRB
 wrb_mukeys = unique(read.table(wrb_mukeys_file, header=T, sep=',')[["MUKEY"]])
 wrb_mukeys = wrb_mukeys[!is.na(wrb_mukeys)]
-drained_mukeys <- na.omit(read.table(drained_mukeys_file, header = T))
+# drained_mukeys <- na.omit(read.table(drained_mukeys_file, header = T))
 # read in gSSURGO tables and process
 ##############
 dat_cols = c(
@@ -87,10 +89,32 @@ chfr = aggregate(fragvol_r ~ chkey, chfr, sum, na.rm=T) # Sum rock volumes by hr
 comp = merge(comp, chfr, by="chkey", all.x=T) # Join component/horizon with chfrags
 comp$fragvol_r[is.na(comp$fragvol_r)] = 0 # Force NA rock fragments to zero
 # 115 mukeys have greater than 50% ag
-drained_ind <- with(comp, mukey %in% drained_mukeys[,1] & nchar(hydgrp) > 2)
 
-comp$hydgrp[drained_ind] = with(comp[drained_ind,], substr(hydgrp, nchar(hydgrp), nchar(hydgrp))) 
-comp$hydgrp[!drained_ind] = with(comp[!drained_ind,], substr(hydgrp, 1, 1))
+## changing methodology:
+## all soils  with dual HSGs will assumed to be UNdrained, for the clustering process
+### then the polygons that have greater than 10%, will be changed to the higher HSG value
+dual_ind <- with(comp, nchar(hydgrp) > 2)
+
+# set all of those that have two hsgs, to D
+### that is assume undrained
+if_drained_hsg <- subset(comp[dual_ind,], select = c("mukey", "compname", "hydgrp"))
+if_drained_hsg$hydgrp <- substr(if_drained_hsg$hydgrp, 1, 1)
+
+if_drained_hsg <- aggregate(hydgrp ~ mukey,
+	data = if_drained_hsg,
+	FUN = function(x){unique(x)[2]})
+
+if_drained_hsg <- substr
+
+write.table(
+	if_drained_hsg,
+	out_default_dual_hsgs,
+	sep='\t',
+	row.names=F)
+
+comp$hydgrp[dual_ind] = with(comp[dual_ind,], substr(hydgrp, nchar(hydgrp), nchar(hydgrp))) 
+
+# comp$hydgrp[drained_ind] = with(comp[!drained_ind,], substr(hydgrp, 1, 1))
 comp$hydgrp[comp$hydgrp == "A"] = 1
 comp$hydgrp[comp$hydgrp == "B"] = 2
 comp$hydgrp[comp$hydgrp == "C"] = 3
