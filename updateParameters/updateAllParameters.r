@@ -1,5 +1,6 @@
 library(RODBC)
-
+options(stringsAsFactors=F)
+options(warn=1)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
 projectDir = "H:/WRB"
 wetland_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands/wetland_geometry_v3.csv"
@@ -163,7 +164,7 @@ for (row in 1:nrow(gw_parameters)) {
 close(con)
 
 #UPDATE MANAGEMENT OPERATIONS
-options(warn=2)
+
 insert_fert = TRUE
 
 prjDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
@@ -201,9 +202,8 @@ close(con_mgt2)
 py_file = tempfile(fileext=".py")
 write(paste("import arcpy; arcpy.Compact_management('", prjDb, "')", sep=""), py_file)
 
-con_mgt2 = odbcConnectAccess(prjDb)
 
-con = odbcConnectAccess(inDb)
+
 oidStart = 1
 for (row in 1:nrow(mgt1)) {
     row_data = mgt1[row,]
@@ -218,32 +218,6 @@ for (row in 1:nrow(mgt1)) {
 	##		IRR_SC=3 for irrigating from shallow aquifer
 	##		IRR_NO=the subbasin number from which the water comes
 	##### !! CHECK ON THESE CROP CODES --- MAKE SURE THEY ARE THE ONLY POTATO VEGGIES !! #####
-	if (row_data$LANDUSE %in% c("SPOT", "CRRT")){
-		
-		irri_mgt1_query = paste(
-			"UPDATE mgt1 SET IRRSC = 3, IRRNO =",
-			as.character(row_data$SUBBASIN),
-			"WHERE SUBBASIN =",
-			as.character(row_data$SUBBASIN),
-            " AND HRU = ",
-            as.character(row_data$HRU),
-            ";",
-            sep=""
-        )
-		sqlQuery(con, irri_mgt1_query)
-		
-		# also need SUBBASIN, HRU, LANDUSE, SOIL CROP, YEAR, MONTH, DAY, PLANT_ID?
-		col_names = c("MONTH","DAY", "YEAR", "MGT_OP", "WSTRS_ID")
-		vals = c(1, 1, 1, 10, 1)
-		irri_mgt2_query = paste(
-			"INSERT mgt2 (",
-			col_names,
-			") VALUES (",
-			vals,
-			");",
-			sep="")
-		sqlQuery(con, irri_mgt2_query)
-	}}
 	
     if (substr(opCode, 1, 1) == "3" & substr(opCode, 4, 4) == "c") {
         igro_query = paste("UPDATE mgt1 SET IGRO = 1, PLANT_ID = 52, NROT = 0 WHERE SUBBASIN = ",
