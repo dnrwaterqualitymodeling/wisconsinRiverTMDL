@@ -133,8 +133,8 @@ soil_tbl$hru_grp[q] = "X"
 soil_tbl$MUID = as.character(soil_tbl$MUID)
 write.table(soil_tbl[,c("MUID", "hru_grp", "SNAM")], agg_unit_mukey_lu_tbl, sep="\t", row.names=F)
 
-water_mus <- subset(soil_tbl, hru_grp == 'W')
-soil_tbl <- subset(soil_tbl, hru_grp != "W")
+water_mus = subset(soil_tbl, hru_grp == 'W')
+soil_tbl = subset(soil_tbl, hru_grp != "W")
 
 ###############################
 # Reformatting soil data so it can be used by aqp
@@ -305,7 +305,7 @@ for (rw in 1:length(unique(soil_tbl$hru_grp))){
 # converting from SSURGO's ksat units of um/sec to SWAT's mm/hr (3.6)
 agg_soil_data[,k_cols] = agg_soil_data[,k_cols] * 3
 # water's MUID/MUKEY is now 1
-agg_soil_data[nrow(agg_soil_data) + 1, c('SNAM','SEQN', 'S5ID',"TEXTURE")] <- 'W'
+agg_soil_data[nrow(agg_soil_data) + 1, c('SNAM','SEQN', 'S5ID',"TEXTURE")] = 'W'
 update_num_cols = c('MUID',
 	'CMPPCT',
 	'SOL_ALB1',
@@ -315,9 +315,9 @@ update_num_cols = c('MUID',
 	"SOL_Z1",
 	"NLAYERS",
 	"SOL_K1")
-agg_soil_data[agg_soil_data$SNAM == "W", update_num_cols] <- c(1, 100, 0.23, 0.5, 0.5, 25, 25, 1, 600)
+agg_soil_data[agg_soil_data$SNAM == "W", update_num_cols] = c(1, 100, 0.23, 0.5, 0.5, 25, 25, 1, 600)
 # givin' water a D
-agg_soil_data$HYDGRP[agg_soil_data$SNAM == "W"] <- "D"
+agg_soil_data$HYDGRP[agg_soil_data$SNAM == "W"] = "D"
 
 agg_soil_data$OBJECTID = 1:nrow(agg_soil_data)
 agg_soil_data$CMPPCT = 100
@@ -335,13 +335,13 @@ agg_soil_data$HYDGRP[agg_soil_data$SNAM == "X"] = x_hydgrp
 
 soil_tbl = rbind(soil_tbl, water_mus)
 # need to recode the soils polygon layer so mukey is now a numeric identifier of the hru_grp
-soil_tbl$hru_code <- NA
+soil_tbl$hru_code = NA
 for (grp in 1:nrow(hru_grp_code_lu)){
-    hru_grp <- hru_grp_code_lu[grp, 'hru_grp']
-    hru_code <- hru_grp_code_lu[grp, 'hru_code']
-    soil_tbl[which(soil_tbl$hru_grp==hru_grp),'hru_code'] <- hru_code 
+    hru_grp = hru_grp_code_lu[grp, 'hru_grp']
+    hru_code = hru_grp_code_lu[grp, 'hru_code']
+    soil_tbl[which(soil_tbl$hru_grp==hru_grp),'hru_code'] = hru_code 
 }
-agg_soil_data <- subset(agg_soil_data, select = -hru_grp)
+agg_soil_data = subset(agg_soil_data, select = -hru_grp)
 agg_soil_data$SEQN = agg_soil_data$MUID
 write.table(agg_soil_data, agg_soil_unit_tbl, sep="\t", row.names = F)
 
@@ -365,8 +365,9 @@ writeOGR(mupolygon_remap_mukey, gsub("/$", "", net_soil_dir),
 # necessary because RODBC only runs on 32 bit R
 update_soils_tbl = tempfile(fileext='.bat')
 
-writeLines("C:\\Users\\evansdm\\Documents\\R\\R-3.1.1\\bin\\i386\\Rscript.exe C:\\Users\\evansdm\\Documents\\Code\\soils\\step2_5_updateSWAT_soils_table.R", update_soils_tbl)
+writeLines(
+	"C:\\Users\\evansdm\\Documents\\R\\R-3.1.1\\bin\\i386\\Rscript.exe C:\\Users\\evansdm\\Documents\\Code\\soils\\step2_5_updateSWAT_soils_table.R",
+	update_soils_tbl)
 
 system(update_soils_tbl)
-
 ######
