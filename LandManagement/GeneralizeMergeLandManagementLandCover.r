@@ -224,18 +224,3 @@ writeGDAL(as(swat_lc, "SpatialGridDataFrame"),
     mvFlag=255)
 
 #dunzo
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
