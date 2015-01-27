@@ -7,13 +7,15 @@ pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geomet
 reservoir_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/hydrology/dams_parameters.csv"
 gw_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/alphaBflowSubbasin_lookup.csv"
 op_db_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/OpSchedules_fert_3Cuts_later.mdb"
+# should be swat_lookup.csv?
 lu_op_xwalk_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/landuse_operation_crosswalk.csv"
 background_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/phosphorus/background_P_from_EPZ.txt"
 soil_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Soil_Phosphorus/soil_phosphorus_by_subbasin.txt"
 
 # UPDATE SLOPE LENGTH BASED ON RECCS IN BAUMGART, 2005
 
-projectDir = "C:/Users/ruesca/Desktop/WRB"
+# projectDir = "C:/Users/ruesca/Desktop/WRB"
+projectDir = "H:/test_wrb/WRB/WRB.mdb"
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 con = odbcConnectAccess(inDb)
 
@@ -186,7 +188,7 @@ if (fert_row_count < 55) {
 }
 close(con_fert)
 
-con_mgt1 = odbcConnectAccess(prjDb)
+con_mgt1 = odbcConnectAccess(inDb)#prjDb
 mgt1 = sqlFetch(con_mgt1, "mgt1")
 close(con_mgt1)
 
@@ -201,12 +203,48 @@ write(paste("import arcpy; arcpy.Compact_management('", prjDb, "')", sep=""), py
 
 con_mgt2 = odbcConnectAccess(prjDb)
 
+con = odbcConnectAccess(inDb)
 oidStart = 1
 for (row in 1:nrow(mgt1)) {
     row_data = mgt1[row,]
     print(paste('Subbasin:',as.character(row_data$SUBBASIN),'hru:', as.character(row_data$HRU)))
     lu = as.character(row_data$LANDUSE)
     opCode = unique(as.character(crosswalk$OPCODE[crosswalk$LANDUSE == lu]))
+	
+	
+	
+	#####	For Irrigation parameters
+	## Note:
+	##		IRR_SC=3 for irrigating from shallow aquifer
+	##		IRR_NO=the subbasin number from which the water comes
+	##### !! CHECK ON THESE CROP CODES --- MAKE SURE THEY ARE THE ONLY POTATO VEGGIES !! #####
+	if (row_data$LANDUSE %in% c("SPOT", "CRRT")){
+		
+		irri_mgt1_query = paste(
+			"UPDATE mgt1 SET IRRSC = 3, IRRNO =",
+			as.character(row_data$SUBBASIN),
+			"WHERE SUBBASIN =",
+			as.character(row_data$SUBBASIN),
+            " AND HRU = ",
+            as.character(row_data$HRU),
+            ";",
+            sep=""
+        )
+		sqlQuery(con, irri_mgt1_query)
+		
+		# also need SUBBASIN, HRU, LANDUSE, SOIL CROP, YEAR, MONTH, DAY, PLANT_ID?
+		col_names = c("MONTH","DAY", "YEAR", "MGT_OP", "WSTRS_ID")
+		vals = c(1, 1, 1, 10, 1)
+		irri_mgt2_query = paste(
+			"INSERT mgt2 (",
+			col_names,
+			") VALUES (",
+			vals,
+			");",
+			sep="")
+		sqlQuery(con, irri_mgt2_query)
+	}}
+	
     if (substr(opCode, 1, 1) == "3" & substr(opCode, 4, 4) == "c") {
         igro_query = paste("UPDATE mgt1 SET IGRO = 1, PLANT_ID = 52, NROT = 0 WHERE SUBBASIN = ",
             as.character(row_data$SUBBASIN),
