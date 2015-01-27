@@ -14,13 +14,13 @@ map_sub_reaches = "subbasins_reaches.png"
 map_sub_reaches_flow_calib = "subbasins_reaches_flow_calib.pdf"
 map_groundwater_p = "groundwater_phosphorus.png"
 map_alpha_bf = "alpha_bf.png"
-map_pcp_count = "pcp_na_counts.png"
+map_pcp_count = "pcp_na_coudnts.png"
 map_tmp_count = "tmp_na_counts.png"
 map_wetlands = "max_surface_area_wetlands.png"
 map_ponds = "ponds.png"
 map_wetlands_and_ponds = "wetlands_and_ponds.png"
 map_evapo_transp = "et_error.png"
-tab_lnd_cvr_mgt = "./Code/doc/tab/landcover_mgt_table.tex"
+tab_lnd_cvr_mgt = "./Code/doc/tab/landcover_mgt_table_raw.tex"
 # paths
 dir_out = "./Code/doc/img"
 
@@ -52,6 +52,11 @@ file_subbasin_precip = paste(dir_gis_data, "Urban/SubPcp.txt",sep = '/')
 file_subbasin_temp = paste(dir_gis_data, "Urban/SubTmp.txt",sep = '/')
 
 file_et_uncertainty = "H:/sim_flow/ET_uncertainty.csv"
+
+file_swat_lu = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/SWAT_lookup.csv"
+# file_landcover_mgt = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/WRB_TMDL_LndCvr_Mgt_07152014.img.vat.dbf"
+file_landcover_mgt = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/Landuse_Lookup_27012015.txt"
+
 # reading data 
 subbasins = readOGR(dir_hydro, "subbasins")
 subbsins_urban = readOGR(dir_hydro, "subbasins_minus_urban_boundaries")
@@ -409,15 +414,13 @@ for (met in c("pbias", "nashsut")){
 }
 #############################################
 # tables
-file_swat_lu = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/SWAT_lookup.csv"
-file_landcover_mgt = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/WRB_TMDL_LndCvr_Mgt_07152014.img.vat.dbf"
 
 swat_lu = read.csv(file_swat_lu)
-lnd_cvr_mgt = read.dbf(file_landcover_mgt)
+lnd_cvr_mgt = read.table(file_landcover_mgt, sep="\t", header=T)
 
-lnd_cvr_mgt_tbl = merge(swat_lu, lnd_cvr_mgt, by.x = 'VALUE', by.y = "Value")
+lnd_cvr_mgt_tbl = merge(swat_lu, lnd_cvr_mgt) #, by.x = 'VALUE', by.y = "Value")
 
-lnd_cvr_mgt_tbl = subset(lnd_cvr_mgt_tbl, select=c("LANDUSE", "Type", "Definition", "Gen_Code"))
+lnd_cvr_mgt_tbl = subset(lnd_cvr_mgt_tbl, select=c("LANDUSE", "TYPE", "Definition", "Gen_Code"))
 
 lbl = "tab:lnd_mgt_def"
 cap = "The land cover classes represented within ArcSWAT are shown here with the class of land use and land management. The rotation codes are: Cg--corn grain, Cs--corn silage, So-soybean, Po--potato, Vg--vegetable, A--Alfalfa, O/A--oats/alfalfa. Tons are English tons."

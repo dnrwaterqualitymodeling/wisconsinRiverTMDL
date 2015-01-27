@@ -15,7 +15,7 @@ properLegend <- function(prop_colr, sig_figs = 0){
 #         print(paste(opn,cls))
         opn <- round(opn, sig_figs)
         cls <- round(cls, sig_figs)
-        nw <- paste('[',opn,', ',cls,')',sep='')
+        nw <- paste('[',opn,',',cls,')',sep='')
         newTxt <- c(newTxt, nw)
     }
     return(newTxt)
