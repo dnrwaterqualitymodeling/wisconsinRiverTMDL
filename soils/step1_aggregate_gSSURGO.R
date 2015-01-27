@@ -104,7 +104,7 @@ if_drained_hsg <- aggregate(hydgrp ~ mukey,
 	data = if_drained_hsg,
 	FUN = function(x){unique(x)[2]})
 
-if_drained_hsg <- substr
+# if_drained_hsg <- substr
 
 write.table(
 	if_drained_hsg,

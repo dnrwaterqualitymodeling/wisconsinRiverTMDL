@@ -193,7 +193,7 @@ site(soil_pr) = ~ group
 agg_profs = data.frame()
 ###############################
 # Merge grouped soils together using aqp
-# this loop takes 30 to 40 minutes to run
+# this loop takes ~5 minutes to run
 ###############################
 pb = txtProgressBar(0,1)
 i = 0
@@ -359,6 +359,8 @@ mupolygon_remap_mukey = merge(mupolygon,
 mupolygon_remap_mukey@data$MUKEY = mupolygon_remap_mukey@data$hru_code
 writeOGR(mupolygon_remap_mukey, gsub("/$", "", net_soil_dir),
 	"MUPOLYGON_remap_mukey", driver = "ESRI Shapefile")
+
+
 
 #### for updating SWAT database
 # for updating swat soils db
