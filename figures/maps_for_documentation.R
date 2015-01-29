@@ -418,9 +418,12 @@ for (met in c("pbias", "nashsut")){
 swat_lu = read.csv(file_swat_lu)
 lnd_cvr_mgt = read.table(file_landcover_mgt, sep="\t", header=T)
 
-lnd_cvr_mgt_tbl = merge(swat_lu, lnd_cvr_mgt) #, by.x = 'VALUE', by.y = "Value")
+lnd_cvr_mgt_tbl = merge(swat_lu, lnd_cvr_mgt, by = c('VALUE', 'LANDUSE'))
 
-lnd_cvr_mgt_tbl = subset(lnd_cvr_mgt_tbl, select=c("LANDUSE", "TYPE", "Definition", "Gen_Code"))
+ind = order(lnd_cvr_mgt_tbl$VALUE)
+lnd_cvr_mgt_tbl = subset(lnd_cvr_mgt_tbl, select=c("LANDUSE", "TYPE", "Definition"))
+lnd_cvr_mgt_tbl = lnd_cvr_mgt_tbl[ind,] 
+
 
 lbl = "tab:lnd_mgt_def"
 cap = "The land cover classes represented within ArcSWAT are shown here with the class of land use and land management. The rotation codes are: Cg--corn grain, Cs--corn silage, So-soybean, Po--potato, Vg--vegetable, A--Alfalfa, O/A--oats/alfalfa. Tons are English tons."

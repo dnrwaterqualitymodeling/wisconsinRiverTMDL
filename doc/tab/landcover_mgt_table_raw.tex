@@ -1,28 +1,19 @@
 % latex table generated in R 3.1.1 by xtable 1.7-4 package
-% Fri Dec 19 13:50:59 2014
-\begin{landscape}
-\begin{longtable}{l l l}
-\caption[Agricultural land cover classes represented within SWAT]{The agricultural land cover classes represented within SWAT are shown here with the class of land use and land management. The rotation codes are Cg=corn grain, Cs=corn silage, So=soybean, Po=potato, Vg=vegetable, A=Alfalfa, O/A=oats/alfalfa. Tons are English tons. Note that the SWAT Landuse is a code used by SWAT and is a placeholder for unique agricultural practices and are not truly representative of the landcover and is only included here for reference.} 
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\hline 
-%%%First and actual col titles
-SWAT Landuse & Type & Definition  \\ 
- \hline 
- \hline
-\endfirsthead
-%%%%% repeating head
-	\multicolumn{3}{c}{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
-	\hline
-	SWAT Landuse & Type & Definition  \\ 
-	\hline 
-	\hline \endhead
-
-	\hline 
-	\multicolumn{3}{r}{\textit{Continued on next page}} \endfoot
-
-	\hline	\endlastfoot
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-    SWHT & Dairy & Cg-Cs-O/A-A-A-A - Spring Chisel - 10,000 ga/acre/year Liquid Manure \\ 
+% Thu Jan 29 13:27:41 2015
+\begin{longtable}{lll}
+  \hline
+LANDUSE & TYPE & Definition \\ 
+  \hline
+WATR & Non-Ag & Open Water \\ 
+  URML & Non-Ag & Developed/Open Space \\ 
+  RNGE & Non-Ag & Barren \\ 
+  FRSD & Non-Ag & Deciduous Forest \\ 
+  RNGE & Non-Ag & Shrubland \\ 
+  RNGE & Non-Ag & Grassland Herbaceous \\ 
+  WETN & Non-Ag & Woody Wetlands \\ 
+  WETN & Non-Ag & Herbaceous Wetlands \\ 
+  WETN & Cranberry & Cranberries \\ 
+  SWHT & Dairy & Cg-Cs-O/A-A-A-A - Spring Chisel - 10,000 ga/acre/year Liquid Manure \\ 
   WWHT & Dairy & O/A-A-A-A-Cg-Cs - Spring Chisel - 10,000 ga/acre/year Liquid Manure \\ 
   DWHT & Dairy & A-A-Cg-Cs-O/A-A - Spring Chisel - 10,000 ga/acre/year Liquid Manure \\ 
   RYE & Dairy & Cg-Cs-O/A-A-A-A - Spring Chisel - 25 tons/acre/year Solid Manure \\ 
@@ -65,7 +56,9 @@ SWAT Landuse & Type & Definition  \\
   SGBT & Potato/Vegetable & Po-Vg-Vg-Po-Vg-Vg - Deep Till Potato Years/Cultivate Vegetable Years \\ 
   POTA & Potato/Vegetable & Vg-Po-Vg-Vg-Po-Vg - Deep Till Potato Years/Cultivate Vegetable Years \\ 
   SPOT & Potato/Vegetable & Vg-Vg-Po-Vg-Vg-Po - Deep Till Potato Years/Cultivate Vegetable Years \\ 
-  CRRT & Pasture/Hay & Continuous Grasses
+  CRRT & Pasture/Hay & Continuous Grasses \\ 
+   \hline
+\hline
+\caption{The land cover classes represented within ArcSWAT are shown here with the class of land use and land management. The rotation codes are: Cg--corn grain, Cs--corn silage, So-soybean, Po--potato, Vg--vegetable, A--Alfalfa, O/A--oats/alfalfa. Tons are English tons.} 
 \label{tab:lnd_mgt_def}
 \end{longtable}
-\end{landscape}
