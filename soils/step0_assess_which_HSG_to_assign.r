@@ -10,8 +10,8 @@
 
 library(raster)
 library(rgdal)
-library(rgeos)
 options(stringsAsFactors = F, warn = 1)
+library(rgeos)
 net_soil_dir = "T:/Projects/Wisconsin_River/GIS_Datasets/Soils"
 dual_hsgs = paste(net_soil_dir, 'dual_hsgs_to_single.txt', sep="/")
 wrb_mukeys_file = paste(net_soil_dir, "wrb_mukeys.txt", sep="/")
@@ -19,6 +19,7 @@ comp_file = paste(net_soil_dir, "SSURGO_wi_mi_2014/component.txt", sep="/")
 hrzn_file = paste(net_soil_dir, "SSURGO_wi_mi_2014/chorizon.txt", sep="/")
 chfr_file = paste(net_soil_dir, "SSURGO_wi_mi_2014/chfrags.txt", sep="/")
 
+file_lc = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/swat_lc_wtm.tif"
 #########
 # mukeys only within the WRB
 wrb_mukeys = unique(read.table(wrb_mukeys_file, header=T, sep=',')[["MUKEY"]])
@@ -77,11 +78,11 @@ chfr = aggregate(fragvol_r ~ chkey, chfr, sum, na.rm=T) # Sum rock volumes by hr
 comp = merge(comp, chfr, by="chkey", all.x=T) # Join component/horizon with chfrags
 comp$fragvol_r[is.na(comp$fragvol_r)] = 0 # Force NA rock fragments to zero
 ##############
-file_lc = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/WRB_TMDL_LndCvr_Mgt_07152014.img"
+
 lc = raster(file_lc)
 lcMat = getValues(lc)
-lcMat[lcMat <= 9 | lcMat >= 55] = 0
-lcMat[lcMat > 9 & lcMat < 55] = 1
+lcMat[lcMat <= 9 | lcMat > 52] = 0
+lcMat[lcMat > 9 & lcMat <= 52] = 1
 lc = setValues(lc, lcMat)
 
 wtm <- proj4string(lc)
@@ -93,29 +94,31 @@ mupoly_dual <- subset(mupolygon, MUKEY %in% dual_mukeys)
 
 # This step takes a long time, the resulting data frame from the extract() function 
 #   was written out to a table
-# mupoly_dual_ex <- extract(lc,
-	# mupoly_dual, 
-	# fun=mean, 
-	# na.rm=T,
-	# df=T,
-	# sp=F)
-# mupoly_dual_ex = subset(mupoly_dual_ex, WRB_TMDL_LndCvr_Mgt_07152014 > 0.1)
-# write.table(mupoly_dual_ex,
-	# paste(net_soil_dir, "polygons_greater_than_10perc_ag.txt",sep='/'),
-	# sep='\t',
-	# row.names=F)
+mupoly_dual_ex <- extract(lc,
+	mupoly_dual, 
+	fun=mean, 
+	na.rm=T,
+	df=T,
+	sp=F)
+bkp = mupoly_dual_ex
+mupoly_dual_ex = subset(mupoly_dual_ex, swat_lc_wtm > 0.1)
+write.table(mupoly_dual_ex,
+	paste(net_soil_dir, "polygons_greater_than_10perc_ag.txt",sep='/'),
+	sep='\t',
+	row.names=F)
 ### Table with those polygons ObJIDs with more than 10% Ag 
-mupoly_dual_ex = read.delim(paste(net_soil_dir, "polygons_greater_than_10perc_ag.txt",sep='/'))
+# mupoly_dual_ex = read.delim(paste(net_soil_dir, "polygons_greater_than_10perc_ag.txt",sep='/'))
 
 mupoly_ag = subset(mupolygon, objID %in% mupoly_dual_ex$ID)
 
+file_mupoly_ag = "mupolygons_greater_10perc_ag"
 writeOGR(
 	obj = mupoly_ag,
-	dsn = net_soil_dir,
+	dsn = tempdir(),
 	layer = file_mupoly_ag,
 	driver= "ESRI Shapefile")
 ### create script to polygonize land use
-file_mupoly_ag = "mupolygons_greater_10perc_ag"
+
 out_landcover_rast = "wrb_tmdl_agric_landuse.tif"
 out_landcover_poly = "wrb_tmdl_agric_landuse.shp"
 out_lndcvr_soilpoly_intersect = "agric_lndcvr_dualhsg_intersect.shp"
@@ -135,7 +138,7 @@ tmpf = tempfile("polygonize_", fileext= ".py")
 ln1 = "import arcpy"
 checkout_line = 'arcpy.CheckOutExtension("Spatial")'
 ln2 = "from arcpy.sa import *"
-ln3 = "arcpy.env.workspace = r'T:/Projects/Wisconsin_River/GIS_Datasets/Soils'"
+ln3 = paste("arcpy.env.workspace = r'", tempdir(), "'", sep="")
 
 
 ##### to extract the agg polygons
