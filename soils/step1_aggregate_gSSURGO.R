@@ -4,6 +4,7 @@ library(aqp)
 # library(RCurl)
 # library(SSOAP)
 library(plyr)
+library(foreign)
 options(stringsAsFactors = F, warn = 1)
 
 # Inputs
@@ -11,21 +12,23 @@ net_soil_dir = "T:/Projects/Wisconsin_River/GIS_Datasets/Soils"
 aggregated_to_mapunit_file = paste(net_soil_dir, 'aggregated_soils_to_mapunit.txt', sep="/")
 tmplate = paste(net_soil_dir, "SWAT_US_SSURGO_Soils_wrb.txt", sep="/")
 wrb_mukeys_file = paste(net_soil_dir, "wrb_mukeys.txt", sep="/")
-drained_mukeys_file <- paste(net_soil_dir, "drained_mukeys.txt", sep="/")
+mukeys_file <- paste(net_soil_dir, "mupolygon_2mile_buffer_wMich_wDrained_2014.dbf", sep="/")
 comp_file = paste(net_soil_dir, "SSURGO_wi_mi_2014/component.txt", sep="/")
 hrzn_file = paste(net_soil_dir, "SSURGO_wi_mi_2014/chorizon.txt", sep="/")
 chfr_file = paste(net_soil_dir, "SSURGO_wi_mi_2014/chfrags.txt", sep="/")
-check_on_these_file = paste(net_soil_dir, 'check_on_these.txt',sep = '/')
+check_on_these_file = paste(net_soil_dir, 'check_on_these.txt', sep='/')
 
-## outputs
-out_default_dual_hsgs = paste(net_soil_dir, "default_dual_hsgs.txt",sep='/')
+## outputs !Do we need this?
+# out_default_dual_hsgs = paste(net_soil_dir, "default_dual_hsgs.txt",sep='/')
+
 #########
 # template output table
 agg_mky_tbl = read.table(tmplate, nrows=1, header=T)
 # mukeys only within the WRB
+mukeys = read.dbf(mukeys_file, as.is=T)
 wrb_mukeys = unique(read.table(wrb_mukeys_file, header=T, sep=',')[["MUKEY"]])
 wrb_mukeys = wrb_mukeys[!is.na(wrb_mukeys)]
-# drained_mukeys <- na.omit(read.table(drained_mukeys_file, header = T))
+mukeys = unique(subset(mukeys, MUKEY %in% wrb_mukeys))
 # read in gSSURGO tables and process
 ##############
 dat_cols = c(
@@ -88,39 +91,22 @@ comp = merge(comp, hrzn, by="cokey", all.x=T, all.y=T) # Join component with cho
 chfr = aggregate(fragvol_r ~ chkey, chfr, sum, na.rm=T) # Sum rock volumes by hrzn
 comp = merge(comp, chfr, by="chkey", all.x=T) # Join component/horizon with chfrags
 comp$fragvol_r[is.na(comp$fragvol_r)] = 0 # Force NA rock fragments to zero
-# 115 mukeys have greater than 50% ag
 
-## changing methodology:
-## all soils  with dual HSGs will assumed to be UNdrained, for the clustering process
-### then the polygons that have greater than 10%, will be changed to the higher HSG value
-dual_ind <- with(comp, nchar(hydgrp) > 2)
+# Bring in drained information
+comp = merge(mukeys, comp, all.x=T, by.x="MUKEY", by.y="mukey")
+del_bool = with(comp, DRAINED == 1 & nchar(hydgrp) < 3 | DRAINED == 0 & nchar(hydgrp) == 3)
+comp = subset(comp, !del_bool)
+drained_ind = which(comp$DRAINED == 1)
+comp$hydgrp[drained_ind] = with(comp[drained_ind,], substr(hydgrp, 1, 1))
+comp$MUKEY[drained_ind] = with(comp[drained_ind,], paste(MUKEY, hydgrp, sep=""))
 
-# set all of those that have two hsgs, to D
-### that is assume undrained
-if_drained_hsg <- subset(comp[dual_ind,], select = c("mukey", "compname", "hydgrp"))
-if_drained_hsg$hydgrp <- substr(if_drained_hsg$hydgrp, 1, 1)
-
-if_drained_hsg <- aggregate(hydgrp ~ mukey,
-	data = if_drained_hsg,
-	FUN = function(x){unique(x)[2]})
-
-if_drained_hsg <- substr
-
-write.table(
-	if_drained_hsg,
-	out_default_dual_hsgs,
-	sep='\t',
-	row.names=F)
-
-comp$hydgrp[dual_ind] = with(comp[dual_ind,], substr(hydgrp, nchar(hydgrp), nchar(hydgrp))) 
-
-# comp$hydgrp[drained_ind] = with(comp[!drained_ind,], substr(hydgrp, 1, 1))
 comp$hydgrp[comp$hydgrp == "A"] = 1
 comp$hydgrp[comp$hydgrp == "B"] = 2
 comp$hydgrp[comp$hydgrp == "C"] = 3
 comp$hydgrp[comp$hydgrp == "D"] = 4
 comp$hydgrp[comp$hydgrp == ""] = NA
 comp$hydgrp = as.integer(comp$hydgrp)
+
 # ASSUMING here that 50% of organic matter is Carbon
 comp$cbn = comp$om_r * 0.50 # Brady and Weil, 
 comp$comppct_r = comp$comppct_r / 100
@@ -143,17 +129,18 @@ sum.that.works = function(values, hrz.height, comppct) {
 }
 
 check.on.these = NULL
-
 rw = 0
 pb = txtProgressBar(0,1)
-for (m in wrb_mukeys){
+# tester: "2685174A"
+m="2685174A"
+for (m in unique(comp$MUKEY)){
     rw = rw + 1
     setTxtProgressBar(pb, rw/length(wrb_mukeys))
     agg_mky_tbl[] = NA
     print("-----------------------------------")
     print(paste('Working on ', m,'...',sep = ''))
-    print(paste(round(rw / length(unique(wrb_mukeys))*100, 2), "% complete", sep=""))
-	mc = subset(comp, mukey==m)
+    print(paste(round(rw / length(unique(comp$MUKEY))*100, 2), "% complete", sep=""))
+	mc = subset(comp, MUKEY==m)
     # for id purposes, selecting the component name with 
     # the greatest comp pct
     SNAM = mc$compname[which.max(mc$comppct_r)][1]
@@ -220,12 +207,13 @@ for (m in wrb_mukeys){
 	nlayers = length(unique(mky_data$top))
 	hydgrp = round(mean(mky_data$value[mky_data$variable == "hydgrp"]))
     if (is.na(hydgrp)) {
-        hydgrp = NA # Move along, nothing to see here.
+        hydgrp = NA 
     } else {
-        if (hydgrp == 1) {hydgrp = "A"}
-        if (hydgrp == 2) {hydgrp = "B"}
-        if (hydgrp == 3) {hydgrp = "C"}
-        if (hydgrp == 4) {hydgrp = "D"}
+		hydgrp = LETTERS[hydgrp]
+        # if (hydgrp == 1) {hydgrp = "A"}
+        # if (hydgrp == 2) {hydgrp = "B"}
+        # if (hydgrp == 3) {hydgrp = "C"}
+        # if (hydgrp == 4) {hydgrp = "D"}
     }
 	print(paste('Mukey', m, 'has a hydgrp of', hydgrp))
     

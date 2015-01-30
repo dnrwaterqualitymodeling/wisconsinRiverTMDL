@@ -19,6 +19,10 @@ comp_file = paste(net_soil_dir, "SSURGO_wi_mi_2014/component.txt", sep="/")
 hrzn_file = paste(net_soil_dir, "SSURGO_wi_mi_2014/chorizon.txt", sep="/")
 chfr_file = paste(net_soil_dir, "SSURGO_wi_mi_2014/chfrags.txt", sep="/")
 
+file_lc = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/swat_lc_wtm.tif"
+
+out_shp = paste(net_soil_dir, "mupolygon_2mile_buffer_wMich_wDrained_2014.shp", sep="/")
+
 #########
 # mukeys only within the WRB
 wrb_mukeys = unique(read.table(wrb_mukeys_file, header=T, sep=',')[["MUKEY"]])
@@ -27,8 +31,7 @@ wrb_mukeys = wrb_mukeys[!is.na(wrb_mukeys)]
 mupolygon = readOGR(net_soil_dir,
     "MUPOLYGON__2mile_buffer_wMich_2014")
 
-mupolygon = subset(mupolygon, MUKEY %in% wrb_mukeys)
-mupolygon@data["objID"] = as.integer(rownames(mupolygon@data))
+mupolygon = subset(mupolygon, MUKEY %in% wrb_mukeys, select=MUKEY)
 ##############
 dat_cols = c(
     "dbovendry_r",
@@ -77,132 +80,92 @@ chfr = aggregate(fragvol_r ~ chkey, chfr, sum, na.rm=T) # Sum rock volumes by hr
 comp = merge(comp, chfr, by="chkey", all.x=T) # Join component/horizon with chfrags
 comp$fragvol_r[is.na(comp$fragvol_r)] = 0 # Force NA rock fragments to zero
 ##############
-file_lc = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/WRB_TMDL_LndCvr_Mgt_07152014.img"
+
 lc = raster(file_lc)
 lcMat = getValues(lc)
-lcMat[lcMat <= 9 | lcMat >= 55] = 0
-lcMat[lcMat > 9 & lcMat < 55] = 1
+lcMat[lcMat <= 9 | lcMat >= 53] = NA
+lcMat[lcMat > 9 & lcMat < 53] = 1
 lc = setValues(lc, lcMat)
+temp_lc = writeRaster(lc, paste(tempdir(), "\\ag_land.tif", sep=""), datatype='INT2S')
 
-wtm <- proj4string(lc)
-mupolygon <- spTransform(mupolygon, CRS(wtm))
-
+# Select MUKEYs that have at least one dual HSG component
 dual_hsg = subset(comp, hydgrp %in% c("A/D", "B/D", "C/D"))
 dual_mukeys <- unique(dual_hsg$mukey)
 mupoly_dual <- subset(mupolygon, MUKEY %in% dual_mukeys)
 
-# This step takes a long time, the resulting data frame from the extract() function 
-#   was written out to a table
-# mupoly_dual_ex <- extract(lc,
-	# mupoly_dual, 
-	# fun=mean, 
-	# na.rm=T,
-	# df=T,
-	# sp=F)
-# mupoly_dual_ex = subset(mupoly_dual_ex, WRB_TMDL_LndCvr_Mgt_07152014 > 0.1)
-# write.table(mupoly_dual_ex,
-	# paste(net_soil_dir, "polygons_greater_than_10perc_ag.txt",sep='/'),
-	# sep='\t',
-	# row.names=F)
-### Table with those polygons ObJIDs with more than 10% Ag 
-mupoly_dual_ex = read.delim(paste(net_soil_dir, "polygons_greater_than_10perc_ag.txt",sep='/'))
-
-mupoly_ag = subset(mupolygon, objID %in% mupoly_dual_ex$ID)
+wtm <- proj4string(lc)
+mupoly_dual <- spTransform(mupoly_dual, CRS(wtm))
 
 writeOGR(
-	obj = mupoly_ag,
-	dsn = net_soil_dir,
-	layer = file_mupoly_ag,
-	driver= "ESRI Shapefile")
-### create script to polygonize land use
-file_mupoly_ag = "mupolygons_greater_10perc_ag"
-out_landcover_rast = "wrb_tmdl_agric_landuse.tif"
-out_landcover_poly = "wrb_tmdl_agric_landuse.shp"
-out_lndcvr_soilpoly_intersect = "agric_lndcvr_dualhsg_intersect.shp"
-out_lndcvr_soilpoly_intersect_dissolved = "agric_lndcvr_dualhsg_intersect_dissolved.shp"
+	obj = mupoly_dual,
+	dsn = tempdir(),
+	layer = "mupoly_dual",
+	driver = "ESRI Shapefile")
 
-input_list = paste(
-	'["',
-	out_landcover_poly,
-	'", "',
-	file_mupoly_ag,".shp",
-	'"]',
-	sep='') 
-# in_sql_state = "Value < 56 & Value > 9"
-
-
-tmpf = tempfile("polygonize_", fileext= ".py")
+tmpf = tempfile("polygonize_and_union_", fileext= ".py")
 ln1 = "import arcpy"
-checkout_line = 'arcpy.CheckOutExtension("Spatial")'
-ln2 = "from arcpy.sa import *"
-ln3 = "arcpy.env.workspace = r'T:/Projects/Wisconsin_River/GIS_Datasets/Soils'"
-
-
-##### to extract the agg polygons
-ln4 = paste(
-	'extract_lyr = ExtractByAttributes("',
-	file_lc,
-	'", ',
-	'"Value > 9"',
-	')',
-	sep='')
-ln5 = paste(
-	'extract_lyr = ExtractByAttributes(extract_lyr, ',
-	'"Value < 56"',
-	')',
-	sep='')
-ln6 = paste(
-	'extract_lyr.save("',
-	out_landcover_rast,
-	'")',
-	sep='')
-
-#### raster to poly conversion
-ln7 = paste(
-	'arcpy.RasterToPolygon_conversion(r"',
-	out_landcover_rast,
-	'", "',
-	out_landcover_poly,
+ln2 = paste("arcpy.env.workspace = r'", tempdir(), "'", sep="")
+ln3 = paste(
+	'arcpy.RasterToPolygon_conversion("ag_land.tif", "',
+	"wrb_tmdl_agric_landuse.shp",
 	'", ',
 	'"NO_SIMPLIFY"',
-	",",
+	", ",
 	'"Value"',
 	")",
 	sep='')
+ln4 = paste(
+	'arcpy.Union_analysis(',
+	'"mupoly_dual.shp 1; wrb_tmdl_agric_landuse.shp 2",',
+	'"ag_ssurgo_union.shp",',
+	'"ALL",',
+	'"#",',
+	'"GAPS")',
+	sep="")
+writeLines(
+	paste(
+		ln1,
+		ln2,
+		ln3,
+		ln4,
+		sep='\n'),
+	tmpf)
+py_cmd = paste("C:\\Python27\\ArcGIS10.1\\python.exe", tmpf)
+system(py_cmd)
 
-## Intersection 
-ln8 = paste(
-	"arcpy.Intersect_analysis(",
-	input_list,
-	', "',
-	out_lndcvr_soilpoly_intersect,
-	'")',
-	sep='')
-	
-##### Dissolve to remove slivers
-ln9 = paste(
-	"arcpy.Dissolve_management(",
-	'"',
-	out_lndcvr_soilpoly_intersect,
-	'", ',
-	'"',
-	out_lndcvr_soilpoly_intersect_dissolved,
-	'", ', 
-	'"objID")',
-	sep='')
+ag_ssurgo_union = readOGR(tempdir(), "ag_ssurgo_union")
+ag_ssurgo_union = subset(ag_ssurgo_union, MUKEY != "")
+split_mukeys = aggregate(GRIDCODE ~ MUKEY, mean, data = ag_ssurgo_union@data)
+split_mukeys = subset(split_mukeys, GRIDCODE >= 0.1)
+ag_ssurgo_union = subset(ag_ssurgo_union,
+	MUKEY %in% split_mukeys$MUKEY,
+	select=c(MUKEY, GRIDCODE))
+names(ag_ssurgo_union@data)[2] = "DRAINED"
+ag_ssurgo_union@data$DRAINED = as.logical(ag_ssurgo_union@data$DRAINED)
+
+mupolygon@data$DRAINED = as.logical(0)
+
+writeOGR(mupolygon,
+	tempdir(),
+	"mupolygon",
+	driver="ESRI Shapefile")
+writeOGR(ag_ssurgo_union,
+	tempdir(),
+	"split_mukeys",
+	driver="ESRI Shapefile")
+
+tmpf = tempfile("update_", fileext= ".py")
+ln1 = "import arcpy"
+ln2 = paste("arcpy.env.workspace = r'", tempdir(), "'", sep="")
+ln3 = 'arcpy.Update_analysis("mupolygon.shp", "split_mukeys.shp", "mukey_update.shp")'
+ln4 = paste('arcpy.Project_management("mukey_update.shp", "', out_shp, '", arcpy.SpatialReference(3071))', sep="")
 
 writeLines(
 	paste(
 		ln1,
-		checkout_line,
 		ln2,
 		ln3,
 		ln4,
-		ln5,
-		ln6,
-		ln7,
-		ln8,
-		ln9,
 		sep='\n'),
 	tmpf)
 
