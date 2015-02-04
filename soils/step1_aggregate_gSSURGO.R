@@ -19,9 +19,6 @@ hrzn_file = paste(net_soil_dir, "SSURGO_wi_mi_2014/chorizon.txt", sep="/")
 chfr_file = paste(net_soil_dir, "SSURGO_wi_mi_2014/chfrags.txt", sep="/")
 check_on_these_file = paste(net_soil_dir, 'check_on_these.txt', sep='/')
 
-## outputs !Do we need this?
-# out_default_dual_hsgs = paste(net_soil_dir, "default_dual_hsgs.txt",sep='/')
-
 #########
 # template output table
 agg_mky_tbl = read.table(tmplate, nrows=1, header=T)
@@ -88,7 +85,6 @@ comp = read.table(comp_file, header=T, sep="\t")[comp_cols]
 hrzn = read.table(hrzn_file, header=T, sep="\t")[hrzn_cols]
 chfr = read.table(chfr_file, header=T, sep="\t")[chfr_cols]
 comp = subset(comp, mukey %in% wrb_mukeys) # Only mukeys in WRB
-# comp = merge(comp, hrzn, by="cokey", all.x=T, all.y=T) # Join component with chorizon
 comp = merge(comp, hrzn, by="cokey", all.x=T)
 chfr = aggregate(fragvol_r ~ chkey, chfr, sum, na.rm=T) # Sum rock volumes by hrzn
 comp = merge(comp, chfr, by="chkey", all.x=T) # Join component/horizon with chfrags
@@ -97,8 +93,6 @@ comp$fragvol_r[is.na(comp$fragvol_r)] = 0 # Force NA rock fragments to zero
 
 # Bring in drained information
 comp = merge(mukeys, comp, all.x=T, by.x="MUKEY", by.y="mukey")
-# del_bool = with(comp, DRAINED == 1 & nchar(hydgrp) < 3)
-# comp = subset(comp, !del_bool)
 drained = which(comp$DRAINED == 1)
 not_drained = which(comp$DRAINED == 0)
 comp$hydgrp[drained] = with(comp[drained,], substr(hydgrp, 1, 1))
@@ -135,8 +129,6 @@ sum.that.works = function(values, hrz.height, comppct) {
 
 check.on.these = NULL
 rw = 0
-# tester: "2685174A"
-# m="2685174A"
 for (m in unique(comp$MUKEY)){
 	rw = rw + 1
 	agg_mky_tbl[] = NA

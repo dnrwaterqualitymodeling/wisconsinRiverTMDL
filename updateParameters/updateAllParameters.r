@@ -1,19 +1,22 @@
 library(RODBC)
-
+options(stringsAsFactors=F)
+options(warn=2)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
-projectDir = "H:/WRB"
+# projectDir = "H:/WRB"
 wetland_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands/wetland_geometry_v3.csv"
 pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
 reservoir_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/hydrology/dams_parameters.csv"
 gw_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/alphaBflowSubbasin_lookup.csv"
 op_db_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/OpSchedules_fert_3Cuts_later.mdb"
+# should be swat_lookup.csv?
 lu_op_xwalk_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/landuse_operation_crosswalk.csv"
 background_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/phosphorus/background_P_from_EPZ.txt"
 soil_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Soil_Phosphorus/soil_phosphorus_by_subbasin.txt"
 
 # UPDATE SLOPE LENGTH BASED ON RECCS IN BAUMGART, 2005
 
-projectDir = "C:/Users/ruesca/Desktop/WRB"
+# projectDir = "C:/Users/ruesca/Desktop/WRB"
+projectDir = "H:/test_wrb/WRB"
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 con = odbcConnectAccess(inDb)
 
@@ -53,7 +56,6 @@ for (row in 1:nrow(reservoir_parameters)) {
 	)
     stdout = sqlQuery(con, query)
 }
-
 close(con)
 
 #UPDATE SWAT SOIL PHOSPHORUS PARAMETER
@@ -112,7 +114,6 @@ for (row in 1:nrow(pond_geometry)) {
 	)
     stdout = sqlQuery(con, query)
 }
-
 close(con)
 
 #UPDATE SWAT WETLAND PARAMETERS
@@ -157,11 +158,10 @@ for (row in 1:nrow(gw_parameters)) {
 	)
     stdout = sqlQuery(con, query)
 }
-
 close(con)
 
 #UPDATE MANAGEMENT OPERATIONS
-options(warn=2)
+
 insert_fert = TRUE
 
 prjDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
@@ -186,7 +186,7 @@ if (fert_row_count < 55) {
 }
 close(con_fert)
 
-con_mgt1 = odbcConnectAccess(prjDb)
+con_mgt1 = odbcConnectAccess(inDb)#prjDb
 mgt1 = sqlFetch(con_mgt1, "mgt1")
 close(con_mgt1)
 
@@ -199,14 +199,30 @@ close(con_mgt2)
 py_file = tempfile(fileext=".py")
 write(paste("import arcpy; arcpy.Compact_management('", prjDb, "')", sep=""), py_file)
 
+#####	For Irrigation parameters
+pot_veggie_landuses = c("SGBT", "POTA", "SPOT")
+## Note:
+##		IRR_SC=3 for irrigating from shallow aquifer
+##		IRR_NO=the subbasin number from which the water comes
+##### !! CHECK ON THESE CROP CODES --- MAKE SURE THEY ARE THE ONLY POTATO VEGGIES !! #####
+#### Steps
+#### First step
+#### In MGT 1, 
+####	For each potato veggie rotation (SGBT, POTA, SPOT)
+####		Set IRRSC = 3
+####		Set IRRNO = Subbasin ID Number
+#### STEP 1 COMPLETE
+#### Then in MGT 2
+#### 	for each year of potato veggie rotation
+####		input the the lines from opschedules template
 con_mgt2 = odbcConnectAccess(prjDb)
-
 oidStart = 1
 for (row in 1:nrow(mgt1)) {
     row_data = mgt1[row,]
     print(paste('Subbasin:',as.character(row_data$SUBBASIN),'hru:', as.character(row_data$HRU)))
     lu = as.character(row_data$LANDUSE)
     opCode = unique(as.character(crosswalk$OPCODE[crosswalk$LANDUSE == lu]))
+
     if (substr(opCode, 1, 1) == "3" & substr(opCode, 4, 4) == "c") {
         igro_query = paste("UPDATE mgt1 SET IGRO = 1, PLANT_ID = 52, NROT = 0 WHERE SUBBASIN = ",
             as.character(row_data$SUBBASIN),
@@ -217,12 +233,28 @@ for (row in 1:nrow(mgt1)) {
         )
         sqlQuery(con_mgt2, igro_query)
     }
+	
+	if (lu %in% pot_veggie_landuses){
+		irri_mgt1_query = paste(
+			"UPDATE mgt1 SET IRRSC = 3, IRRNO = ",
+			row_data$SUBBASIN,
+			" WHERE SUBBASIN = ",
+			as.character(row_data$SUBBASIN),
+			" AND LANDUSE = '",
+			lu,
+			"';",
+			sep='')
+		out = sqlQuery(con_mgt2, irri_mgt1_query)
+	}
     operation = opSched[gsub(" " , "", as.character(opSched$SID)) == opCode,]
     operation$SUBBASIN = as.character(row_data$SUBBASIN)
     operation$HRU = as.character(row_data$HRU)
     operation$LANDUSE = as.character(row_data$LANDUSE)
     operation$SOIL = as.character(row_data$SOIL)
     operation$SLOPE_CD = as.character(row_data$SLOPE_CD)
+	if (row_data$LANDUSE %in% pot_veggie_landuses){
+		operation$IRR_NOA = as.character(row_data$SUBBASIN)
+	}
     formatTempFile = tempfile()
     write.csv(operation[,2:ncol(operation)], formatTempFile, row.names=F, quote=T)
     colNames = readLines(formatTempFile, 1)

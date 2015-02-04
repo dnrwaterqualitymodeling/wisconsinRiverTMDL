@@ -14,10 +14,6 @@ agg_soil_unit_tbl = paste(net_soil_dir, "aggregated_soil_units.txt", sep = '')
 agg_unit_mukey_lu_tbl = paste(net_soil_dir, "agg_unit_mukey_lu.txt", sep = '')
 lc = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/swat_lc_wtm.tif"
 
-
-
-# mupolygon = readOGR(paste(net_soil_dir, "WRB_Soils_2mile_Buffer_gSSURGO.gdb", sep=""),
-	# "MUPOLYGON__2mile_buffer_wMich_2014")
 mupolygon = readOGR(
 	gsub('/$','',net_soil_dir), 
 	"mupolygon_2mile_buffer_wMich_wDrained_2014")
@@ -163,8 +159,8 @@ soil_tbl$hru_grp[q] = "X"
 soil_tbl$MUID = as.character(soil_tbl$MUID)
 write.table(soil_tbl[,c("MUID", "hru_grp", "SNAM")], agg_unit_mukey_lu_tbl, sep="\t", row.names=F)
 
-water_mus <- subset(soil_tbl, hru_grp == 'W')
-soil_tbl <- subset(soil_tbl, hru_grp != "W")
+water_mus = subset(soil_tbl, hru_grp == 'W')
+soil_tbl = subset(soil_tbl, hru_grp != "W")
 
 ###############################
 # Reformatting soil data so it can be used by aqp
@@ -224,7 +220,7 @@ site(soil_pr) = ~ group
 agg_profs = data.frame()
 ###############################
 # Merge grouped soils together using aqp
-# this loop takes 30 to 40 minutes to run
+# this loop takes ~5 minutes to run
 ###############################
 
 for (grp in unique(soil_tbl$hru_grp)) {
@@ -339,7 +335,7 @@ agg_soil_data$HYDGRP = LETTERS[agg_soil_data$HYDGRP]
 # converting from SSURGO's ksat units of um/sec to SWAT's mm/hr (3.6)
 agg_soil_data[,k_cols] = agg_soil_data[,k_cols] * 3
 # water's MUID/MUKEY is now 1
-agg_soil_data[nrow(agg_soil_data) + 1, c('SNAM','SEQN', 'S5ID',"TEXTURE")] <- 'W'
+agg_soil_data[nrow(agg_soil_data) + 1, c('SNAM','SEQN', 'S5ID',"TEXTURE")] = 'W'
 update_num_cols = c('MUID',
 	'CMPPCT',
 	'SOL_ALB1',
@@ -349,9 +345,9 @@ update_num_cols = c('MUID',
 	"SOL_Z1",
 	"NLAYERS",
 	"SOL_K1")
-agg_soil_data[agg_soil_data$SNAM == "W", update_num_cols] <- c(1, 100, 0.23, 0.5, 0.5, 25, 25, 1, 600)
+agg_soil_data[agg_soil_data$SNAM == "W", update_num_cols] = c(1, 100, 0.23, 0.5, 0.5, 25, 25, 1, 600)
 # givin' water a D
-agg_soil_data$HYDGRP[agg_soil_data$SNAM == "W"] <- "D"
+agg_soil_data$HYDGRP[agg_soil_data$SNAM == "W"] = "D"
 
 agg_soil_data$OBJECTID = 1:nrow(agg_soil_data)
 agg_soil_data$CMPPCT = 100
@@ -359,7 +355,6 @@ agg_soil_data$CMPPCT = 100
 agg_soil_data[is.na(agg_soil_data)] = 0
 
 agg_soil_data$MUID = as.integer(agg_soil_data$MUID)
-# agg_soil_data$MUID = as.character(agg_soil_data$MUID)
 
 x_hydgrps = subset(soil_tbl, hru_grp == "X")$HYDGRP
 
@@ -369,13 +364,13 @@ agg_soil_data$HYDGRP[agg_soil_data$SNAM == "X"] = x_hydgrp
 
 soil_tbl = rbind(soil_tbl, water_mus)
 # need to recode the soils polygon layer so mukey is now a numeric identifier of the hru_grp
-soil_tbl$hru_code <- NA
+soil_tbl$hru_code = NA
 for (grp in 1:nrow(hru_grp_code_lu)){
-	hru_grp <- hru_grp_code_lu[grp, 'hru_grp']
-	hru_code <- hru_grp_code_lu[grp, 'hru_code']
-	soil_tbl[which(soil_tbl$hru_grp==hru_grp),'hru_code'] <- hru_code 
+	hru_grp = hru_grp_code_lu[grp, 'hru_grp']
+	hru_code = hru_grp_code_lu[grp, 'hru_code']
+	soil_tbl[which(soil_tbl$hru_grp==hru_grp),'hru_code'] = hru_code 
 }
-agg_soil_data <- subset(agg_soil_data, select = -hru_grp)
+agg_soil_data = subset(agg_soil_data, select = -hru_grp)
 agg_soil_data$SEQN = agg_soil_data$MUID
 write.table(agg_soil_data, agg_soil_unit_tbl, sep="\t", row.names = F)
 
@@ -444,5 +439,4 @@ writeLines(
 	update_soils_tbl)
 
 system(update_soils_tbl)
-
 ######

@@ -1,0 +1,9 @@
+\subsection{HRU Definition}\label{sec:hru_definition}
+
+The hydrologic response units in SWAT are defined by unique combinations of land use, soils, and slope class and are unique for every subbasin. 
+If every combination were honored, there would be many tens of thousands of HRUs and the model would take an impractical amount of time to run while having a number of functional redundancies within it. 
+To reduce the number of HRUs, ArcSWAT allows for the removal of small HRUs; by setting a minimum threshold for each landcover, soils, and slope class, we reduced the number of overall HRUs. 
+First, if a given landcover covered less than 1\% of a subbasin, we excluded it and proportionally reallocated the remaining landcovers so that they would add to 100\%. 
+Second, within the remaining landcovers, if a given soil type covered less than 25\% of a landcover class, it was excluded and reallocated in the same way as landcover. 
+Finally, within the remaining landcover/soil combinations, if a given slope class covered less than 50\% of a landcover/soil combination, it was excluded and reallocated. This means that only the dominant slope class is used for a given landcover/soil combination.
+This iterative method of exclusion resulted in 4,400 HRUs; a manageable number for performing calibrations and yet detailed enough where there is little data resolution lost. %Table \ref{tab:hru_table} shows the number of HRUs in each subbasin, the average and standard deviation of the area of the HRUs in each subbasin.

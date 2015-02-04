@@ -1,6 +1,42 @@
+\subsection{Agricultural Land Management}\label{sec:ag_land_mgt}
+The representation of agriculture is particularly important in the WRB where agriculture covers nearly
+25\% of the watershed. When combined with other variables such as precipitation, soils,
+and slope, certain agricultural practices can contribute significant loads of sediment and phosphorus to receiving waters.  
+The SWAT model provides the opportunity to distinguish between land cover and land management. 
+One of SWAT’s strengths, and one of the primary reasons it was selected for the WRB TMDL modeling effort, is its ability to model variability in land management on a daily time step.
+
+The objective of this effort was to develop and implement a methodology to define agricultural management by integrating geospatial data and analysis, local knowledge from county land and water conservation staff, private agronomists, and field data. The methodology was applied to agricultural landcover within the WRB. The result is a spatial layer that defines spatiotemporal variability of agricultural land management, such as rotation, tillage, and nutrient application for any given 900 mi$^2$ pixel in the basin-wide grid. All methods included in Section \ref{sec:ag_land_mgt} are fully described in the WDNR Land Cover and Agricultural Management Definition Report \citepalias{wdnr_landcover_2014}.
+
+No unified dataset existed with data related to changes in tillage practices, fertilizer application, timing of the fertilizer application, etc.  Local knowledge became essential as county and regional experts were brought together to supply this missing information and develop a regionally-specific dataset at the scale of a Public Land Survey System (PLSS) quarter section. A balance was struck between relying on satellite imagery and relying on local knowledge. The satellite imagery is trusted (with overall accuracies between  84 and 91\%\footnote{\url{http://www.nass.usda.gov/research/Cropland/metadata/meta.htm}}) to spatially identify rotation types better than a local expert, but the local experts were trusted to inform the satellite-identified rotation with the land management information. Transect data collected in the field provided us with a validation dataset to verify data provided from counties.
+
 \subsubsection{Tillage}
-For a detailed description of tillage definitions, see \href{http://dnr.wi.gov/topic/TMDLs/documents/WisconsinRiver/Technical/WRBLndManagmntJuly2014.pdf}{http://dnr.wi.gov/topic/TMDLs/documents/WisconsinRiver/Technical/WRBLndManagmntJuly2014.pdf}
-\subsubsection{Inorganic Fertilizer}
-Starter fertilizer, 20-10-18 N-P-K applied at 150 lbs/acre/year (consult SWAT manual to convert to proper units).
+
+The types of tillage practiced on farms was reported to the WDNR by county conservation staff and local experts. Tillage practices were mapped by county staff as the dominant pattern within any given PLSS quarter section. For each PLSS quarter section, tillage timing (e.g., spring or fall) and type (e.g., chisel disk or moldboard plow) was reported across a 6-year crop rotation. We used transect survey data collected by county staff to confirm the reported tillage types and timing. For example, fall tillage is predominant in the north central WRB and spring tillage is predominant in the southern WRB---a deviation from this pattern would flag it for further confirmation, which was mainly from professional agronomists working within the region.
+
+\subsubsection{Inorganic Fertilizers}
+
+A starter fertilizer application was changed from 0.22 to 0.17 $tons \cdot ha^{-1} \cdot yr^{-1}$ with an NPK composition of 20-10-18. This was done following the suggestions from a panel of WDNR staff, faculty from the University of Wisconsin, private agronomists, manure haulers, and crop consultants.
+
+A nitrogen auto-fertilization routine was added to SWAT's management operations. 
+This operation applies nitrogen in order to minimize plant stress due to nitrogen limitation and therefore maintain proper plant growth. This assumption may not be realistic; as a result, the model should not be used to assess nitrogen loads in surface waters.
+
 \subsubsection{Manure}
-For a detailed description of manure definitions, see \href{http://dnr.wi.gov/topic/TMDLs/documents/WisconsinRiver/Technical/WRBLndManagmntJuly2014.pdf}{http://dnr.wi.gov/topic/TMDLs/documents/WisconsinRiver/Technical/WRBLndManagmntJuly2014.pdf}
+Manure application type (e.g., stored and applied as a liquid or applied frequently as a solid) and timing (e.g., spring or fall if liquid manure) were reported to the WDNR by county staff and local experts in the same way tillage information was collected.
+
+Similar to past SWAT applications, cattle inventories were used to validate the amount of manure application reported by the counties, as well as the extent of dairy rotation identification \citep{baumgart_source_2005, freihoefer_mead_2007, timm_swat_2011}. SWAT uses dry weight values for manure application, so reported values of liquid and solid manure were converted to dry weight values in kg/ha. The conversion process required dry weight percentages of each solid and liquid manure. Based on previous research 6\% dry weight for liquid manure and 24\% dry weight for solid manure were used \citepalias{jokela_dairyman_2009, laboski_a2809_2012, nrcs_590_2006}. Based on the Department of Agriculture, Trade, and Consumer Protection (DATCP) dairy manure estimation calculator\footnote{\url{http://datcp.wi.gov/uploads/Farms/pdf/NMTrainingYKnowHowMuchYouHaul.pdf}}, it was assumed that liquid manure has the same density as water (8.34 lbs/gal).
+
+
+\subsubsection{Crop Rotations}
+
+Generalized rotations were created by using rules to classify five years of cropland information, as described in \citetalias{wdnr_landcover_2014}.  
+The generalized rotations were entered into a database where each activity was stored for a 6-year
+period. In total, 15 rotations (11 dairy, 3 cash grain, and 1 potato/vegetable) were created for the WRB,
+based on the data from the CDL, information from county and regional staff, NASS census data, and
+information from our meeting with agronomists. Each of the 15 rotations had three
+variations, each a result from offsetting the rotation period (described further below), resulting in 45 rotations that were incorporated into the SWAT model \citepalias{wdnr_landcover_2014}.
+
+%\subsubsection{Rotation Randomization}\label{sec:rotation_rando}
+
+We found it necessary to randomize rotations for several different reasons. Firstly, locations where corn was grown continuously for the five year period were randomly classified as either a cash grain rotation or a dairy rotation. Using long-term records in the Pleasant Valley watershed in south-central Wisconsin, we found that when corn was being grown continuously over a 5-year period, it was equally likely to be a cash grain operation or a dairy rotation. Additionally, several of the counties provided non-spatial information about how manure was handled: it was estimated that about 50\% of producers used liquid storage while the other 50\% were daily haulers. The manure management types were randomly assigned to the dairy rotations for those counties.  
+
+If each land use was given the same rotation sequence, the artificial landscape would represent all the same crop being grown in any given year. This was considered an issue especially for the corn silage years of the dairy rotations. If all of the dairy rotations were growing corn silage in the same year, there could be unreasonably large spikes in runoff and erosion during that year. To remedy this issue, rotations of identical management operation schedules were offset by two years, creating three different rotation sequences for each rotation/tillage/fertilizer combination (Table \ref{tab:lnd_mgt_def}).

@@ -10,8 +10,8 @@
 
 library(raster)
 library(rgdal)
-library(rgeos)
 options(stringsAsFactors = F, warn = 1)
+library(rgeos)
 net_soil_dir = "T:/Projects/Wisconsin_River/GIS_Datasets/Soils"
 dual_hsgs = paste(net_soil_dir, 'dual_hsgs_to_single.txt', sep="/")
 wrb_mukeys_file = paste(net_soil_dir, "wrb_mukeys.txt", sep="/")
@@ -75,16 +75,12 @@ comp = read.table(comp_file, header=T, sep="\t")[comp_cols]
 hrzn = read.table(hrzn_file, header=T, sep="\t")[hrzn_cols]
 chfr = read.table(chfr_file, header=T, sep="\t")[chfr_cols]
 comp = subset(comp, mukey %in% wrb_mukeys) # Only mukeys in WRB
-# comp = merge(comp, hrzn, by="cokey", all.x=T, all.y=T) # Join component with chorizon
-# chfr = aggregate(fragvol_r ~ chkey, chfr, sum, na.rm=T) # Sum rock volumes by hrzn
-# comp = merge(comp, chfr, by="chkey", all.x=T) # Join component/horizon with chfrags
-# comp$fragvol_r[is.na(comp$fragvol_r)] = 0 # Force NA rock fragments to zero
 ##############
 
 lc = raster(file_lc)
 lcMat = getValues(lc)
-lcMat[lcMat <= 9 | lcMat >= 53] = NA
-lcMat[lcMat > 9 & lcMat < 53] = 1
+lcMat[lcMat <= 9 | lcMat > 52] = 0
+lcMat[lcMat > 9 & lcMat <= 52] = 1
 lc = setValues(lc, lcMat)
 temp_lc = writeRaster(lc, paste(tempdir(), "\\ag_land.tif", sep=""), datatype='INT2S')
 
@@ -96,6 +92,7 @@ mupoly_dual <- subset(mupolygon, MUKEY %in% dual_mukeys)
 wtm <- proj4string(lc)
 mupoly_dual <- spTransform(mupoly_dual, CRS(wtm))
 
+file_mupoly_ag = "mupolygons_greater_10perc_ag"
 writeOGR(
 	obj = mupoly_dual,
 	dsn = tempdir(),

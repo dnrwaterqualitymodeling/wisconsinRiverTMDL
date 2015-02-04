@@ -38,7 +38,6 @@ if (!file.exists(paste(local_dir, basename(inCDL2MileBuffer), sep='/'))){
             local_dir)
     }
 }
-# I don't know where this is used, Tom?
 # writeRaster(
 # 	raster(paste(rotation_dir, inCDLRasterPixels, sep="/")),
 # 	paste(local_dir, inCDLRasterPixels, sep="/"))
@@ -225,18 +224,3 @@ writeGDAL(as(swat_lc, "SpatialGridDataFrame"),
     mvFlag=255)
 
 #dunzo
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
