@@ -75,10 +75,10 @@ comp = read.table(comp_file, header=T, sep="\t")[comp_cols]
 hrzn = read.table(hrzn_file, header=T, sep="\t")[hrzn_cols]
 chfr = read.table(chfr_file, header=T, sep="\t")[chfr_cols]
 comp = subset(comp, mukey %in% wrb_mukeys) # Only mukeys in WRB
-comp = merge(comp, hrzn, by="cokey", all.x=T, all.y=T) # Join component with chorizon
-chfr = aggregate(fragvol_r ~ chkey, chfr, sum, na.rm=T) # Sum rock volumes by hrzn
-comp = merge(comp, chfr, by="chkey", all.x=T) # Join component/horizon with chfrags
-comp$fragvol_r[is.na(comp$fragvol_r)] = 0 # Force NA rock fragments to zero
+# comp = merge(comp, hrzn, by="cokey", all.x=T, all.y=T) # Join component with chorizon
+# chfr = aggregate(fragvol_r ~ chkey, chfr, sum, na.rm=T) # Sum rock volumes by hrzn
+# comp = merge(comp, chfr, by="chkey", all.x=T) # Join component/horizon with chfrags
+# comp$fragvol_r[is.na(comp$fragvol_r)] = 0 # Force NA rock fragments to zero
 ##############
 
 lc = raster(file_lc)
