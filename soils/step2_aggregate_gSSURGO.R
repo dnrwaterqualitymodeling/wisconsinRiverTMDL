@@ -142,7 +142,7 @@ for (hsg in 1:4) {
 }
 ind = which(
 	!(soil_tbl$SNAM %in% excld) &
-	grepl("[A-D]$", soil_tbl$MUID)
+	grepl("(_drained)$", soil_tbl$MUID)
 )
 clus_d = agg_tbl[ind,]
 clus_d_scld = scale(clus_d)
@@ -346,7 +346,6 @@ update_num_cols = c('MUID',
 	"NLAYERS",
 	"SOL_K1")
 agg_soil_data[agg_soil_data$SNAM == "W", update_num_cols] = c(1, 100, 0.23, 0.5, 0.5, 25, 25, 1, 600)
-# givin' water a D
 agg_soil_data$HYDGRP[agg_soil_data$SNAM == "W"] = "D"
 
 agg_soil_data$OBJECTID = 1:nrow(agg_soil_data)
@@ -375,22 +374,28 @@ agg_soil_data$SEQN = agg_soil_data$MUID
 write.table(agg_soil_data, agg_soil_unit_tbl, sep="\t", row.names = F)
 
 #----
-mupolygon = spTransform(mupolygon, CRS(wtm))
+# mupolygon = spTransform(mupolygon, CRS(wtm))
+
+# RECODE MUPOLYGON MUKEY FOR DRAINED
+mupolygon@data$MUKEY[mupolygon@data$DRAINED == 1] = paste(
+	mupolygon@data$MUKEY[mupolygon@data$DRAINED == 1],
+	"drained",
+	sep="_")
 
 mupolygon_remap_mukey = merge(mupolygon, 
 	soil_tbl[,c("MUID", "hru_grp","hru_code")],
 	by.x="MUKEY", 
 	by.y="MUID")
 
-# I (DE) don't believe its necessary to have a numeric id for mukey,
-#   in fact I think it makes it more difficult as it gets read as long type and cannot be
-#   joined to the shapefile
-
 mupolygon_remap_mukey@data$MUKEY = mupolygon_remap_mukey@data$hru_code
+for (col in c("MUKEY", "hru_code")) {
+	mupolygon_remap_mukey@data[[col]] = vapply(
+		mupolygon_remap_mukey@data[[col]],
+		as.integer, integer(1))
+}
+
 writeOGR(mupolygon_remap_mukey, gsub("/$", "", net_soil_dir),
 	"MUPOLYGON_remap_mukey", driver = "ESRI Shapefile")
-mupolygon_remap_mukey@data$hru_code = apply(
-	mupolygon_remap_mukey@data$hru_code)
 
 py_file = tempfile(pattern="rasterize_ssurgo_", fileext=".py")
 ln1 = "import arcpy"
@@ -398,20 +403,19 @@ ln2 = "from arcpy import env"
 ln3 = paste("env.extent = '", lc, "'", sep="")
 ln4 = paste("env.cellSize = '", lc, "'", sep="")
 ln5 = paste("env.snapRaster = '", lc, "'", sep="")
-ln6 = paste("env.cellSize = '", lc, "'", sep="")
-ln7 = paste("arcpy.CopyFeatures_management(r'",
+ln6 = paste("arcpy.CopyFeatures_management(r'",
 	paste(net_soil_dir, "MUPOLYGON_remap_mukey.shp", sep=""),
 	"', r'",
 	paste(tempdir(), "mupolygon_remap_mukey.shp", sep="\\"),
 	"')",
 	sep="")
-ln8 = paste("arcpy.PolygonToRaster_conversion(r'",
+ln7 = paste("arcpy.PolygonToRaster_conversion(r'",
 	paste(tempdir(), "mupolygon_remap_mukey.shp", sep="\\"),
 	"', 'hru_code', r'",
 	paste(tempdir(), "ssurgo_wtm.tif", sep="\\"),
 	"', 'MAXIMUM_COMBINED_AREA', '', 30)",
 	sep="")
-ln9 = paste("arcpy.CopyRaster_management(r'",
+ln8 = paste("arcpy.CopyRaster_management(r'",
 	paste(tempdir(), "ssurgo_wtm.tif", sep="\\"),
 	"', r'",
 	paste(net_soil_dir, "ssurgo_wtm.tif", sep=""),
@@ -420,7 +424,7 @@ ln9 = paste("arcpy.CopyRaster_management(r'",
 
 writeLines(
 	paste(
-		ln1,ln2,ln3,ln4,ln5,ln6,ln7,ln8,ln9,
+		ln1,ln2,ln3,ln4,ln5,ln6,ln7,ln8,
 		sep="\n"),
 	py_file)
 

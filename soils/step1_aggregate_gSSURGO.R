@@ -97,7 +97,7 @@ drained = which(comp$DRAINED == 1)
 not_drained = which(comp$DRAINED == 0)
 comp$hydgrp[drained] = with(comp[drained,], substr(hydgrp, 1, 1))
 comp$hydgrp[not_drained] = with(comp[not_drained,], substr(hydgrp, nchar(hydgrp), nchar(hydgrp)))
-comp$MUKEY[drained] = with(comp[drained,], paste(MUKEY, hydgrp, sep=""))
+comp$MUKEY[drained] = with(comp[drained,], paste(MUKEY, "drained", sep="_"))
 
 comp$hydgrp[comp$hydgrp == "A"] = 1
 comp$hydgrp[comp$hydgrp == "B"] = 2
