@@ -2,7 +2,7 @@ library(RODBC)
 options(stringsAsFactors=F)
 options(warn=2)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
-# projectDir = "H:/WRB"
+projectDir = "H:/WRB"
 wetland_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands/wetland_geometry_v3.csv"
 pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
 reservoir_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/hydrology/dams_parameters.csv"
@@ -16,7 +16,7 @@ soil_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Soil_Phosphorus/soil_pho
 # UPDATE SLOPE LENGTH BASED ON RECCS IN BAUMGART, 2005
 
 # projectDir = "C:/Users/ruesca/Desktop/WRB"
-projectDir = "H:/test_wrb/WRB"
+# projectDir = "H:/test_wrb/WRB"
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 con = odbcConnectAccess(inDb)
 
@@ -233,10 +233,10 @@ for (row in 1:nrow(mgt1)) {
         )
         sqlQuery(con_mgt2, igro_query)
     }
-	
+
 	if (lu %in% pot_veggie_landuses){
 		irri_mgt1_query = paste(
-			"UPDATE mgt1 SET IRRSC = 3, IRRNO = ",
+			"UPDATE mgt1 SET IRRSC = 1, IRRNO = ",
 			row_data$SUBBASIN,
 			" WHERE SUBBASIN = ",
 			as.character(row_data$SUBBASIN),
@@ -272,7 +272,7 @@ for (row in 1:nrow(mgt1)) {
             sep=""
         )
         sqlQuery(con_mgt2, insertQuery)
-    }                                       # testing to see if nrot = 1 is better than 6
+    }                                       
     
     if (!(opCode %in% c('BARR','FRSD', 'WATR', 'URML', 'RNGB','RNGE','WETF', 'WETN','HAY'))){ 
         husc_query = paste("UPDATE mgt1 SET HUSC = 1, NROT = 6, ISCROP = 1 WHERE SUBBASIN = ",

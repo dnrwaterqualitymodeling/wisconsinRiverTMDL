@@ -115,9 +115,13 @@ file.cio.dat = readLines("file.cio")
 
 file.cio.dat[59] = "               1    | IPRINT: print code (month, day, year)"
 
+##### Reach output variables
 file.cio.dat[65] = "   2   6  44   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
+##### Subbasin output variables
 file.cio.dat[67] = "   4   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
+##### HRU output variables
 file.cio.dat[69] = "   6   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
+##### HRU data to be printed
 file.cio.dat[71] = "   1   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
 writeLines(file.cio.dat, "file.cio")
 ###########
