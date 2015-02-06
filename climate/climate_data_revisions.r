@@ -4,8 +4,11 @@ wd = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/climate"
 
 # first line
 first_line = "19900101"
-solar_han = read.csv(paste(wd, "solar_han.txt",sep='/'),skip =1)
-solar_spg = read.csv(paste(wd, "solar_spg.txt",sep='/'),skip =1)
+file_han = paste(wd, "solar_han.txt",sep='/')
+file_spg =  paste(wd, "solar_spg.txt",sep='/')
+
+solar_han = read.csv(file_han, skip =1)
+solar_spg = read.csv(file_spg, skip =1)
 
 # setting early 2004 and an anomalous value in 2007 in hancock to missing 
 solar_han[5119:5132,1] = -99
@@ -17,17 +20,17 @@ solar_spg[which(solar_spg[,1] > 35),1] = -99
 
 
 write(first_line,
-	"solar_han.txt")
+	file_han)
 write(
 	as.matrix(solar_han),
-	"solar_han.txt",
+	file_han,
 	ncolumns=1,
 	append = TRUE)
 
 write(first_line,
-	"solar_spg.txt")
+	file_spg)
 write(
 	as.matrix(solar_spg),
-	"solar_spg.txt",
+	file_spg,
 	ncolumns=1,
 	append = TRUE)

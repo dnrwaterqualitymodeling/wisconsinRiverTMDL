@@ -12,7 +12,7 @@ library(maptools)
 library(classInt)
 library(RColorBrewer)
 # # # # # # # # # # # # # # # # # 
-wd = "C:/Users/evansdm/Documents/bflow/wi_dailyValues/"
+wd = "C:/Users/ruesca/Documents/bflow/wi_dailyValues/"
 setwd(wd)
 # reach ids were manually added to each flow site, by taking the reachid of the closest
 #   stream. This was done in ArcGIS with reachids grabbed from the WD_HYDRO_FLWLN_NTWRK_LN_24K feature class
@@ -67,8 +67,8 @@ fieldsToJoin <- c("REACHID",
                     "TRW_SLOPE")#"TRW_SINK1",  #"TRW_SINK5",
 # note that this merge may disrupt the relationship between feature id and 
 #   the attribute table (@data slot)
-stream_data <- merge(stream_data, vaData[,fieldsToJoin], by = 'REACHID')
-stream_data <- merge(stream_data, ecoregionData, by = 'REACHID')
+stream_data <- merge(stream_data, vaData[,fieldsToJoin], by = 'REACHID', all.x=T, all.y=F)
+stream_data <- merge(stream_data, ecoregionData, by = 'REACHID', all.x=T, all.y=F)
 # removing Dry Run, with alpha base flow > 1
 stream_data = subset(stream_data, siteName != "DRY RUN AT 190TH STREET NEAR JEWETT, WI")
 writePointShape(stream_data, "streamFlowSites_v3")
@@ -257,6 +257,7 @@ valRMSE.2 <- sqrt(valMSE.2)
 stream_data@data$C_ECO[stream_data@data$C_ECO == 47] = 51
 stream_data@data$C_ECO[stream_data@data$C_ECO == 54] = 53
 bflw.lm.3 <- lm(log10(siteWeight) ~ log(TRW_SLOPE):factor(C_ECO) + log(TRW_APERM0), data = training@data)
+bflw.lm.3 <- lm(log10(siteWeight) ~ log(TRW_SLOPE.x):factor(C_ECO.x) + log(TRW_SLOPE.y)*log(TRW_APERM0.y), data = training@data)
 pdf('Model_3_perm_slopexEcoregion.pdf')
 plot(bflw.lm.3$residuals~bflw.lm.3$fitted, 
      main = "Model 3: Residual plot, for model with slope and perm, with ecoregions",
