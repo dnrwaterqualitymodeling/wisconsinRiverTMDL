@@ -45,7 +45,7 @@ for (s in stations) {
 		write(s_row, station_file, append=T)
 		vd = d[c("Date", cols[j])]
 		vd = merge(dates, vd, all.x=T)[[cols[j]]]
-		vd[is.na(vd) | vd <= -699] = NA
+		vd[is.na(vd) | vd <= -699 | vd >= 699] = NA
 		if (v == "rel_hum") {
 			vd[vd > 100] = 100
 			vd = vd / 100
@@ -59,6 +59,22 @@ for (s in stations) {
 			} else if (s == "spg") {
 				del_bool = with(dates,
 					(Date >= as.Date("2005-05-04") & Date <= as.Date("2005-05-25")))
+				vd[del_bool] = NA
+			}
+		} else if (v == "wind") {
+			if (s == "arl") {
+				del_bool = with(dates,
+					(Date >= as.Date("2013-12-20") & Date <= as.Date("2013-12-26")))
+				vd[del_bool] = NA
+			} else if (s == "han") {
+				del_bool = with(dates,
+					(Date >= as.Date("2005-01-02") & Date <= as.Date("2005-01-16")) |
+					(Date >= as.Date("2009-08-31") & Date <= as.Date("2009-09-26")))
+				vd[del_bool] = NA
+			} else if (s == "spg") {
+				del_bool = with(dates,
+					(Date >= as.Date("2005-05-04") & Date <= as.Date("2005-09-25")) |
+					(Date >= as.Date("2010-11-15") & Date <= as.Date("2012-03-13")))
 				vd[del_bool] = NA
 			}
 		}
