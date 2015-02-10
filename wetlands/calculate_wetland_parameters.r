@@ -8,13 +8,24 @@ library(raster)
 #     2.) What is the conversion factor for the volume? Units are 10^4 m^3?
 
 wd <- "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands"
-setwd(wd)
+# setwd(wd)
+file_wetland_parm = "wetland_parameters.csv"
 # 
 gd_dir <- "T:/Projects/Wisconsin_River/GIS_Datasets"
 # orginal dem
 dem <- raster(paste(gd_dir, 'DEM','wrb_dem',sep ='/'))
 # filled dem
 dem_fl <- raster(paste(gd_dir, 'DEM','wrb_fill',sep ='/'))
+
+dir_out_maps = "wetland_maps"
+if (!exists(paste(wd, dir_out_maps, sep = '/'))){
+	dir.create(paste(wd, dir_out_maps, sep = '/'))
+}
+
+dir_out_files = "wetland_files"
+if (!exists(paste(wd, dir_out_files, sep = '/'))){
+	dir.create(paste(wd, dir_out_files, sep = '/'))
+}
 
 #ponds
 # watersheds_ll = readOGR("ponds", "landlocked_watersheds")
@@ -29,7 +40,7 @@ dem_fl <- raster(paste(gd_dir, 'DEM','wrb_fill',sep ='/'))
 #         rbind(c(-Inf,Inf,1)))
 # 
 # writeRaster(ponds, 'ponds.tif')
-ponds <- raster('ponds.tif')
+ponds <- raster(paste(wd, 'ponds.tif', sep ='/'))
 # land cover
 # lc_lm <- raster("T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/landcoverlandmanagement.img")
 # lc_lm <- resample(lc_lm, dem)
@@ -41,7 +52,13 @@ ponds <- raster('ponds.tif')
 #     ))
 # writeRaster("wetland_landcover.tif")
 # already resampled and reclassed so wetland areas are 1
-lc_lm <- raster("wetland_landcover.tif")
+lc_lm <- raster(paste(wd, "wetland_landcover.tif",sep='/'))
+
+max_sa = lc_lm
+norm_sa = lc_lm
+max_sa[] = NA
+writeRaster(max_sa, "test_rast.tif")
+norm_sa[] = NA 
     # 7 is woody wetlands
     # 8 is herbaceous wetlands
     # 9 is cranberries
@@ -51,7 +68,7 @@ subbasins = readOGR("T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro"
 geometry_table = data.frame()
 # failed after 148 subbasins, due to lack of memory, 
 #   added clean up lines to hopefully improve. sb 149 is huge.
-for (s in 215:length(subbasins@data$Subbasin)) {
+for (s in 2:length(subbasins@data$Subbasin)) {
 #     s <- 250
     # for elapsed time
     ptm <- proc.time()[3]
@@ -77,8 +94,10 @@ for (s in 215:length(subbasins@data$Subbasin)) {
     
     # subbasin sinks and sink binary
     sinks_sb <- filled_sb - dem_sb
+	sinks_sb <- mask(sinks_sb, ponds_sb, inverse = T)
     sinks_sb_crp <- mask(sinks_sb, subbasin)
-    sinkBin_sb <- sinks_sb 
+    sinkBin_sb <- sinks_sb
+	
     sinkBin_sb[sinkBin_sb > 0] <- 1
     sinkBin_sb[sinkBin_sb == 0] <- NA
     sinkBin_sb_crp <- mask(sinkBin_sb, subbasin)
@@ -105,21 +124,38 @@ for (s in 215:length(subbasins@data$Subbasin)) {
     geometry_table <- rbind(geometry_table, rw)
     elpsd <- proc.time()[3] - ptm
     print(paste('Elapsed time for this subbasin:',round(elpsd,2),'seconds.'))
-    print("###################")
+    print("Plotting...")
+	file_name_map = paste(wd, "/", dir_out_maps, "/", "Subbasin_",s,".png",sep = '')
+	png(file_name_map)
+	plot(subbasin, main = paste("Subbasin",s))
+	plot(ponds_sb, add = T, col="#0000ff50", legend = F)
+	plot(sinkBin_sb_crp, add = T, col="#ff000050", legend = F)
+	legend(
+		"topleft",
+		legend=c("Ponds", "Max Wetland SA"),
+		fill = c("#0000ff50", "#ff000050")
+		)
+
+	dev.off()
+	
+	print("Exporting files...")
+	writeRaster(
+		sinkBin_sb_crp, 
+		paste(wd, "/", dir_out_files,"/Max_SA_Subbasin_",s,".tif",sep=''))
+
+	writeRaster(
+		wet_n_crp, 
+		paste(wd, "/", dir_out_files,"/Normal_SA_Subbasin_",s,".tif",sep=''))
+
+	print("###################")
+
 }
 names(geometry_table) <- c('subbasin','WET_FR','WET_NSA','WET_NVOL','WET_VOL','WET_MXSA','WET_MXVOL')
-write.csv(geometry_table, 'testGeom_new_v3_pt2.csv',row.names = F)
+write.csv(
+	geometry_table, 
+	file_wetland_parm,
+	row.names = F)
 
-    # giving a unique ID to contiguous areas of sinks
-#     sinkBinClump <- clump(sinkBin_sb_crp)
-#     # finding which sink areas overlie mapped wetlands 
-#     zonMat_bool <- zonal(wet_n_crp, sinkBinClump, fun = 'sum')
-#     #finding the sink depths
-#     zonMat_depth <- zonal(sinks_sb_crp, sinkBinClump, fun = 'sum')
-#     # finding the number of cells in each sink clump
-#     zonMat_area <- zonal(sinkBin_sb_crp, sinkBinClump, fun = 'sum')
-#     #aggregating
-#     zonMat <- data.frame(Zone = zonMat_bool[,1],
-#                          Wetland = zonMat_bool[,2] > 0,
-#                          n_cells = zonMat_area[,2],
-#                          depthSum = zonMat_depth[,2])
+
+
+
