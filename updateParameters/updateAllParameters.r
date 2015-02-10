@@ -221,7 +221,7 @@ for (row in 1:nrow(mgt1)) {
         sqlQuery(con_mgt2, insertQuery)
     }                                       # testing to see if nrot = 1 is better than 6
     
-    if (!(opCode %in% c('BARR','FRSD', 'WATR', 'URML', 'RNGB','RNGE','WETF', 'WETN','HAY'))){ 
+    if (!(opCode %in% c('BARR','FRSD', 'WATR', 'URML', 'RNGB','RNGE','WETF', 'WETN','HAY'))) { 
         husc_query = paste("UPDATE mgt1 SET HUSC = 1, NROT = 6, ISCROP = 1 WHERE SUBBASIN = ",
             as.character(row_data$SUBBASIN),
             " AND HRU = ",
