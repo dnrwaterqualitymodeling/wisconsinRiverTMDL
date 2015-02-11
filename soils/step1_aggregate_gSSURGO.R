@@ -147,7 +147,7 @@ for (m in unique(comp$MUKEY)){
 			"hzdept_r", 
 			"hzdepb_r",
 			dat_cols)]
-		max_depth = max(mc$hzdepb_r, is.na=T)
+		max_depth = max(mc$hzdepb_r, na.rm=T)
 		# need to calculate a component-weighted mean of all data columns
 		if (length(unique(mc$cokey)) > 1) { # If there is more than one component
 			w.aves = colSums(mc$comppct_r * mc[dat_cols], na.rm=T)
@@ -163,7 +163,7 @@ for (m in unique(comp$MUKEY)){
 		names(mky_data)[1:2] = c("top", "bottom")
 		mky_data = subset(mky_data, !(variable %in% c("MUKEY", "chkey")))
 		mky_data$value = as.numeric(mky_data$value)
-		# check query says for any single-component map unit, compenent percentages add to less than half,
+		# check query says for any single-component map unit, component percentages add to less than half,
 		# or there are no horizons,
 		# all hydrologic soil groups are NA (probably water, and some pits, and other trash basket items).
 		check_query = any(mc$comppct_r < 0.5) | any(is.na(mc$chkey)) | all(is.na(mc$hydgrp))
@@ -173,7 +173,7 @@ for (m in unique(comp$MUKEY)){
 	} else {
 		print("Slabber...")
 		max_depths = aggregate(cbind(hzdepb_r, comppct_r) ~ cokey, mc, max, na.rm=T)
-		max_depth = with(max_depths, weighted.mean(hzdepb_r, w = comppct_r))
+		max_depth = with(max_depths, weighted.mean(hzdepb_r, w = comppct_r, na.rm=T))
 		depths(mc) = cokey ~ hzdept_r + hzdepb_r
 		# slab to the MU level		   
 		slab.structure = seq(0,round(max_depth),length.out=6)
