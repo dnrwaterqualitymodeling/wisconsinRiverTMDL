@@ -4,7 +4,8 @@ options(stringsAsFactors=F)
 net_dir = "T:/Projects/Wisconsin_River/GIS_Datasets/Climatological/stationData/observations"
 out_dir = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/climate"
 stations = c("arl", "han", "mar", "spg")
-dem = raster("T:/GIS/Statewide_Coverages/DEM/10_meter/raw_prj.img")
+# dem = raster("T:/GIS/Statewide_Coverages/DEM/10_meter/raw_prj.img")
+dem = raster("T:/GIS/Statewide_Coverages/DEM/dem_30m")
 variables = c("rel_hum", "solar", "wind")
 cols = c("Average.Relative.Humidity..Percent.",
 	"Average.Solar.Radiation..W.m2.",
@@ -25,6 +26,7 @@ for (v in variables) {
 }
 i = 0
 for (s in stations) {
+
 	print(s)
 	i=i+1
 	climate_file = paste(net_dir, "/", s, "_wind_sol_hum.csv", sep="")

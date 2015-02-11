@@ -209,17 +209,7 @@ pot_veggie_landuses = c("SGBT", "POTA", "SPOT")
 ## Note:
 ##		IRR_SC=3 for irrigating from shallow aquifer
 ##		IRR_NO=the subbasin number from which the water comes
-##### !! CHECK ON THESE CROP CODES --- MAKE SURE THEY ARE THE ONLY POTATO VEGGIES !! #####
-#### Steps
-#### First step
-#### In MGT 1, 
-####	For each potato veggie rotation (SGBT, POTA, SPOT)
-####		Set IRRSC = 3
-####		Set IRRNO = Subbasin ID Number
-#### STEP 1 COMPLETE
-#### Then in MGT 2
-#### 	for each year of potato veggie rotation
-####		input the the lines from opschedules template
+
 con_mgt2 = odbcConnectAccess(prjDb)
 con_swat2012 = odbcConnectAccess(swatDb)
 hydgrp = unique(sqlQuery(con_mgt2, "SELECT SOIL, HYDGRP from sol")) # for CNOP
