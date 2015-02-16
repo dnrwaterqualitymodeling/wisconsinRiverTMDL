@@ -27,6 +27,8 @@ if (!exists(paste(wd, dir_out_files, sep = '/'))){
 	dir.create(paste(wd, dir_out_files, sep = '/'))
 }
 
+gdal_path = "C:/Program Files/GDAL"
+
 #ponds
 # watersheds_ll = readOGR("ponds", "landlocked_watersheds")
 # watersheds_ll_df = watersheds_ll@data
@@ -54,11 +56,6 @@ ponds <- raster(paste(wd, 'ponds.tif', sep ='/'))
 # already resampled and reclassed so wetland areas are 1
 lc_lm <- raster(paste(wd, "wetland_landcover.tif",sep='/'))
 
-max_sa = lc_lm
-norm_sa = lc_lm
-max_sa[] = NA
-writeRaster(max_sa, "test_rast.tif")
-norm_sa[] = NA 
     # 7 is woody wetlands
     # 8 is herbaceous wetlands
     # 9 is cranberries
@@ -69,7 +66,7 @@ geometry_table = data.frame()
 # failed after 148 subbasins, due to lack of memory, 
 #   added clean up lines to hopefully improve. sb 149 is huge.
 for (s in 2:length(subbasins@data$Subbasin)) {
-#     s <- 250
+    s <- 4
     # for elapsed time
     ptm <- proc.time()[3]
     print("###################")
@@ -141,11 +138,13 @@ for (s in 2:length(subbasins@data$Subbasin)) {
 	print("Exporting files...")
 	writeRaster(
 		sinkBin_sb_crp, 
-		paste(wd, "/", dir_out_files,"/Max_SA_Subbasin_",s,".tif",sep=''))
+		paste(wd, "/", dir_out_files,"/Max_SA_Subbasin_",s,".tif",sep=''),
+		NAflag=-9999)
 
 	writeRaster(
 		wet_n_crp, 
-		paste(wd, "/", dir_out_files,"/Normal_SA_Subbasin_",s,".tif",sep=''))
+		paste(wd, "/", dir_out_files,"/Normal_SA_Subbasin_",s,".tif",sep=''),
+		NAflag=-9999)
 
 	print("###################")
 
@@ -156,6 +155,35 @@ write.csv(
 	file_wetland_parm,
 	row.names = F)
 
+## Creating layers of max and normal surface area
+gdalbuildvrt = "gdalbuildvrt"
 
+for (lvl in c("Max", "Normal")){
+	file_list = list.files(
+		paste(wd, "/", dir_out_files, sep=''),
+		pattern = lvl,
+		full.names=T)
+	tmpf_tif_list = tempfile("tif_list_", fileext='.txt')
+	write(paste(file_list, sep='\n'), tmpf_tif_list)
+	
+	outfile = paste(lvl, "_wetland_surface_area.vrt")
+	
+	tmpf = tempfile("buildvrt_", fileext = ".bat")
+	cd = paste("cd", gdal_path)
 
+	cmd = paste(
+		gdalbuildvrt,
+		'-vrtnodata "-9999"',
+		'-srcnodata "-9999"',
+		"-input_file_list",
+		tmpf_tif_list,
+		paste(wd,
+			out_file,
+			sep='/')
+	)
+
+	lnes = paste(cd, cmd, sep='\n')
+	write(lnes, tmpf)
+	system(tmpf)
+}
 
