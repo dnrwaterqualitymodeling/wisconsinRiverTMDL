@@ -34,10 +34,20 @@ for (row in 1:nrow(hru_data)) {
 }
 close(con)
 
+# UPDATE MANNINGS N BASED ON RECCS IN BAUMGART, 2005
+
+con = odbcConnectAccess(inDb)
+query = "UPDATE hru SET OV_N = 0.1;"
+stdout = sqlQuery(con, query)
+query = "UPDATE rte SET CH_N2 = 0.065;"
+stdout = sqlQuery(con, query)
+close(con)
+
 # SET EVAPOTRANSPIRATION EQUATION TO PENMAN MONTEITH
 
 con = odbcConnectAccess(inDb)
 query = "UPDATE bsn SET IPET = 1;"
+stdout = sqlQuery(con, query)
 close(con)
 
 #UPDATE SWAT RESERVOIR PARAMETERS 
