@@ -1,19 +1,13 @@
-\subsubsection{Climate}	
+\subsection{Climate Station Data}\label{sec:climate_data}
 
-Provided are data concerning temperature (found in the "tmp" folder) and precipitation	(found in the "pcp" folder). The data are in two different formats, text files (.txt) and data base files (.dbf),	note that these files are, to some extent, redundant. The data in the database files are the raw data from the climate stations formatted for input to the SWAT model. The naming convention for the DBF file names is the weather station ID followed by a 'tmp' for temperature or 'pcp' for precipitation.	Similarly, the naming convention for the text files is a 't' for temperature or 'p' for precipitation, followed by the station ID. The files pcp.txt and tmp.txt contain the station names, and the latitude and longitude in WGS84 coordinate reference system.
+The WRB SWAT model will eventually be calibrated to reduce the error between model estimates and measured data. Measured data of streamflow, sediment concentrations, and phosphorus concentrations were collected between the years of 2002 and 2013. Therefore, we compiled daily climate station data between that period so that measured climate station data would temporally align with streamflow, sediment, and phosphorus measurements.
 
-The text files contain largely the same data as the database files, however, the text files contain a time series where any gaps in the raw data have been filled by data from the nearest climate station. If that nearest weather station was also missing data for that period, the next closest weather station's data was used to fill the gaps. 
+Daily weather and climate data used in the SWAT model were downloaded from the National Climate Data Center (NCDC) - Global Historic Climate Data Network website\footnote{\url{ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily}} \citep{ncdc_ghcn_2012}. 
+Weather data include precipitation and temperature.  
+Data sets from 120 different stations were downloaded, from which precipitation data was taken from 74 stations, and temperature from 46. 
+In addition to temperature and precipitation records, we retrieved daily solar radiation, wind speed, and relative humidity data from University of Wisconsin Extension Agricultural Research Stations\footnote{\url{http://agwx.soils.wisc.edu/uwex_agwx/awon/}} at Arlington, Hancock, Spring Green, and Marshfield \citepalias{uwex_ars_2014}. 
+For both of these sources, the data have gone through quality assurance and quality control procedures.
 
-The format of the database files is the Date, the daily maximum and the daily minimum, in Celsius for temperature and millimeters for precipitation. The value -99 means that there was no data for that day. The text files were formatted specifically for ArcSWAT. The first line contains the starting date of the model simulation, in the format yyyymmdd (19900101 or 1 January, 1990). Each row after this contains minimum and maximum daily temperature or precipitation. All the dates in the warm-up period until the beginning of the model period (1 January, 2002) are given the value of -99, thus the first 12 years do not have climate data, but are represented in the text files for SWAT input. 
+Not all stations had complete data records covering the entire timeframe being modeled.  For time periods missing precipitation or temperature data, the record was supplemented with data from the nearest weather station with data for that time period (Figure \ref{fig:climate_missing}). Data from neighboring stations was used to fill gaps iteratively until each station had a continuous record of daily observations for the whole model period. For solar radiation, wind speed and relative humidity missing data was generated automatically by the SWAT weather generator which stochastically generates data based on historic weather patterns.
 
-The climate data used in the SWAT model was provided for the US EPA contractors (Limnotech). This data was retrieved on 13 August, 2014 from the National Climate Data Center - Global Historic Climate Data Network.
-
-We chose an evapotranspiration method by evaluating percent bias and Nash-Sutcliffe coefficients when comparing modeled water yield to observed water yield at 20 sites acroos the basin. The three methods compared were Hargreaves, Penman-Monteith, and Preistley-Taylor. Without calibrating the initial model, Penman-Monteith outperformed the other 2 methods in both Nash-Sutcliffe coefficient and percent bias. 
-
-\begin{tabular}{ l c r }
-ET Method         &	Percent bias & Nash-Sutcliffe \\
-\hline	\hline
-Hargreaves        &	204.730	& 	-17.873	\\
-Penman-Monteith	  &	30.645	&	-4.491 	\\
-Preistley-Taylor  &	42.090	&	-5.089 	\\
-\end{tabular}
+Deterministic models such as SWAT usually perform better with a spin-up period of several years to allow the water budget and other physical and chemical processes of the system to equilibrate. We chose a spin-up period equal in length to the model period of 12 years. For these 12 years, weather was simulated by SWAT using patterns of historic weather between the years of 1961 and 2010. Therefore, the model runs for a total of 24 years (12 spin-up years, and 12 years using measured data). However, as stated above, only the 12 years using measured data are printed.

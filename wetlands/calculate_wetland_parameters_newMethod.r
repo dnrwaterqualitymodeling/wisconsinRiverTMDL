@@ -89,7 +89,7 @@ for (s in 215:length(subbasins@data$Subbasin)) {
     # multiplying the number of wetland cells
     #   by the pixel length and width and converting to ha
     print("Calculating Normal and maximum SA and Vols...")
-    SA_N <- cellStats(wet_n_crp, stat = sum, na.rm = T) * (10*10)*0.0001
+    SA_N <- cellStats(wet_n_crp, stat = sum, na.rm = T) * (10*10) * 0.0001
     # units are 10^4-m3?
     volRast <- (wet_n_crp * 0.5) * (10*10) 
     # what is the conversion factor?

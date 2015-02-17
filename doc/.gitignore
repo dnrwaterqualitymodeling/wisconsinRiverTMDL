@@ -12,3 +12,9 @@ Thumbs.db
 *.toc
 *.lot
 *.synctex.gz
+tmp
+*.xwm
+.metadata
+.project
+.texlipse
+wisconsin_river_tmdl_model_report.pdf
