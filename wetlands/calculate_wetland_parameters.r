@@ -15,7 +15,7 @@ gd_dir <- "T:/Projects/Wisconsin_River/GIS_Datasets"
 # orginal dem
 dem <- raster(paste(gd_dir, 'DEM','wrb_dem',sep ='/'))
 # filled dem
-dem_fl <- raster(paste(gd_dir, 'DEM','wrb_fill',sep ='/'))
+dem_fl <- raster(paste(gd_dir, 'DEM','wrb_filled.tif',sep ='/'))
 
 dir_out_maps = "wetland_maps"
 if (!exists(paste(wd, dir_out_maps, sep = '/'))){
@@ -65,8 +65,8 @@ subbasins = readOGR("T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro"
 geometry_table = data.frame()
 # failed after 148 subbasins, due to lack of memory, 
 #   added clean up lines to hopefully improve. sb 149 is huge.
-for (s in 2:length(subbasins@data$Subbasin)) {
-    s <- 4
+for (s in 1:length(subbasins@data$Subbasin)) {
+
     # for elapsed time
     ptm <- proc.time()[3]
     print("###################")
