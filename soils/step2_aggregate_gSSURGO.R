@@ -230,8 +230,8 @@ for (grp in unique(soil_tbl$hru_grp)) {
 	print(paste(grp," contains ", length(grp_tbl), " profiles...")) 
 	max_depth = max_depths[max_depths$hru_grp == grp, "SOL_ZMX"]
 	# setting those horizons with percentages that sum to less than 80
-# 	txtSums = rowSums(grp_tbl@horizons[,c('sand','silt','clay')])
-# 	grp_tbl@horizons[which(txtSums < 80),c('sand','silt','clay')] = NA
+	# txtSums = rowSums(grp_tbl@horizons[,c('sand','silt','clay')])
+	# grp_tbl@horizons[which(txtSums < 80),c('sand','silt','clay')] = NA
 	
 	grp_slab = slab(grp_tbl,
 		fm = ~ hydgrp +
@@ -302,8 +302,12 @@ for (rw in 1:length(unique(soil_tbl$hru_grp))){
 	solZ = paste('SOL_Z', 1:nlayers,sep = '')
 	agg_soil_data[rw,solZ] = cumsum(dpths)
 	# creating texture class
-	txt= dcast(sbst, top + bottom ~ variable)[c('sand','silt','clay')]
+	txt = dcast(sbst, top + bottom ~ variable)[c('sand','silt','clay')]
+	# Scale texture percentages so they add to 100 (i.e., fix rounding errors)
+	txt = (txt / rowSums(txt, na.rm=T)) * 100
+	# cbind hrz id then insert into sbst
 	names(txt) = toupper(names(txt))
+	
 	for (h in 1:5) {
 		err = try({
 			txt$TxtClass[h] = TT.points.in.classes(tri.data = txt[h,1:3],
@@ -321,6 +325,21 @@ for (rw in 1:length(unique(soil_tbl$hru_grp))){
 		}
 	}
 	agg_soil_data[rw, 'TEXTURE'] = paste(txt$TxtClass[1:5], collapse= '-')
+	
+	# overwriting the UNscaled texture values
+	## in sbst with those from txt
+	txt = txt[,1:3]
+	txt = cbind(1:5, txt)
+	
+	names(txt) = c("hrz_num", tolower(names(txt)[2:4]))
+	txt = melt(txt, id.var = "hrz_num")
+	txt[["variable"]] = as.character(txt[["variable"]]) 
+	sbst[["variable"]] = as.character(sbst[["variable"]])
+	txt = txt[order(txt$variable,txt$hrz_num),]
+	sbst = sbst[order(sbst$variable,sbst$hrz_num),]
+	
+	sbst$value[which(sbst$variable %in% c("clay", "silt", "sand"))] = txt$value
+	
 	# for the horizon level variables
 	for (vrb in unique(sbst$variable)){
 		if (vrb == "hydgrp"){next}
@@ -358,7 +377,7 @@ agg_soil_data$MUID = as.integer(agg_soil_data$MUID)
 x_hydgrps = subset(soil_tbl, hru_grp == "X")$HYDGRP
 
 # Average the HSGs together for MUID = X
-x_hydgrp = LETTERS[round(mean(unlist(lapply(x_hydgrps, function (x) {which(LETTERS == x)}))))]
+x_hydgrp = LETTERS[mean(x_hydgrps, na.rm=T)]
 agg_soil_data$HYDGRP[agg_soil_data$SNAM == "X"] = x_hydgrp
 
 soil_tbl = rbind(soil_tbl, water_mus)
