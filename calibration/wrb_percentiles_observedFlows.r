@@ -34,16 +34,23 @@ for (gage in 1:nrow(gauge_basin_lu)){
 ##split date into month, day, & year columns
 # mdy <- colsplit(as.character(df$DATE), "-", c("month", "day", "year"))  
 # sta <- cbind(df, mdy)
-df$YEAR = format(DATE, "%Y")
+df$YEAR = format(df$DATE, "%Y")
 ##STEP 1
 ##summarize mean daily flows for each station/year combination
 # sta$val <- as.numeric(sta$val)
-yr_mean <- aggregate(FLOW_OBSERVED ~ YEAR + station, data = df, FUN= "mean",na.rm=TRUE)
-names(yr_mean) = c("year","site_id","val")
+
+# yr_mean <- aggregate(FLOW_OBSERVED ~ YEAR + station, data = df, FUN= "mean",na.rm=TRUE)
+# names(yr_mean) = c("year","site_id","val")
 
 ##STEP2
 ##determine percentile flows for each station based on 3 quantile criteria
-quantiles = apply()
+for (site in unique(df$station)){
+	site_dat = subset(df, station = site)
+	
+
+}
+
+
 #### ---
 temp_quantiles <- tapply(yr_mean$val, yr_mean$site_id, quantile, c(.25, .5, .75))
 quants <- data.frame(matrix(unlist(temp_quantiles),nrow=20,byrow=T))
