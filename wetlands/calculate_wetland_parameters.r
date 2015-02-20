@@ -64,7 +64,7 @@ subbasins = readOGR("T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro"
 
 geometry_table = data.frame()
 # failed after 148 subbasins, due to lack of memory, 
-#   added clean up lines to hopefully improve. sb 149 is huge.
+#   added clean up lines to hopefully improve. subbasin 149 is huge.
 for (s in 1:length(subbasins@data$Subbasin)) {
 
     # for elapsed time
@@ -156,34 +156,36 @@ write.csv(
 	row.names = F)
 
 ## Creating layers of max and normal surface area
-gdalbuildvrt = "gdalbuildvrt"
+# if (file.exists(gdal_path)){
+	# gdalbuildvrt = "gdalbuildvrt"
 
-for (lvl in c("Max", "Normal")){
-	file_list = list.files(
-		paste(wd, "/", dir_out_files, sep=''),
-		pattern = lvl,
-		full.names=T)
-	tmpf_tif_list = tempfile("tif_list_", fileext='.txt')
-	write(paste(file_list, sep='\n'), tmpf_tif_list)
-	
-	outfile = paste(lvl, "_wetland_surface_area.vrt")
-	
-	tmpf = tempfile("buildvrt_", fileext = ".bat")
-	cd = paste("cd", gdal_path)
+	# for (lvl in c("Max", "Normal")){
+		# file_list = list.files(
+			# paste(wd, "/", dir_out_files, sep=''),
+			# pattern = lvl,
+			# full.names=T)
+		# tmpf_tif_list = tempfile("tif_list_", fileext='.txt')
+		# write(paste(file_list, sep='\n'), tmpf_tif_list)
+		
+		# outfile = paste(lvl, "_wetland_surface_area.vrt")
+		
+		# tmpf = tempfile("buildvrt_", fileext = ".bat")
+		# cd = paste("cd", gdal_path)
 
-	cmd = paste(
-		gdalbuildvrt,
-		'-vrtnodata "-9999"',
-		'-srcnodata "-9999"',
-		"-input_file_list",
-		tmpf_tif_list,
-		paste(wd,
-			out_file,
-			sep='/')
-	)
+		# cmd = paste(
+			# gdalbuildvrt,
+			# '-vrtnodata "-9999"',
+			# '-srcnodata "-9999"',
+			# "-input_file_list",
+			# tmpf_tif_list,
+			# paste(wd,
+				# out_file,
+				# sep='/')
+		# )
 
-	lnes = paste(cd, cmd, sep='\n')
-	write(lnes, tmpf)
-	system(tmpf)
-}
+		# lnes = paste(cd, cmd, sep='\n')
+		# write(lnes, tmpf)
+		# system(tmpf)
+	# }
+# } else {print("GDAL not found on C drive")}
 
