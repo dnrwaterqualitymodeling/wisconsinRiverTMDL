@@ -217,8 +217,8 @@ write(paste("import arcpy; arcpy.Compact_management('", prjDb, "')", sep=""), py
 #####	For Irrigation parameters
 pot_veggie_landuses = c("SGBT", "POTA", "SPOT")
 ## Note:
-##		IRR_SC=3 for irrigating from shallow aquifer
-##		IRR_NO=the subbasin number from which the water comes
+##	IRR_SC=3 for irrigating from shallow aquifer
+##	IRR_NO=the subbasin number from which the water comes
 
 con_mgt2 = odbcConnectAccess(prjDb)
 con_swat2012 = odbcConnectAccess(swatDb)
