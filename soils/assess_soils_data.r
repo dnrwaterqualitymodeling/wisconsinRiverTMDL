@@ -35,7 +35,7 @@ dfault_soils["SOL_K"] = calc_horz_wtd_mean("SOL_K", dfault_soils)
 dfault_soils["SOL_BD"]= calc_horz_wtd_mean("SOL_BD", dfault_soils)
 dfault_soils["SOL_Z"] = calc_horz_wtd_mean("SOL_Z", dfault_soils)
 
-dfault_soils = subset(dfault_soils, select=c("MUID", "HYDGRP", "SOL_ZMX", "sand", "silt", "clay", "SOL_AWC", "USLE_K", "SOL_K", "SOL_BD", "SOL_Z"))
+# dfault_soils = subset(dfault_soils, select=c("MUID", "HYDGRP", "SOL_ZMX", "sand", "silt", "clay", "SOL_AWC", "USLE_K", "SOL_K", "SOL_BD", "SOL_Z"))
 dfault_soils["Data_Type"] = "SWAT_Default"
 ##### ----- ##### -----##### ----- ##### -----##### ----- ##### -----##### ----- #####
 
@@ -49,19 +49,19 @@ swat_soils["SOL_K"] = calc_horz_wtd_mean("SOL_K", swat_soils)
 swat_soils["SOL_BD"]= calc_horz_wtd_mean("SOL_BD", swat_soils)
 swat_soils["SOL_Z"] = calc_horz_wtd_mean("SOL_Z", swat_soils)
 
-swat_soils = subset(swat_soils, select=c("MUID", "HYDGRP", "SOL_ZMX", "sand", "silt", "clay", "SOL_AWC", "USLE_K", "SOL_K", "SOL_BD", "SOL_Z"))
+# swat_soils = subset(swat_soils, select=c("MUID", "HYDGRP", "SOL_ZMX", "sand", "silt", "clay", "SOL_AWC", "USLE_K", "SOL_K", "SOL_BD", "SOL_Z"))
 swat_soils["Data_Type"] = "WRB_Custom"
 ##### ----- ##### -----##### ----- ##### -----##### ----- ##### -----##### ----- #####
 dat = rbind(dfault_soils, swat_soils)
 dat = subset(dat, !is.na(HYDGRP))
 
-
-png("./miscellaneous/new_clusters_texture_distribution_assessment.png",
-	height = 7,
-	width = 7,
+setwd(dir_net_soil)
+png("new_clusters_texture_distribution_assessment.png",
+	height = 8.5,
+	width = 11,
 	units = 'in',
 	res=500)
-text = ggplot(dat, aes(x=sand, y=clay, color=silt, shape=HYDGRP)) + theme_bw()  + ggtitle("Particle Size Distribution of \n New Clusters")
+text = ggplot(dat, aes(x=CLAY1, y=SILT1, color=SAND1, shape=HYDGRP)) + theme_bw()  + ggtitle("Particle Size Distribution of \n Comparing WR Method to SWAT Default")
 text = text + geom_point(size=5) + scale_shape_manual(values = c("A","B","C","D")) 
 text + facet_grid(Data_Type ~ HYDGRP)
 dev.off()

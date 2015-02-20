@@ -16,6 +16,7 @@ dir_hydro = "T:/Projects/Wisconsin_River/GIS_Datasets/Hydrology"
 
 file_hydro_in = dir_hydro +"/WI_River_Hydro_Flowline_24K.shp"
 file_dem = dir_dem + "/wrb_dem.tif"
+env.snapRaster = file_dem
 
 hydro_ras = "rasterized_hydro.tif"
 file_hydro_ras_200m = "rasterized_hydro_200m.tif"

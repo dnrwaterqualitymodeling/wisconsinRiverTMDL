@@ -11,8 +11,10 @@ regions = readOGR(
 	dsn="T:/Projects/Wisconsin_River/GIS_Datasets/Water_Budget",
 	layer="WRB_Budget_Divisions")
 
-file_subbasin_region_lu = "T:/Projects/Wisconsin_River/GIS_Datasets/Water_Budget/subbasin_region_lookup.txt"#"D:/Water_Budget/subbasin_region_lookup.txt"
-setwd("H:/netCDF_files")
+
+file_subbasin_region_lu = "T:/Projects/Wisconsin_River/GIS_Datasets/Water_Budget/subbasin_region_lookup.txt"
+setwd("C:/Users/ruesca/Desktop/WRB_sensitivity")
+
 vars = list(
 	c("streamflow", "Annual Average streamflow (cms)"),
 	c("sediment", "Average Daily Sediment Load (tons)"),
@@ -45,8 +47,7 @@ for (nc_file in nc_files) {
 		
 		subbasin_all = cbind(subbasin_all, p_change)
 		
-		sb_region_lu = cbind(sb_region_lu, p_change)
-		names(sb_region_lu)[4] = "delta"
+		sb_region_lu$delta = p_change
 		regional_means = aggregate(
 			delta ~ region, 
 			data=sb_region_lu, 
