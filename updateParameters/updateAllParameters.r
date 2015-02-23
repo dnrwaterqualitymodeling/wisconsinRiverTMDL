@@ -20,8 +20,8 @@ op_db_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLand
 lu_op_xwalk_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/landuse_operation_crosswalk.csv"
 background_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/phosphorus/background_P_from_EPZ.txt"
 soil_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Soil_Phosphorus/soil_phosphorus_by_subbasin.txt"
-projectDir = "C:/Users/ruesca/Desktop/WRB"
-# projectDir = "H:/test_wrb/WRB"
+# projectDir = "C:/Users/ruesca/Desktop/WRB"
+projectDir = "H:/WRB"
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 
 
@@ -226,15 +226,15 @@ write(paste("import arcpy; arcpy.Compact_management('", prjDb, "')", sep=""), py
 #####	For Irrigation parameters
 pot_veggie_landuses = c("SGBT", "POTA", "SPOT")
 ## Note:
-##		IRR_SC=3 for irrigating from shallow aquifer
-##		IRR_NO=the subbasin number from which the water comes
+##	IRR_SC=3 for irrigating from shallow aquifer
+##	IRR_NO=the subbasin number from which the water comes
 
 con_mgt2 = odbcConnectAccess(prjDb)
 con_swat2012 = odbcConnectAccess(swatDb)
-hydgrp = unique(sqlQuery(con_mgt2, "SELECT SOIL, HYDGRP from sol")) # for CNOP
+
 oidStart = 1
 for (row in 1:nrow(mgt1)) {
-
+	
     row_data = mgt1[row,]
     print(paste('Subbasin:',as.character(row_data$SUBBASIN),'hru:', as.character(row_data$HRU)))
     lu = as.character(row_data$LANDUSE)
@@ -273,9 +273,7 @@ for (row in 1:nrow(mgt1)) {
 	if (row_data$LANDUSE %in% pot_veggie_landuses){
 		operation$IRR_NOA = as.character(row_data$SUBBASIN)
 	}
-
-	# Edit CNOP
-
+	
 	formatTempFile = tempfile()
 	write.csv(operation[,2:ncol(operation)], formatTempFile, row.names=F, quote=T)
 	colNames = readLines(formatTempFile, 1)
@@ -322,4 +320,42 @@ for (row in 1:nrow(mgt1)) {
 	}
 
 }
+# CNOP
+hydgrp_lu = unique(sqlQuery(con_mgt2, "SELECT SOIL, HYDGRP from sol")) # for CNOP
+crop_cn_lu = unique(sqlQuery(con_swat2012, "SELECT ICNUM, CN2A, CN2B, CN2C, CN2D from crop")) # for CNOP
+
+for (hydgrp in LETTERS[1:4]) {
+	for (crop in c(19, 20, 21, 52, 56, 70, 84)) {
+		hydgrp_col = paste("CN2", hydgrp, sep="")
+		cnop = crop_cn_lu[crop_cn_lu$ICNUM == crop, hydgrp_col]
+		soils = hydgrp_lu[hydgrp_lu$HYDGRP == hydgrp, "SOIL"]
+		soils = paste("('", paste(soils, collapse="','"), "')", sep="")
+		query = paste(
+			"UPDATE mgt2 SET CNOP = ",
+			cnop,
+			" WHERE SOIL IN ",
+			soils,
+			" AND PLANT_ID = ",
+			crop,
+			";",
+			sep=""
+		)
+		stdout = sqlQuery(con_mgt2, query)
+	}
+}
+
+
+# for (hydgrp in LETTERS[1:4]) {
+	# for till in tillage_types
+		
+
+	# }
+# }
+
+# UPDATE mgt2 SET CNOP = 
+
+
+
 odbcCloseAll()
+
+
