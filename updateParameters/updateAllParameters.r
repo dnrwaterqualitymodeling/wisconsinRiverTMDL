@@ -1,3 +1,12 @@
+# Before running this script ensure that:
+#	Reservoirs are added and associated with a daily time series
+#	Point sources are added and associated with a daily time series
+#	Wetlands and ponds are summarized by the correct subbasin boundaries
+#	Mean slope per LULC/subbasin are summarized by the correct subbasin boundaries.
+
+
+
+
 library(RODBC)
 options(stringsAsFactors=F)
 options(warn=2)
