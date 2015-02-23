@@ -1,3 +1,10 @@
+arguments = commandArgs(trailingOnly = T)
+strt = arguments[1]
+stp = arguments[2]
+
+# strt = 1
+# stp = 3
+
 library(rgdal)
 library(rgeos)
 library(raster)
@@ -9,7 +16,7 @@ library(raster)
 
 wd <- "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands"
 # setwd(wd)
-file_wetland_parm = "wetland_parameters.csv"
+file_wetland_parm = paste("wetland_parameters_",strt,"to",stp,".csv",sep='')
 # 
 gd_dir <- "T:/Projects/Wisconsin_River/GIS_Datasets"
 # orginal dem
@@ -65,7 +72,7 @@ subbasins = readOGR("T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro"
 geometry_table = data.frame()
 # failed after 148 subbasins, due to lack of memory, 
 #   added clean up lines to hopefully improve. subbasin 149 is huge.
-for (s in 1:length(subbasins@data$Subbasin)) {
+for (s in strt:stp){#length(subbasins@data$Subbasin)) {
 
     # for elapsed time
     ptm <- proc.time()[3]
@@ -123,28 +130,45 @@ for (s in 1:length(subbasins@data$Subbasin)) {
     print(paste('Elapsed time for this subbasin:',round(elpsd,2),'seconds.'))
     print("Plotting...")
 	file_name_map = paste(wd, "/", dir_out_maps, "/", "Subbasin_",s,".png",sep = '')
-	png(file_name_map)
-	plot(subbasin, main = paste("Subbasin",s))
-	plot(ponds_sb, add = T, col="#0000ff50", legend = F)
-	plot(sinkBin_sb_crp, add = T, col="#ff000050", legend = F)
-	legend(
-		"topleft",
-		legend=c("Ponds", "Max Wetland SA"),
-		fill = c("#0000ff50", "#ff000050")
-		)
-
-	dev.off()
 	
-	print("Exporting files...")
-	writeRaster(
-		sinkBin_sb_crp, 
-		paste(wd, "/", dir_out_files,"/Max_SA_Subbasin_",s,".tif",sep=''),
-		NAflag=-9999)
+	names(geometry_table) <- c('subbasin','WET_FR','WET_NSA','WET_NVOL','WET_VOL','WET_MXSA','WET_MXVOL')
+	if (file.exists(file_wetland_parm)){
+		write.csv(
+			geometry_table, 
+			file_wetland_parm,
+			row.names = F,
+			col.names = F,
+			append = T)
+	} else {
+		write.csv(
+			geometry_table, 
+			file_wetland_parm,
+			row.names = F)
+	}
+	# png(file_name_map)
+	# plot(subbasin, main = paste("Subbasin",s))
+	# plot(ponds_sb, add = T, col="#0000ff50", legend = F)
+	# plot(sinkBin_sb_crp, add = T, col="#ff000050", legend = F)
+	# legend(
+		# "topleft",
+		# legend=c("Ponds", "Max Wetland SA"),
+		# fill = c("#0000ff50", "#ff000050")
+		# )
+	
+	# dev.off()
+	
+	# print("Exporting files...")
+	# writeRaster(
+		# sinkBin_sb_crp, 
+		# paste(wd, "/", dir_out_files,"/Max_SA_Subbasin_",s,".tif",sep=''),
+		# NAflag=-9999,
+		# overwrite=TRUE)
 
-	writeRaster(
-		wet_n_crp, 
-		paste(wd, "/", dir_out_files,"/Normal_SA_Subbasin_",s,".tif",sep=''),
-		NAflag=-9999)
+	# writeRaster(
+		# wet_n_crp, 
+		# paste(wd, "/", dir_out_files,"/Normal_SA_Subbasin_",s,".tif",sep=''),
+		# NAflag=-9999,
+		# overwrite=TRUE)
 
 	print("###################")
 
@@ -156,36 +180,36 @@ write.csv(
 	row.names = F)
 
 ## Creating layers of max and normal surface area
-# if (file.exists(gdal_path)){
-	# gdalbuildvrt = "gdalbuildvrt"
+if (file.exists(gdal_path)){
+	gdalbuildvrt = "gdalbuildvrt"
 
-	# for (lvl in c("Max", "Normal")){
-		# file_list = list.files(
-			# paste(wd, "/", dir_out_files, sep=''),
-			# pattern = lvl,
-			# full.names=T)
-		# tmpf_tif_list = tempfile("tif_list_", fileext='.txt')
-		# write(paste(file_list, sep='\n'), tmpf_tif_list)
+	for (lvl in c("Max", "Normal")){
+		file_list = list.files(
+			paste(wd, "/", dir_out_files, sep=''),
+			pattern = lvl,
+			full.names=T)
+		tmpf_tif_list = tempfile("tif_list_", fileext='.txt')
+		write(paste(file_list, sep='\n'), tmpf_tif_list)
 		
-		# outfile = paste(lvl, "_wetland_surface_area.vrt")
+		outfile = paste(lvl, "_wetland_surface_area.vrt",sep='')
 		
-		# tmpf = tempfile("buildvrt_", fileext = ".bat")
-		# cd = paste("cd", gdal_path)
+		tmpf = tempfile("buildvrt_", fileext = ".bat")
+		cd = paste("cd", gdal_path)
 
-		# cmd = paste(
-			# gdalbuildvrt,
-			# '-vrtnodata "-9999"',
-			# '-srcnodata "-9999"',
-			# "-input_file_list",
-			# tmpf_tif_list,
-			# paste(wd,
-				# out_file,
-				# sep='/')
-		# )
+		cmd = paste(
+			gdalbuildvrt,
+			'-vrtnodata "-9999"',
+			'-srcnodata "-9999"',
+			"-input_file_list",
+			tmpf_tif_list,
+			paste(wd,
+				outfile,
+				sep='/')
+		)
 
-		# lnes = paste(cd, cmd, sep='\n')
-		# write(lnes, tmpf)
-		# system(tmpf)
-	# }
-# } else {print("GDAL not found on C drive")}
+		lnes = paste(cd, cmd, sep='\n')
+		write(lnes, tmpf)
+		system(tmpf)
+	}
+} else {print("GDAL not found on C drive")}
 

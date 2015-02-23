@@ -337,7 +337,10 @@ for (hydgrp in LETTERS[1:4]) {
 
 
 # for (hydgrp in LETTERS[1:4]) {
-	
+	# for till in tillage_types
+		
+
+	# }
 # }
 
 # UPDATE mgt2 SET CNOP = 
