@@ -3,9 +3,11 @@ library(raster)
 library(reshape2)
 
 dir_prj = "C:/Users/ruesca/Desktop/WRB"
-lc_lu_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/SWAT_lookup.csv"
+lc_lu_file = "T:/Projects/Wisconsin_River/GIS_Datasets/slope"
+out_mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
 
-lc_lu = read.csv(lc_lu_file)
+lc_lu = read.csv(lc_lu_file, stringsAsFactors=F)
+names(lc_lu) = c("lc", "landuse")
 
 subbasins_file = paste(dir_prj, "Watershed", "Shapes", "subs1.shp", sep="/")
 slope_file = paste(dir_prj, "RasterStore.mdb", "Slope", sep="/")
@@ -59,5 +61,14 @@ subbasins_lc[grep("NA", subbasins_lc)] = NA
 
 mean_slope = aggregate(slope_v, list(subbasins_lc), mean)
 out_data = colsplit(mean_slope$Group.1, "_", c("subbasin", "lc"))
-
 out_data$mean_slope = mean_slope$x
+out_data = merge(lc_lu, out_data)
+
+out_data = data.frame(
+	subbasin=out_data$subbasin,
+	landuse=out_data$landuse,
+	mean_slope=out_data$mean_slope
+)
+
+write.table(out_data, out_mean_slope_file, row.names=F, sep="\t")
+

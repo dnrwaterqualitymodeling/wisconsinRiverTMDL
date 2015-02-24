@@ -4,34 +4,48 @@
 #	Wetlands and ponds are summarized by the correct subbasin boundaries
 #	Mean slope per LULC/subbasin are summarized by the correct subbasin boundaries.
 
-
-
-
 library(RODBC)
 options(stringsAsFactors=F)
 options(warn=2)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
-wetland_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands/wetland_geometry_v3.csv"
+mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
+wetland_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands/wetland_geometry.csv"
 pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
 reservoir_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/hydrology/dams_parameters.csv"
 gw_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/alphaBflowSubbasin_lookup.csv"
-op_db_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/OpSchedules_fert_3Cuts_later_daily_haul_fix.mdb"
+op_db_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/OpSchedules.mdb"
 # should be swat_lookup.csv?
 lu_op_xwalk_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/landuse_operation_crosswalk.csv"
 background_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/phosphorus/background_P_from_EPZ.txt"
 soil_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Soil_Phosphorus/soil_phosphorus_by_subbasin.txt"
-# projectDir = "C:/Users/ruesca/Desktop/WRB"
-projectDir = "H:/WRB"
+projectDir = "C:/Users/ruesca/Desktop/WRB"
+# projectDir = "H:/WRB"
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 
 
-# UPDATE SLOPE LENGTH BASED ON RECCS IN BAUMGART, 2005
+# UPDATE SLOPE AND SLOPE LENGTH BASED ON RECCS IN BAUMGART, 2005
+
+mean_slope = read.table(mean_slope_file, header=T)
 
 con = odbcConnectAccess(inDb)
 hru_data = sqlQuery(con, "SELECT * from hru")
 
 for (row in 1:nrow(hru_data)) {
-	sl = 91.4 / ((hru_data$HRU_SLP[row] * 100) + 1)^0.4 # Baumgart, 2005
+	new_slope = with(mean_slope,
+		mean_slope[
+			subbasin == hru_data$SUBBASIN[row] &
+			landuse == hru_data$LANDUSE[row]
+		]
+	)	
+	query = paste(
+		"UPDATE hru ",
+		"SET HRU_SLP = ", new_slope / 100, " ",
+		"WHERE SUBBASIN = ", hru_data$SUBBASIN[row],
+		" AND HRU = ", hru_data$HRU[row], ";",
+		sep=""
+	)
+	stdout = sqlQuery(con, query)
+	sl = 91.4 / (new_slope + 1)^0.4 # Baumgart, 2005
 	query = paste(
 		"UPDATE hru ",
 		"SET SLSUBBSN = ", sl, " ",
@@ -59,7 +73,7 @@ query = "UPDATE bsn SET IPET = 1;"
 stdout = sqlQuery(con, query)
 close(con)
 
-#UPDATE SWAT RESERVOIR PARAMETERS 
+# UPDATE SWAT RESERVOIR PARAMETERS 
 reservoir_parameters = read.csv(reservoir_parameter_file)
 
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
@@ -324,6 +338,7 @@ for (row in 1:nrow(mgt1)) {
 hydgrp_lu = unique(sqlQuery(con_mgt2, "SELECT SOIL, HYDGRP from sol")) # for CNOP
 crop_cn_lu = unique(sqlQuery(con_swat2012, "SELECT ICNUM, CN2A, CN2B, CN2C, CN2D from crop")) # for CNOP
 
+# Update CNOP for planting operations
 for (hydgrp in LETTERS[1:4]) {
 	for (crop in c(19, 20, 21, 52, 56, 70, 84)) {
 		hydgrp_col = paste("CN2", hydgrp, sep="")
@@ -344,16 +359,73 @@ for (hydgrp in LETTERS[1:4]) {
 	}
 }
 
+till_tr55 = list(
+	bare_soil = c(77,86,91,94),
+	poor_residue = c(76,85,90,93),
+	good_residue = c(74,83,88,90)
+)
+# We assume that 1-EFTMIX is equal to crop residue cover
+# Crop residue cover <20% is considered "good" according to TR-55
+# Moldboard leaves so little residue, we chose to give it bare soil properties.
+till_codes = list(
+	c('2', "good_residue"), # Generic spring plowing
+	c('6', "good_residue"), # Field cultivator
+	c('35', "good_residue"), # Cultivator 1 row
+	c('58', "good_residue"), # Chisel plow
+	c('61', "poor_residue"), # Disk plow
+	c('64', "bare_soil") # Moldboard plow
+) 
 
-# for (hydgrp in LETTERS[1:4]) {
-	# for till in tillage_types
-		
-
-	# }
-# }
-
-# UPDATE mgt2 SET CNOP = 
-
+for (hydgrp in LETTERS[1:4]) {
+	for (till in till_codes) {
+		soils = hydgrp_lu[hydgrp_lu$HYDGRP == hydgrp, "SOIL"]
+		soils = paste("('", paste(soils, collapse="','"), "')", sep="")
+		cnop = till_tr55[[till[2]]][LETTERS == hydgrp]
+		query = paste(
+			"UPDATE mgt2 SET CNOP = ",
+			cnop,
+			" WHERE TILLAGE_ID = ",
+			till[1],
+			" AND SOIL IN ",
+			soils,
+			";",
+			sep=""
+		)
+		stdout = sqlQuery(con_mgt2, query)
+	}
+}
+# Set CNOP as CN2 for non-ag land cover so that CNOP is the only calibrated parameter
+for (hydgrp in LETTERS[1:4]) {
+	soils = hydgrp_lu[hydgrp_lu$HYDGRP == hydgrp, "SOIL"]
+	soils = paste("('", paste(soils, collapse="','"), "')", sep="")
+	for (lc in c("WATR", "URML", "FRSD", "WETN", "RNGE", "ONIO", "CRRT")) {
+		query = paste(
+			"SELECT CN2 FROM mgt1 WHERE LANDUSE = '",
+			lc, 
+			"' AND SOIL IN ",
+			soils,
+			";",
+			sep=""
+		)
+		cn2 = sqlQuery(con_mgt2, query)
+		if (length(unique(cn2)) == 1) { # They should all be the same
+			cn2 = cn2[1,1]
+			query = paste(
+				"UPDATE mgt2 SET CNOP = ",
+				cn2,
+				" WHERE LANDUSE = '",
+				lc,
+				"' AND SOIL IN ",
+				soils,
+				" AND MGT_OP = 1;",
+				sep=""
+			)
+			stdout = sqlQuery(con_mgt2, query)
+		} else {
+			print("Why did one of these curve numbers get a different assignment than the others?")
+		}
+	}
+}
 
 
 odbcCloseAll()
