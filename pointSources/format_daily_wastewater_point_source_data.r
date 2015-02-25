@@ -1,5 +1,5 @@
-library(rgdal)
-library(rgeos)
+# library(rgdal)
+# library(rgeos)
 library(foreign)
 options(stringsAsFactors=F)
 
@@ -24,6 +24,7 @@ dates = data.frame(
 	MON = as.integer(format(dates, "%m")),
 	DAY = as.integer(format(dates, "%j"))
 )
+
 output_holder = data.frame()
 for(sample_pt in sample_pts){
 	print(sample_pt)
@@ -44,7 +45,7 @@ for(sample_pt in sample_pts){
 	
 	sed_data = subset(pt_data, STORET_PARM_DESC == "Suspended Solids, Total")
 	units = sed_data$PARM_UNIT_TYPE[1]
-	if(units == "mg/L"){
+	if(units == "mg/L" | units == "MGD") { # MGD was a mistake in the database---actually mg/L
 		sed_conc = (sed_data$MODEL_VALUE)
 		sed_load = sed_conc*mean_flow*0.000001
 	} else if(units == "lbs/day"){
@@ -72,22 +73,58 @@ aggregated_of_by_subs = aggregate(
 	na.rm=T)
 
 
-aggreg_of_by_subs_sort = aggregated_of_by_subs[order(aggregated_of_by_subs[,2], aggregated_of_by_subs[,1]),]
-arcswat_hdr = c("Day","Year","Floday","Sedday","Orgnday","Orgpday","No3day","Nh3day","No2day","Minpday","Cbodday","Disoxday","Chladay","Solpstday","Srbpstday","Bactpday","Bactlpday","Cmtl1day","Cmtl2day","Cmtl3day")
+aggreg_of_by_subs_sort = aggregated_of_by_subs[order(
+	aggregated_of_by_subs$sb_id,
+	aggregated_of_by_subs$YEAR,
+	aggregated_of_by_subs$DAY
+	),]
+
+arcswat_hdr = c(
+	"DATE",
+	"Floday",
+	"Sedday",
+	"Orgnday",
+	"Orgpday",
+	"No3day",
+	"Nh3day",
+	"No2day",
+	"Minpday",
+	"Cbodday",
+	"Disoxday",
+	"Chladay",
+	"Solpstday",
+	"Srbpstday",
+	"Bactpday",
+	"Bactlpday",
+	"Cmtl1day",
+	"Cmtl2day",
+	"Cmtl3day")
 
 out_tbl = matrix(0, nrow=nrow(dates), ncol=length(arcswat_hdr))
 out_tbl = data.frame(out_tbl)
 names(out_tbl) = arcswat_hdr
-out_tbl$Day = dates$DAY
-out_tbl$Year = dates$YEAR
-
+dates = seq(as.Date("1990-01-01"), as.Date("2013-12-31"), by="1 day")
+out_tbl$DATE = format(dates, "%m/%d/%Y")
+out_tbl$DATE = gsub("^0", "", out_tbl$DATE)
+out_tbl$DATE = gsub("(/0)", "/", out_tbl$DATE)
 # update with point source specific data
 setwd(out_dir)
 for (sb in 1:337){
 	file_name = paste("recday_", sb, ".txt", sep='')
-	sb_dat = subset(aggregated_of_by_subbasins, sb_id == sb)
-	sb_dat_with_zeros = cbind(sb_dat, out_tbl)
-	write.table(sb_dat_with_zeros, file = file_name, sep="\t", row.names = F)
+	print(file_name)
+	sb_dat = subset(aggreg_of_by_subs_sort, sb_id == sb)
+	out_sb_tbl = out_tbl
+	out_sb_tbl[c("Floday", "Sedday", "Minpday")] = sb_dat[c("mean_flow", "sed_load", "p_load")]
+	out_sb_tbl[is.na(out_sb_tbl)] = 0
+	hdr = paste('"', paste(arcswat_hdr, collapse='","'), '"', sep="")
+	writeLines(hdr, file_name)
+	write.table(out_sb_tbl,
+		file=file_name,
+		row.names=F,
+		col.names=F,
+		quote=F,
+		sep=",",
+		append=T)
 }
 
 
