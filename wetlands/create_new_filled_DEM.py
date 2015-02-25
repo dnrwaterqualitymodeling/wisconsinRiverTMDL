@@ -28,19 +28,22 @@ dem_filled_no_nulls = "wrb_filled_no_nulls.tif"
 arcpy.PolylineToRaster_conversion(file_hydro_in, "ORIG_HRZ_S", hydro_ras, "", "", 10)
 
 #set hydro layer to 200
-Con(Raster(hydro_ras) > 2, 200, 0).save(file_hydro_ras_200m)
-Con(IsNull(file_hydro_ras_200m), 0, 200).save(file_hydro_ras_200m_zeros)
+Con(Raster(hydro_ras) > 2, 1, 0).save(file_hydro_ras_200m)
+# Con(IsNull(file_hydro_ras_200m), 0, 200).save(file_hydro_ras_200m_zeros)
 
 #Subtract from DEM
-(Raster(file_dem) - Raster(file_hydro_ras_200m_zeros)).save(dem_less_200m_hydro)
+# (Raster(file_dem) - Raster(file_hydro_ras_200m_zeros)).save(dem_less_200m_hydro)
 
 #Fill
 
-Fill(dem_less_200m_hydro, 150).save(dem_filled_no_nulls)
-hydro_null = SetNull(Raster(file_hydro_ras_200m_zeros), Raster(file_hydro_ras_200m_zeros), "Value > 100")
+# hydro_null = SetNull(Raster(file_hydro_ras_200m_zeros), Raster(file_hydro_ras_200m_zeros), "Value > 100")
+dem_hydro_null = SetNull(Raster(file_hydro_ras_200m), Raster(file_dem), "Value = 1") 
+Fill(dem_hydro_null).save(dem_filled_no_nulls)
+# Fill(dem_less_200m_hydro, 150).save(dem_filled_no_nulls)
+
 
 (dem_filled_no_nulls + hydro_null).save("wrb_filled.tif")
-#Set DEM_Stream overlay area to NA
+# Set DEM_Stream overlay area to NA
 # SetNull(dem_filled_no_nulls, dem_filled_no_nulls, "VALUE ").save(file_hydro_ras_200m)
 
 print("Dunzo.")
