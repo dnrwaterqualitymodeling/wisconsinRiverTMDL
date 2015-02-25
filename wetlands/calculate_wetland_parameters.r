@@ -2,8 +2,8 @@ arguments = commandArgs(trailingOnly = T)
 strt = arguments[1]
 stp = arguments[2]
 
-# strt = 1
-# stp = 3
+strt = 1
+stp = 3
 
 library(rgdal)
 library(rgeos)
@@ -20,7 +20,7 @@ file_wetland_parm = paste("wetland_parameters_",strt,"to",stp,".csv",sep='')
 # 
 gd_dir <- "T:/Projects/Wisconsin_River/GIS_Datasets"
 # orginal dem
-dem <- raster(paste(gd_dir, 'DEM','wrb_dem',sep ='/'))
+dem <- raster(paste(gd_dir, 'DEM','wrb_dem.tif',sep ='/'))
 # filled dem
 dem_fl <- raster(paste(gd_dir, 'DEM','wrb_filled.tif',sep ='/'))
 
@@ -113,11 +113,11 @@ for (s in strt:stp){#length(subbasins@data$Subbasin)) {
     #   by the pixel length and width and converting to ha
     print("Calculating Normal and maximum SA and Vols...")
     SA_N <- cellStats(wet_n_crp, stat = sum, na.rm = T) * (10*10)*0.0001
-    # units are 10^4-m3?
+    # units are 10^4-m3
     volRast <- (wet_n_crp * 0.5) * (10*10) 
-    # what is the conversion factor?
     V_N <- cellStats(volRast, stat = sum, na.rm = T) * 0.0001
-    ### finding SA and V maximum
+    
+	### finding SA and V maximum
     SA_MAX <- cellStats(sinkBin_sb_crp, stat = sum, na.rm = T) * (10*10)*0.0001
     volRast_max <- (sinks_sb_crp) * (10*10) * 0.0001 
     V_MAX <- cellStats(volRast_max, stat = sum, na.rm = T) + V_N
