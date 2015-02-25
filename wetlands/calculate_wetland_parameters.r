@@ -20,7 +20,7 @@ file_wetland_parm = paste("wetland_parameters_",strt,"to",stp,".csv",sep='')
 # 
 gd_dir <- "T:/Projects/Wisconsin_River/GIS_Datasets"
 # orginal dem
-dem <- raster(paste(gd_dir, 'DEM','wrb_dem',sep ='/'))
+dem <- raster(paste(gd_dir, 'DEM','wrb_dem.tif',sep ='/'))
 # filled dem
 dem_fl <- raster(paste(gd_dir, 'DEM','wrb_filled.tif',sep ='/'))
 

@@ -5,6 +5,7 @@
 #	Mean slope per LULC/subbasin are summarized by the correct subbasin boundaries.
 
 library(RODBC)
+library(stringr)
 options(stringsAsFactors=F)
 options(warn=2)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
@@ -14,17 +15,40 @@ pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geomet
 reservoir_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/hydrology/dams_parameters.csv"
 gw_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/alphaBflowSubbasin_lookup.csv"
 op_db_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/OpSchedules.mdb"
+ps_files = list.files(
+	"T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/point_sources",
+	"^recday_[0-9]+\\.txt$",
+	full.names=T
+)
 # should be swat_lookup.csv?
 lu_op_xwalk_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/landuse_operation_crosswalk.csv"
 background_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/phosphorus/background_P_from_EPZ.txt"
 soil_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Soil_Phosphorus/soil_phosphorus_by_subbasin.txt"
-projectDir = "C:/Users/ruesca/Desktop/WRB"
-# projectDir = "H:/WRB"
+# projectDir = "C:/Users/ruesca/Desktop/WRB"
+projectDir = "H:/WRB"
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 
+## for irrigation
+## 0 is off, 1 from reach, 3 from shallow aquifer
+irr_sca = 3 
+
+# UPDATE PP TABLE
+
+con = odbcConnectAccess(inDb)
+for (ps_file in ps_files) {
+	ps_file = gsub("/", "\\\\", ps_file)
+	sb = str_extract(basename(ps_file), "[0-9]+")
+	query = paste(
+		"UPDATE pp SET DAILYREC = '",
+		ps_file,
+		"', TYPE = 10 WHERE SUBBASIN = ",
+		sb,
+		sep="")
+	stdout = sqlQuery(con, query)
+}
+close(con)
 
 # UPDATE SLOPE AND SLOPE LENGTH BASED ON RECCS IN BAUMGART, 2005
-
 mean_slope = read.table(mean_slope_file, header=T)
 
 con = odbcConnectAccess(inDb)
@@ -237,7 +261,9 @@ close(con_mgt2)
 py_file = tempfile(fileext=".py")
 write(paste("import arcpy; arcpy.Compact_management('", prjDb, "')", sep=""), py_file)
 
-#####	For Irrigation parameters
+
+
+# for irrigation
 pot_veggie_landuses = c("SGBT", "POTA", "SPOT")
 ## Note:
 ##	IRR_SC=3 for irrigating from shallow aquifer
@@ -264,10 +290,12 @@ for (row in 1:nrow(mgt1)) {
         )
         sqlQuery(con_mgt2, igro_query)
     }
-
+# UPDATE IRRIGATION PARAMETERS
+# 	opschedules.mdb currently has place holders for irrigation
+#	these lines set the necessary parameters, later they get turned on.
 	if (lu %in% pot_veggie_landuses){
 		irri_mgt1_query = paste(
-			"UPDATE mgt1 SET IRRSC = 1, IRRNO = ",
+			"UPDATE mgt1 SET IRRSC = 3, IRRNO = ",
 			row_data$SUBBASIN,
 			" WHERE SUBBASIN = ",
 			as.character(row_data$SUBBASIN),
@@ -334,6 +362,38 @@ for (row in 1:nrow(mgt1)) {
 	}
 
 }
+### IRRIGATION PARAMETERS
+# already have a slot in wrb.mdb (from opschedules) for every year in potato veggie ops
+
+
+
+wstrs_id = 1
+auto_wstrs = 1
+irr_eff = 90
+irr_mx = 90
+irr_asq = 0.02
+
+#### for (lu in pot_veggie_landuses){
+irri_query = paste(
+		"UPDATE mgt2 SET WSTRS_ID = ",
+		wstrs_id,
+		", AUTO_WSTRS = ",
+		auto_wstrs,
+		", IRR_EFF = ",
+		irr_eff,
+		", IRR_MX = ",
+		irr_mx,
+		", IRR_ASQ = ",
+		irr_asq,
+		", IRR_SCA = ",
+		irr_sca,
+		" WHERE MGT_OP = 10;",
+		sep=''
+)
+stout = sqlQuery(con_mgt2, irri_query)
+# }
+
+
 # CNOP
 hydgrp_lu = unique(sqlQuery(con_mgt2, "SELECT SOIL, HYDGRP from sol")) # for CNOP
 crop_cn_lu = unique(sqlQuery(con_swat2012, "SELECT ICNUM, CN2A, CN2B, CN2C, CN2D from crop")) # for CNOP
