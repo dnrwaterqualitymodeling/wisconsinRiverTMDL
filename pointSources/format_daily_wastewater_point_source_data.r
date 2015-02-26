@@ -108,6 +108,7 @@ dates = seq(as.Date("1990-01-01"), as.Date("2013-12-31"), by="1 day")
 out_tbl$DATE = format(dates, "%m/%d/%Y")
 out_tbl$DATE = gsub("^0", "", out_tbl$DATE)
 out_tbl$DATE = gsub("(/0)", "/", out_tbl$DATE)
+
 # update with point source specific data
 setwd(dir_mod_inputs)
 for (sb in 81:337){

@@ -8,7 +8,7 @@ library(RODBC)
 library(stringr)
 library(foreign)
 options(stringsAsFactors=F)
-options(warn=2)
+options(warn=1)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
 mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
 wetland_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands/wetland_geometry.csv"
@@ -25,8 +25,8 @@ ps_files = list.files(
 lu_op_xwalk_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/landuse_operation_crosswalk.csv"
 background_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/phosphorus/background_P_from_EPZ.txt"
 soil_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Soil_Phosphorus/soil_phosphorus_by_subbasin.txt"
-# projectDir = "C:/Users/ruesca/Desktop/WRB"
-projectDir = "H:/WRB"
+projectDir = "C:/Users/evansdm/Documents/WRB"
+# projectDir = "H:/WRB"
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 
 ## for irrigation
@@ -53,9 +53,8 @@ dates = seq(as.POSIXct("1990-01-01", tz="America/Chicago"),
 # dates = format(dates, "%m/%d/%Y")
 
 TimeSeries = sqlFetch(con, "TimeSeries")
-TimeSeries = subset(TimeSeries, select = c("FeatureID", "TSTypeID", "TSDateTime", "TSValue"))
-
-
+TimeSeries = subset(TimeSeries, 
+	select=c("FeatureID", "TSTypeID", "TSDateTime", "TSValue"))
 
 sb_count = 0
 for (ps_file in ps_files) {
@@ -69,8 +68,8 @@ for (ps_file in ps_files) {
 		"', TYPE = 10 WHERE SUBBASIN = ",
 		sb,
 		sep="")
-	stdout = sqlQuery(con, query)
-	hydroid = subset(sb_hydroid_lu, Subbasin == sb & Type == "P")$HydroID
+	# stdout = sqlQuery(con, query)
+	hydroid = 460677#subset(sb_hydroid_lu, Subbasin == sb & Type == "P")$HydroID
 	ps_data = read.csv(ps_file)
 	strt_time = proc.time()[3]
 	i = 0
@@ -89,10 +88,12 @@ for (ps_file in ps_files) {
 				v = 0
 			}
 			
-			rw = c(hydroid, TSType, dt, v)
+			rw = c(hydroid, TSType,dt, v)# as.POSIXct(dt,origin="1970-01-01")
 			TimeSeries = rbind(TimeSeries, rw)
-			
-			
+			if (i ==1){
+				names(TimeSeries)=c("FeatureID", "TSTypeID", "TSDateTime", "TSValue")
+				#TimeSeries$TSDateTime = as.POSIXct(TimeSeries$TSDateTime, origin="1970-01-01")
+			}
 			# query = paste(
 				# "INSERT INTO TimeSeries (FeatureID,TSTypeID,TSDateTime,TSValue) VALUES (",
 				# hydroid,
@@ -111,7 +112,6 @@ for (ps_file in ps_files) {
 	}
 	close(pb)
 	print(paste("Elapsed time: ", proc.time()[3]-strt_time))
-
 }
 
 # con_ts = odbcConnectAccess(inDb)
@@ -120,19 +120,6 @@ del_time_series = sqlQuery(con, "DELETE FROM TimeSeries")
 # sqlQuery(con_ts, "DROP TABLE TimeSeries")
 # sqlQuery(con_ts, "Select * Into mgt2 From mgt2_backup Where 1 = 2")
 
-# INSERT INTO Table ( Column1, Column2 ) VALUES
-# ( Value1, Value2 ), ( Value1, Value2 )
-tst = data.frame(
-	fID=c(1:6),
-	TSType=c(101:106),
-	TSdt=c(
-		"1990-01-01",
-		"1990-01-02",
-		"1990-01-03",
-		"1990-01-04",
-		"1990-01-05",
-		"1990-01-06"),
-	TSVal=c(10,9,8,7,6,4))
 col_names = c("FeatureID", "TSTypeID", "TSDateTime", "TSValue")
 strt = 1
 while (strt <= nrow(TimeSeries)){
@@ -143,7 +130,8 @@ while (strt <= nrow(TimeSeries)){
 		nd = nrow(TimeSeries)
 	}
 	print(paste("Working on records",strt,"to",nd))
-	to_insert = TimeSeries[strt:nd, tst_col_names]
+	to_insert = TimeSeries[strt:nd, col_names]
+	to_insert$TSDateTime = as.character(to_insert$TSDateTime)
 	
 	for_q = apply(
 		to_insert,
@@ -170,8 +158,8 @@ while (strt <= nrow(TimeSeries)){
 		close(con)
 		print("Compacting database. Please wait...")
 		system(paste("C:\\Python27\\ArcGIS10.1\\python.exe", py_file))
-		con = odbcConnectAccess(inDb) 
-
+		con = odbcConnectAccess(inDb)
+	}
 }
 close(con)
 
