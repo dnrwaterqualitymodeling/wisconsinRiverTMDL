@@ -6,6 +6,7 @@
 
 library(RODBC)
 library(stringr)
+library(foreign)
 options(stringsAsFactors=F)
 options(warn=2)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
@@ -32,12 +33,31 @@ inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 ## 0 is off, 1 from reach, 3 from shallow aquifer
 irr_sca = 3 
 
-# UPDATE PP TABLE
 
+py_file = tempfile(fileext=".py")
+write(paste("import arcpy; arcpy.Compact_management('", inDb, "')", sep=""), py_file)
+
+# UPDATE PP TABLE
+wipe_TimeSeries = TRUE
 con = odbcConnectAccess(inDb)
+if (wipe_TimeSeries){
+	sqlQuery(con, "DELETE FROM TimeSeries WHERE TSTypeID>0")
+}
+
+sb_hydroid_lu = read.dbf(paste(projectDir, "Watershed", "Shapes", "monitoring_points1.dbf", sep="/"), as.is=T)
+TSTypes = seq(1,35,2)
+dates = seq(as.Date("1990-01-01"), as.Date("2013-12-31"), "day")
+dates = format(dates, "%m/%d/%Y")
+
+TimeSeries = sqlFetch(con, "TimeSeries")
+TimeSeries = subset(TimeSeries, select = c("FeatureID", "TSTypeID", "TSDateTime", "TSValue"))
+
+sb_count = 0
 for (ps_file in ps_files) {
 	ps_file = gsub("/", "\\\\", ps_file)
 	sb = str_extract(basename(ps_file), "[0-9]+")
+	sb_count = sb_count + 1
+	print(paste("Subbasin:",sb))
 	query = paste(
 		"UPDATE pp SET DAILYREC = '",
 		ps_file,
@@ -45,6 +65,46 @@ for (ps_file in ps_files) {
 		sb,
 		sep="")
 	stdout = sqlQuery(con, query)
+	hydroid = subset(sb_hydroid_lu, Subbasin == sb & Type == "P")$HydroID
+	ps_data = read.csv(ps_file)
+	i = 0
+	pb = txtProgressBar(0,1)
+	for (dt in dates) {
+		i = i + 1
+		for (TSType in TSTypes) {
+			setTxtProgressBar(pb, i/nrow(ps_data))
+			if (TSType == 1) {
+				v = ps_data$Floday[i]
+			} else if (TSType == 3) {
+				v = ps_data$Sedday[i]
+			} else if (TSType == 15) {
+				v = ps_data$Minpday[i]
+			} else {
+				v = 0
+
+			query = paste(
+				"INSERT INTO TimeSeries (FeatureID,TSTypeID,TSDateTime,TSValue) VALUES (",
+				hydroid,
+				",",
+				TSType,
+				",'",
+				dt,
+				"',",
+				v,
+				");",
+				sep=""
+			)
+			stdout = sqlQuery(con, query)
+		}
+		
+	}
+	close(pb)
+	if (sb_count %% 100 == 0) {
+		close(con)
+		print("Compacting database. Please wait...")
+		system(paste("C:\\Python27\\ArcGIS10.1\\python.exe", py_file))
+		con = odbcConnectAccess(inDb) 
+	}
 }
 close(con)
 
@@ -258,8 +318,6 @@ sqlQuery(con_mgt2, "DROP TABLE mgt2")
 sqlQuery(con_mgt2, "Select * Into mgt2 From mgt2_backup Where 1 = 2")
 close(con_mgt2)
 
-py_file = tempfile(fileext=".py")
-write(paste("import arcpy; arcpy.Compact_management('", prjDb, "')", sep=""), py_file)
 
 
 
