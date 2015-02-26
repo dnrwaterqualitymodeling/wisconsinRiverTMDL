@@ -33,7 +33,6 @@ inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 ## 0 is off, 1 from reach, 3 from shallow aquifer
 irr_sca = 3 
 
-
 py_file = tempfile(fileext=".py")
 write(paste("import arcpy; arcpy.Compact_management('", inDb, "')", sep=""), py_file)
 
@@ -49,11 +48,14 @@ TSTypes = seq(1,35,2)
 # dates = seq(as.Date("1990-01-01"), as.Date("2013-12-31"), "day")
 # dates = format(dates, "%m/%d/%Y")
 
-dates = seq(as.POSIXt("1990-01-01", tz="CST"), as.Date("2013-12-31"), "day")
-dates = format(dates, "%m/%d/%Y")
+dates = seq(as.POSIXct("1990-01-01", tz="America/Chicago"), 
+	as.POSIXct("2013-12-31", tz="America/Chicago"), "day")
+# dates = format(dates, "%m/%d/%Y")
 
 TimeSeries = sqlFetch(con, "TimeSeries")
 TimeSeries = subset(TimeSeries, select = c("FeatureID", "TSTypeID", "TSDateTime", "TSValue"))
+
+
 
 sb_count = 0
 for (ps_file in ps_files) {
@@ -86,31 +88,90 @@ for (ps_file in ps_files) {
 			} else {
 				v = 0
 			}
-			query = paste(
-				"INSERT INTO TimeSeries (FeatureID,TSTypeID,TSDateTime,TSValue) VALUES (",
-				hydroid,
-				",",
-				TSType,
-				",'",
-				dt,
-				"',",
-				v,
-				");",
-				sep=""
-			)
-			stdout = sqlQuery(con, query)
+			
+			rw = c(hydroid, TSType, dt, v)
+			TimeSeries = rbind(TimeSeries, rw)
+			
+			
+			# query = paste(
+				# "INSERT INTO TimeSeries (FeatureID,TSTypeID,TSDateTime,TSValue) VALUES (",
+				# hydroid,
+				# ",",
+				# TSType,
+				# ",'",
+				# dt,
+				# "',",
+				# v,
+				# ");",
+				# sep=""
+			# )
+			# stdout = sqlQuery(con, query)
 		}
 		
 	}
 	close(pb)
 	print(paste("Elapsed time: ", proc.time()[3]-strt_time))
 
-	if (sb_count %% 100 == 0) {
+}
+
+# con_ts = odbcConnectAccess(inDb)
+sqlQuery(con, "SELECT * INTO timeseries_bkup FROM TimeSeries;")
+del_time_series = sqlQuery(con, "DELETE FROM TimeSeries")
+# sqlQuery(con_ts, "DROP TABLE TimeSeries")
+# sqlQuery(con_ts, "Select * Into mgt2 From mgt2_backup Where 1 = 2")
+
+# INSERT INTO Table ( Column1, Column2 ) VALUES
+# ( Value1, Value2 ), ( Value1, Value2 )
+tst = data.frame(
+	fID=c(1:6),
+	TSType=c(101:106),
+	TSdt=c(
+		"1990-01-01",
+		"1990-01-02",
+		"1990-01-03",
+		"1990-01-04",
+		"1990-01-05",
+		"1990-01-06"),
+	TSVal=c(10,9,8,7,6,4))
+col_names = c("FeatureID", "TSTypeID", "TSDateTime", "TSValue")
+strt = 1
+while (strt <= nrow(TimeSeries)){
+	
+	if ((strt + 1000) <= nrow(TimeSeries)){
+		nd = strt + 1000
+	} else if ((strt + 1000) > nrow(TimeSeries)){
+		nd = nrow(TimeSeries)
+	}
+	print(paste("Working on records",strt,"to",nd))
+	to_insert = TimeSeries[strt:nd, tst_col_names]
+	
+	for_q = apply(
+		to_insert,
+		MARGIN=1,
+		FUN=function(x){
+			hld = paste(x,collapse=",")
+			hld = paste("(", hld,")", sep="")
+			return(hld)
+		}
+	)	
+	
+	insert_query = paste(
+		"INSERT INTO TimeSeries (",
+		paste(col_names, collapse=","),
+		") VALUES ",
+		paste(for_q,collapse=","),
+		";",
+		sep=''
+	)
+	insrt_out = sqlQuery(con, insert_query)
+	
+	strt = strt + 1001
+	if (nd %% 10000 == 0) {
 		close(con)
 		print("Compacting database. Please wait...")
 		system(paste("C:\\Python27\\ArcGIS10.1\\python.exe", py_file))
 		con = odbcConnectAccess(inDb) 
-	}
+
 }
 close(con)
 

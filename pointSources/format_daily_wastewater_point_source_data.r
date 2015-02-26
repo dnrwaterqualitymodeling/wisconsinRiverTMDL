@@ -110,7 +110,7 @@ out_tbl$DATE = gsub("^0", "", out_tbl$DATE)
 out_tbl$DATE = gsub("(/0)", "/", out_tbl$DATE)
 # update with point source specific data
 setwd(dir_mod_inputs)
-for (sb in 1:337){
+for (sb in 81:337){
 	file_name = paste("recday_", sb, ".txt", sep='')
 	print(file_name)
 	sb_dat = subset(aggreg_of_by_subs_sort, sb_id == sb)
@@ -120,7 +120,7 @@ for (sb in 1:337){
 	dts = out_sb_tbl$DATE
 	
 	out_sb_tbl = out_sb_tbl[,2:length(out_sb_tbl)]
-	
+	print("formatting output...")
 	out_sb_tbl = apply(
 		out_sb_tbl,
 		MARGIN=2,
@@ -133,6 +133,7 @@ for (sb in 1:337){
 		paste(arcswat_hdr, collapse='","'),
 		'"',
 		sep="")
+	print('writing data...')
 	writeLines(hdr, file_name)
 	write.table(out_sb_tbl,
 		file=file_name,
