@@ -46,7 +46,10 @@ if (wipe_TimeSeries){
 
 sb_hydroid_lu = read.dbf(paste(projectDir, "Watershed", "Shapes", "monitoring_points1.dbf", sep="/"), as.is=T)
 TSTypes = seq(1,35,2)
-dates = seq(as.Date("1990-01-01"), as.Date("2013-12-31"), "day")
+# dates = seq(as.Date("1990-01-01"), as.Date("2013-12-31"), "day")
+# dates = format(dates, "%m/%d/%Y")
+
+dates = seq(as.POSIXt("1990-01-01", tz="CST"), as.Date("2013-12-31"), "day")
 dates = format(dates, "%m/%d/%Y")
 
 TimeSeries = sqlFetch(con, "TimeSeries")
@@ -67,6 +70,7 @@ for (ps_file in ps_files) {
 	stdout = sqlQuery(con, query)
 	hydroid = subset(sb_hydroid_lu, Subbasin == sb & Type == "P")$HydroID
 	ps_data = read.csv(ps_file)
+	strt_time = proc.time()[3]
 	i = 0
 	pb = txtProgressBar(0,1)
 	for (dt in dates) {
@@ -81,7 +85,7 @@ for (ps_file in ps_files) {
 				v = ps_data$Minpday[i]
 			} else {
 				v = 0
-
+			}
 			query = paste(
 				"INSERT INTO TimeSeries (FeatureID,TSTypeID,TSDateTime,TSValue) VALUES (",
 				hydroid,
@@ -99,6 +103,8 @@ for (ps_file in ps_files) {
 		
 	}
 	close(pb)
+	print(paste("Elapsed time: ", proc.time()[3]-strt_time))
+
 	if (sb_count %% 100 == 0) {
 		close(con)
 		print("Compacting database. Please wait...")
