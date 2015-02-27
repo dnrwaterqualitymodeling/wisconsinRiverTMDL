@@ -2,7 +2,7 @@
 #   This should be run with MONTHLY output (code 0)
 wd = "H:\\WRB\\Scenarios\\Default\\TxtInOut"
 setwd(wd)
-source("C:/Users/evansdm/Documents/Code/validation/functions_query_output.r")
+source("C:/Users/evansdm/Documents/Code/calibration/functions_query_output.r")
 
 file.copy("C:/SWAT/ArcSWAT/SWAT_64rel.exe", paste(wd, "SWAT_64rel.exe", sep="\\"))
 
@@ -45,12 +45,12 @@ for (crop in c("CORN", "SOYB", "ALFA")) {
             aggregate(AREA ~ MON, data=modData, sum))
         area_wt_yld$MEAN = area_wt_yld[['YLD * AREA']] / area_wt_yld[['AREA']]
         
-        row = data.frame(crop=crop, bio_e=bio_e, yld=mean(area_wt_yld$MEAN))
-        cal_table = rbind(cal_table, row)
-        write.csv(cal_table, paste(wd, "bio_calibration.csv", sep="\\"), row.names=F)
+        rw = data.frame(crop=crop, bio_e=bio_e, yld=mean(area_wt_yld$MEAN))
+        cal_table = rbind(cal_table, rw)
+        write.csv(cal_table, "C:/Users/evansdm/Documents/bio_calibration.csv"), row.names=F)
     }
     substr(plant.dat[plant.dat.ind + 1], 3, 7) = format(original_bio_e, digits=2, nsmall=2)
     writeLines(plant.dat, paste(wd, "plant.dat", sep="\\"))
 }
 
-source("C:/Users/evansdm/Documents/Code/validation/calibrate_crop_yields_using_response_curve_plotting.r")
+source("C:/Users/evansdm/Documents/Code/calibration/crop_yield/calibrate_crop_yields_using_response_curve_plotting.r")

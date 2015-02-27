@@ -1,6 +1,6 @@
 wd <- 'H:\\WRB\\Scenarios\\Default\\TxtInOut'
 options(stringsAsFactors = F)
-bio_calib <- read.csv(paste(wd, 'bio_calibration.csv', sep = '//'))
+bio_calib <- read.csv("C:/Users/evansdm/Documents/bio_calibration.csv")
 # formatting Observed Data
 obsData_full <- read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/upDated_NASSstats_30092014.csv", stringsAsFactors=F)
 

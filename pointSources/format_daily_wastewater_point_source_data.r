@@ -100,7 +100,7 @@ arcswat_hdr = c(
 	"Cmtl2day",
 	"Cmtl3day")
 
-out_tbl = matrix(0, nrow=nrow(dates), ncol=length(arcswat_hdr))
+out_tbl = matrix("0.000", nrow=nrow(dates), ncol=length(arcswat_hdr))
 out_tbl = data.frame(out_tbl)
 names(out_tbl) = arcswat_hdr
 dates = seq(as.Date("1990-01-01"), as.Date("2013-12-31"), by="1 day")
@@ -108,14 +108,23 @@ out_tbl$DATE = format(dates, "%m/%d/%Y")
 out_tbl$DATE = gsub("^0", "", out_tbl$DATE)
 out_tbl$DATE = gsub("(/0)", "/", out_tbl$DATE)
 # update with point source specific data
+
 setwd(out_dir)
 for (sb in 1:337){
 	file_name = paste("recday_", sb, ".txt", sep='')
 	print(file_name)
 	sb_dat = subset(aggreg_of_by_subs_sort, sb_id == sb)
+
 	out_sb_tbl = out_tbl
 	out_sb_tbl[c("Floday", "Sedday", "Minpday")] = sb_dat[c("mean_flow", "sed_load", "p_load")]
-	out_sb_tbl[is.na(out_sb_tbl)] = 0
+	out_sb_tbl[c("Floday", "Sedday", "Minpday")] =
+		apply(
+			out_sb_tbl[c("Floday", "Sedday", "Minpday")],
+			2,
+			function (x) {format(x, nsmall=3, digits=3)}
+		)
+	out_sb_tbl[is.na(out_sb_tbl)] = "0.000"
+	
 	hdr = paste('"', paste(arcswat_hdr, collapse='","'), '"', sep="")
 	writeLines(hdr, file_name)
 	write.table(out_sb_tbl,
