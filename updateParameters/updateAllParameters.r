@@ -8,7 +8,7 @@ library(RODBC)
 library(stringr)
 library(foreign)
 options(stringsAsFactors=F)
-options(warn=2)
+options(warn=1)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
 mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
 wetland_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands/wetland_geometry.csv"
@@ -25,14 +25,13 @@ ps_files = list.files(
 lu_op_xwalk_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/landuse_operation_crosswalk.csv"
 background_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/phosphorus/background_P_from_EPZ.txt"
 soil_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Soil_Phosphorus/soil_phosphorus_by_subbasin.txt"
-# projectDir = "C:/Users/ruesca/Desktop/WRB"
-projectDir = "H:/WRB"
+projectDir = "C:/Users/evansdm/Documents/WRB"
+# projectDir = "H:/WRB"
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 
 ## for irrigation
 ## 0 is off, 1 from reach, 3 from shallow aquifer
 irr_sca = 3 
-
 
 py_file = tempfile(fileext=".py")
 write(paste("import arcpy; arcpy.Compact_management('", inDb, "')", sep=""), py_file)
@@ -49,11 +48,13 @@ TSTypes = seq(1,35,2)
 # dates = seq(as.Date("1990-01-01"), as.Date("2013-12-31"), "day")
 # dates = format(dates, "%m/%d/%Y")
 
-dates = seq(as.POSIXt("1990-01-01", tz="CST"), as.Date("2013-12-31"), "day")
-dates = format(dates, "%m/%d/%Y")
+dates = seq(as.POSIXct("1990-01-01", tz="America/Chicago"), 
+	as.POSIXct("2013-12-31", tz="America/Chicago"), "day")
+# dates = format(dates, "%m/%d/%Y")
 
 TimeSeries = sqlFetch(con, "TimeSeries")
-TimeSeries = subset(TimeSeries, select = c("FeatureID", "TSTypeID", "TSDateTime", "TSValue"))
+TimeSeries = subset(TimeSeries, 
+	select=c("FeatureID", "TSTypeID", "TSDateTime", "TSValue"))
 
 sb_count = 0
 for (ps_file in ps_files) {
@@ -67,8 +68,8 @@ for (ps_file in ps_files) {
 		"', TYPE = 10 WHERE SUBBASIN = ",
 		sb,
 		sep="")
-	stdout = sqlQuery(con, query)
-	hydroid = subset(sb_hydroid_lu, Subbasin == sb & Type == "P")$HydroID
+	# stdout = sqlQuery(con, query)
+	hydroid = 460677#subset(sb_hydroid_lu, Subbasin == sb & Type == "P")$HydroID
 	ps_data = read.csv(ps_file)
 	strt_time = proc.time()[3]
 	i = 0
@@ -86,30 +87,78 @@ for (ps_file in ps_files) {
 			} else {
 				v = 0
 			}
-			query = paste(
-				"INSERT INTO TimeSeries (FeatureID,TSTypeID,TSDateTime,TSValue) VALUES (",
-				hydroid,
-				",",
-				TSType,
-				",'",
-				dt,
-				"',",
-				v,
-				");",
-				sep=""
-			)
-			stdout = sqlQuery(con, query)
+			
+			rw = c(hydroid, TSType,dt, v)# as.POSIXct(dt,origin="1970-01-01")
+			TimeSeries = rbind(TimeSeries, rw)
+			if (i ==1){
+				names(TimeSeries)=c("FeatureID", "TSTypeID", "TSDateTime", "TSValue")
+				#TimeSeries$TSDateTime = as.POSIXct(TimeSeries$TSDateTime, origin="1970-01-01")
+			}
+			# query = paste(
+				# "INSERT INTO TimeSeries (FeatureID,TSTypeID,TSDateTime,TSValue) VALUES (",
+				# hydroid,
+				# ",",
+				# TSType,
+				# ",'",
+				# dt,
+				# "',",
+				# v,
+				# ");",
+				# sep=""
+			# )
+			# stdout = sqlQuery(con, query)
 		}
 		
 	}
 	close(pb)
 	print(paste("Elapsed time: ", proc.time()[3]-strt_time))
+}
 
-	if (sb_count %% 100 == 0) {
+# con_ts = odbcConnectAccess(inDb)
+sqlQuery(con, "SELECT * INTO timeseries_bkup FROM TimeSeries;")
+del_time_series = sqlQuery(con, "DELETE FROM TimeSeries")
+# sqlQuery(con_ts, "DROP TABLE TimeSeries")
+# sqlQuery(con_ts, "Select * Into mgt2 From mgt2_backup Where 1 = 2")
+
+col_names = c("FeatureID", "TSTypeID", "TSDateTime", "TSValue")
+strt = 1
+while (strt <= nrow(TimeSeries)){
+	
+	if ((strt + 1000) <= nrow(TimeSeries)){
+		nd = strt + 1000
+	} else if ((strt + 1000) > nrow(TimeSeries)){
+		nd = nrow(TimeSeries)
+	}
+	print(paste("Working on records",strt,"to",nd))
+	to_insert = TimeSeries[strt:nd, col_names]
+	to_insert$TSDateTime = as.character(to_insert$TSDateTime)
+	
+	for_q = apply(
+		to_insert,
+		MARGIN=1,
+		FUN=function(x){
+			hld = paste(x,collapse=",")
+			hld = paste("(", hld,")", sep="")
+			return(hld)
+		}
+	)	
+	
+	insert_query = paste(
+		"INSERT INTO TimeSeries (",
+		paste(col_names, collapse=","),
+		") VALUES ",
+		paste(for_q,collapse=","),
+		";",
+		sep=''
+	)
+	insrt_out = sqlQuery(con, insert_query)
+	
+	strt = strt + 1001
+	if (nd %% 10000 == 0) {
 		close(con)
 		print("Compacting database. Please wait...")
 		system(paste("C:\\Python27\\ArcGIS10.1\\python.exe", py_file))
-		con = odbcConnectAccess(inDb) 
+		con = odbcConnectAccess(inDb)
 	}
 }
 close(con)

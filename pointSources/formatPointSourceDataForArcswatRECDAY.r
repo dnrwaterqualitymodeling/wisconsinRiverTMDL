@@ -53,7 +53,7 @@ for(sample_pt in sample_pts){
 	
 	sed_data = subset(pt_data, STORET_PARM_DESC == "Suspended Solids, Total")
 	units = sed_data$PARM_UNIT_TYPE[1]
-	if(units == "mg/L"){
+	if(tolower(units) == "mg/l"){
 		sed_conc = (sed_data$MODEL_VALUE)
 		sed_load = sed_conc*mean_flow*0.000001
 	} else if(units == "lbs/day"){
@@ -73,7 +73,6 @@ for(sample_pt in sample_pts){
 }
 output_holder[is.na(output_holder)] = 0
 
-# write text file with daily loads
 aggregated_of_by_subs = aggregate(
 	cbind(mean_flow, sed_load, p_load) ~ YEAR + DAY + sb_id, 
 	data=output_holder, 
