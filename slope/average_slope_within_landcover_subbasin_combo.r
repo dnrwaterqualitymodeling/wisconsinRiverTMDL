@@ -3,7 +3,7 @@ library(raster)
 library(reshape2)
 
 dir_prj = "C:/Users/ruesca/Desktop/WRB"
-lc_lu_file = "T:/Projects/Wisconsin_River/GIS_Datasets/slope"
+lc_lu_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/SWAT_lookup.csv"
 out_mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
 
 lc_lu = read.csv(lc_lu_file, stringsAsFactors=F)

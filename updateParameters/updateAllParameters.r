@@ -16,84 +16,84 @@ pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geomet
 reservoir_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/hydrology/dams_parameters.csv"
 gw_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/alphaBflowSubbasin_lookup.csv"
 op_db_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/OpSchedules.mdb"
-ps_files = list.files(
-	"T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/point_sources",
-	"^recday_[0-9]+\\.txt$",
-	full.names=T
-)
+# ps_files = list.files(
+	# "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/point_sources",
+	# "^recday_[0-9]+\\.txt$",
+	# full.names=T
+# )
 # should be swat_lookup.csv?
 lu_op_xwalk_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/landuse_operation_crosswalk.csv"
 background_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/phosphorus/background_P_from_EPZ.txt"
 soil_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Soil_Phosphorus/soil_phosphorus_by_subbasin.txt"
-projectDir = "C:/Users/evansdm/Documents/WRB"
+
+projectDir = "C:/Users/ruesca/Desktop/WRB"
 # projectDir = "H:/WRB"
+
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 
 ## for irrigation
 ## 0 is off, 1 from reach, 3 from shallow aquifer
 irr_sca = 3 
 
-py_file = tempfile(fileext=".py")
-write(paste("import arcpy; arcpy.Compact_management('", inDb, "')", sep=""), py_file)
+#############################################
+# The point source block below does not work because ArcSWAT cannot handle the size of the TimeSeries table it creates
+# If there is a workaround, it's possible the code below could be useful.
+#############################################
+
+# UPDATE POINT SOURCES
+
+# py_file = tempfile(fileext=".py")
+# write(paste("import arcpy; arcpy.Compact_management('", inDb, "')", sep=""), py_file)
 
 # UPDATE PP TABLE
-wipe_TimeSeries = TRUE
-con = odbcConnectAccess(inDb)
-if (wipe_TimeSeries){
-	sqlQuery(con, "DELETE FROM TimeSeries WHERE TSTypeID>0")
-}
+# wipe_TimeSeries = TRUE
+# con = odbcConnectAccess(inDb)
+# if (wipe_TimeSeries){
+	# sqlQuery(con, "DELETE FROM TimeSeries WHERE TSTypeID > 0")
+# }
+# close(con)
 
-sb_hydroid_lu = read.dbf(paste(projectDir, "Watershed", "Shapes", "monitoring_points1.dbf", sep="/"), as.is=T)
-TSTypes = seq(1,35,2)
+# sb_hydroid_lu = read.dbf(paste(projectDir, "Watershed", "Shapes", "monitoring_points1.dbf", sep="/"), as.is=T)
+# TSTypes = seq(1,35,2)
+
 # dates = seq(as.Date("1990-01-01"), as.Date("2013-12-31"), "day")
 # dates = format(dates, "%m/%d/%Y")
 
-dates = seq(as.POSIXct("1990-01-01", tz="America/Chicago"), 
-	as.POSIXct("2013-12-31", tz="America/Chicago"), "day")
-# dates = format(dates, "%m/%d/%Y")
-
-TimeSeries = sqlFetch(con, "TimeSeries")
-TimeSeries = subset(TimeSeries, 
-	select=c("FeatureID", "TSTypeID", "TSDateTime", "TSValue"))
-
-sb_count = 0
-for (ps_file in ps_files) {
-	ps_file = gsub("/", "\\\\", ps_file)
-	sb = str_extract(basename(ps_file), "[0-9]+")
-	sb_count = sb_count + 1
-	print(paste("Subbasin:",sb))
-	query = paste(
-		"UPDATE pp SET DAILYREC = '",
-		ps_file,
-		"', TYPE = 10 WHERE SUBBASIN = ",
-		sb,
-		sep="")
+# sb_count = 0
+# for (ps_file in ps_files) {
+	# ps_file = gsub("/", "\\\\", ps_file)
+	# ps_data = read.csv(ps_file)
+	
+	# sb = str_extract(basename(ps_file), "[0-9]+")
+	# if (all(cbind(ps_data[c("Floday","Sedday","Minpday")]) == 0)) {
+		# print(paste("Skipping subbasin", sb))
+		# next}
+	# sb_count = sb_count + 1
+	# print(paste("Subbasin:",sb))
+	# query = paste(
+		# "UPDATE pp SET DAILYREC = '",
+		# ps_file,
+		# "', TYPE = 10 WHERE SUBBASIN = ",
+		# sb,
+		# sep="")
 	# stdout = sqlQuery(con, query)
-	hydroid = 460677#subset(sb_hydroid_lu, Subbasin == sb & Type == "P")$HydroID
-	ps_data = read.csv(ps_file)
-	strt_time = proc.time()[3]
-	i = 0
-	pb = txtProgressBar(0,1)
-	for (dt in dates) {
-		i = i + 1
-		for (TSType in TSTypes) {
-			setTxtProgressBar(pb, i/nrow(ps_data))
-			if (TSType == 1) {
-				v = ps_data$Floday[i]
-			} else if (TSType == 3) {
-				v = ps_data$Sedday[i]
-			} else if (TSType == 15) {
-				v = ps_data$Minpday[i]
-			} else {
-				v = 0
-			}
-			
-			rw = c(hydroid, TSType,dt, v)# as.POSIXct(dt,origin="1970-01-01")
-			TimeSeries = rbind(TimeSeries, rw)
-			if (i ==1){
-				names(TimeSeries)=c("FeatureID", "TSTypeID", "TSDateTime", "TSValue")
-				#TimeSeries$TSDateTime = as.POSIXct(TimeSeries$TSDateTime, origin="1970-01-01")
-			}
+	# hydroid = subset(sb_hydroid_lu, Subbasin == sb & Type == "P")$HydroID
+	# strt_time = proc.time()[3]
+	# i = 0
+	# pb = txtProgressBar(0,1)
+	# for (dt in dates) {
+		# i = i + 1
+		# for (TSType in TSTypes) {
+			# setTxtProgressBar(pb, i/nrow(ps_data))
+			# if (TSType == 1) {
+				# v = ps_data$Floday[i]
+			# } else if (TSType == 3) {
+				# v = ps_data$Sedday[i]
+			# } else if (TSType == 15) {
+				# v = ps_data$Minpday[i]
+			# } else {
+				# v = 0
+			# }
 			# query = paste(
 				# "INSERT INTO TimeSeries (FeatureID,TSTypeID,TSDateTime,TSValue) VALUES (",
 				# hydroid,
@@ -107,61 +107,12 @@ for (ps_file in ps_files) {
 				# sep=""
 			# )
 			# stdout = sqlQuery(con, query)
-		}
+		# }
 		
-	}
-	close(pb)
-	print(paste("Elapsed time: ", proc.time()[3]-strt_time))
-}
-
-# con_ts = odbcConnectAccess(inDb)
-sqlQuery(con, "SELECT * INTO timeseries_bkup FROM TimeSeries;")
-del_time_series = sqlQuery(con, "DELETE FROM TimeSeries")
-# sqlQuery(con_ts, "DROP TABLE TimeSeries")
-# sqlQuery(con_ts, "Select * Into mgt2 From mgt2_backup Where 1 = 2")
-
-col_names = c("FeatureID", "TSTypeID", "TSDateTime", "TSValue")
-strt = 1
-while (strt <= nrow(TimeSeries)){
-	
-	if ((strt + 1000) <= nrow(TimeSeries)){
-		nd = strt + 1000
-	} else if ((strt + 1000) > nrow(TimeSeries)){
-		nd = nrow(TimeSeries)
-	}
-	print(paste("Working on records",strt,"to",nd))
-	to_insert = TimeSeries[strt:nd, col_names]
-	to_insert$TSDateTime = as.character(to_insert$TSDateTime)
-	
-	for_q = apply(
-		to_insert,
-		MARGIN=1,
-		FUN=function(x){
-			hld = paste(x,collapse=",")
-			hld = paste("(", hld,")", sep="")
-			return(hld)
-		}
-	)	
-	
-	insert_query = paste(
-		"INSERT INTO TimeSeries (",
-		paste(col_names, collapse=","),
-		") VALUES ",
-		paste(for_q,collapse=","),
-		";",
-		sep=''
-	)
-	insrt_out = sqlQuery(con, insert_query)
-	
-	strt = strt + 1001
-	if (nd %% 10000 == 0) {
-		close(con)
-		print("Compacting database. Please wait...")
-		system(paste("C:\\Python27\\ArcGIS10.1\\python.exe", py_file))
-		con = odbcConnectAccess(inDb)
-	}
-}
-close(con)
+	# }
+	# close(pb)
+	# print(paste("Elapsed time: ", proc.time()[3]-strt_time))
+# }
 
 # UPDATE SLOPE AND SLOPE LENGTH BASED ON RECCS IN BAUMGART, 2005
 mean_slope = read.table(mean_slope_file, header=T)
@@ -373,14 +324,14 @@ sqlQuery(con_mgt2, "DROP TABLE mgt2")
 sqlQuery(con_mgt2, "Select * Into mgt2 From mgt2_backup Where 1 = 2")
 close(con_mgt2)
 
-
-
-
 # for irrigation
 pot_veggie_landuses = c("SGBT", "POTA", "SPOT")
 ## Note:
 ##	IRR_SC=3 for irrigating from shallow aquifer
 ##	IRR_NO=the subbasin number from which the water comes
+
+py_file = tempfile(fileext=".py")
+write(paste("import arcpy; arcpy.Compact_management('", inDb, "')", sep=""), py_file)
 
 con_mgt2 = odbcConnectAccess(prjDb)
 con_swat2012 = odbcConnectAccess(swatDb)
@@ -403,9 +354,9 @@ for (row in 1:nrow(mgt1)) {
         )
         sqlQuery(con_mgt2, igro_query)
     }
-# UPDATE IRRIGATION PARAMETERS
-# 	opschedules.mdb currently has place holders for irrigation
-#	these lines set the necessary parameters, later they get turned on.
+	# UPDATE IRRIGATION PARAMETERS
+	# 	opschedules.mdb currently has place holders for irrigation
+	#	these lines set the necessary parameters, later they get turned on.
 	if (lu %in% pot_veggie_landuses){
 		irri_mgt1_query = paste(
 			"UPDATE mgt1 SET IRRSC = 3, IRRNO = ",
