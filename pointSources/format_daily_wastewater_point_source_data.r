@@ -1,21 +1,14 @@
-# library(rgdal)
-# library(rgeos)
 library(foreign)
 options(stringsAsFactors=F)
 
 # define inputs
 of_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Outfalls/WRB_Permitted_Outfall_Data_DRAFT_Jan2015.txt"
 lu_file = "T:/Projects/Wisconsin_River/Model_Documents/Point_Source_Info/DRAFT WASTEWATER DATASET FILES/WRB_Outfalls_DRAFT_JAN2015.dbf"
-out_dir = "T:/Projects/Wisconsin_River/GIS_Datasets/Outfalls/arcswat_text_files"
-dir_mod_inputs = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/point_sources"
+out_dir = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/point_sources"
 
-# loc_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Outfalls/WRB_Outfalls_DRAFT_JAN2015.shp"
-# sb_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/subbasins.shp"
 # read in point source monthly from tab delimited file
 of_data=read.delim(of_file)
 
-# locs = readOGR(dirname(loc_file), strsplit(basename(loc_file), "\\.")[[1]][1])
-# sbs = readOGR(dirname(sb_file), strsplit(basename(sb_file), "\\.")[[1]][1])
 lu_table = read.dbf(lu_file)
 # loop through each point source
 sample_pts=unique(of_data$SAMPLE_ID)
@@ -111,8 +104,8 @@ out_tbl$DATE = gsub("(/0)", "/", out_tbl$DATE)
 
 # update with point source specific data
 
-setwd(dir_mod_inputs)
-for (sb in 1:337){
+setwd(out_dir)
+for (sb in unique(aggreg_of_by_subs_sort$sb_id)) {
 
 	file_name = paste("recday_", sb, ".txt", sep='')
 	print(file_name)
