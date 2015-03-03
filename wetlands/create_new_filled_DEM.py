@@ -9,7 +9,8 @@ arcpy.CheckOutExtension("Spatial")
 fl_hydro = 'W23324.WD_HYDRO_DATA_24K'
 sbbsns = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/subbasins.shp"
 
-file_dem = "C:/Users/evansdm/filled_dem_processing/raw_prj_10_m_cpy.tif"
+file_dem = "C:/Users/evansdm/filled_dem_processing/raw_prj_10_m.img"
+env.snapRaster = file_dem
 
 # dir_hydro = "T:/Projects/Wisconsin_River/GIS_Datasets/Hydrology"
 # file_hydro_in = dir_hydro +"/WI_River_Hydro_Flowline_24K.shp"
@@ -17,8 +18,6 @@ file_dem = "C:/Users/evansdm/filled_dem_processing/raw_prj_10_m_cpy.tif"
 
 flowlines_ras = "flowLines_clip_PolylineToRas"
 llckbodys_ras = "nonLndLckedLkes_clip_Polygon"
-
-# env.snapRaster = file_dem
 
  # subprocess.Popen("mpiexec -n 8 pitremove")
 tmpdir = os.path.expanduser("~") + "/filled_dem_processing"
@@ -53,14 +52,24 @@ arcpy.Clip_analysis("flowLines", sbbsns, "flowLines_clip")
 arcpy.RepairGeometry_management("flowLines_clip")
 arcpy.RepairGeometry_management("nonLndLcked_clip")
 
-arcpy.AddField_management("flowLines_clip", "dumDum", "SHORT")
-arcpy.AddField_management("nonLndLcked_clip", "dumDum", "SHORT")
+# arcpy.AddField_management("flowLines_clip", "dumDum", "SHORT")
+# arcpy.AddField_management("nonLndLcked_clip", "dumDum", "SHORT")
 
-arcpy.CalculateField_management("flowLines_clip", "dumDum", "dumDum = 1")
-arcpy.CalculateField_management("nonLndLcked_clip", "dumDum", "dumDum = 1")
+# arcpy.CalculateField_management("flowLines_clip", "dumDum", "dumDum = 1")
+# arcpy.CalculateField_management("nonLndLcked_clip", "dumDum", "dumDum = 1")
 
-arcpy.CopyFeatures_management("flowLines_clip", "C:/Users/evansdm/filled_dem_processing/flowLines_clip.shp")
-arcpy.CopyFeatures_management("nonLndLcked_clip", "C:/Users/evansdm/filled_dem_processing/nonLndLckedLkes_clip.shp")
+# arcpy.CopyFeatures_management("flowLines_clip", "C:/Users/evansdm/filled_dem_processing/flowLines_clip.shp")
+# arcpy.CopyFeatures_management("nonLndLcked_clip", "C:/Users/evansdm/filled_dem_processing/nonLndLckedLkes_clip.shp")
+
+ExtractByMask(file_dem, "flowLines_clip").save("flowLines_ras")
+ExtractByMask(file_dem, "nonLndLcked_clip").save("lakes_ras")
+
+tst = SetNull("flowLines_ras", 0, "Value > 1")
+# Con("flowLines_ras", -9999, Raster(file_dem), "Value > 1").save("con_test")
+
+# dem_na_flow = SetNull("flowLines_ras", file_dem, "VALUE > 1")
+# dem_na_flow.save("dem_na_flow_3")
+# SetNull("lakes_ras", dem_na_flow, "Value > 1").save("C:/Users/evansdm/filled_dem_processing/na_burned_dem.tif")
 
 ## ... manually converted to raster
 
