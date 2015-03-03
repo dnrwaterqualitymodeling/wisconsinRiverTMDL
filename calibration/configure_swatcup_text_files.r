@@ -12,7 +12,7 @@ setInternet2(TRUE)
 # 1=mult,2=sum,3=r2,4=chi2,5=NS,6=br2,7=ssqr,8=PBIAS,9=RSR
 # Observations -- variable name, column index in output.rch, subbasin ID, observed data
 # obsDir = "D:/usgs_raw"
-obsDir = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw"
+obsDir = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration"
 gage_subbasin_lu = read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
 # gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
     colClasses=c("character", "character", "integer", "integer", "character"))
