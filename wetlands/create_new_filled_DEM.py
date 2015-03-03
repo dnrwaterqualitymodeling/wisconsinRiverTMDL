@@ -5,11 +5,25 @@ from arcpy import env
 from arcpy.sa import *
 arcpy.CheckOutExtension("Spatial")
 
-
+dem_net = "T:/Projects/Wisconsin_River/GIS_Datasets/DEM/raw_prj_10_m.img"
+# sde = "C:/Users/evansdm/AppData/Roaming/ESRI/Desktop10.1/ArcCatalog/DNR SDE PRODUCTION.sde"# sde path in app data roaming
+sde = "C:/Users/ruesca/AppData/Roaming/ESRI/Desktop10.1/ArcCatalog/dnrSdeReadOnly.sde"
 fl_hydro = 'W23324.WD_HYDRO_DATA_24K'
 sbbsns = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/subbasins.shp"
 
-file_dem = "C:/Users/evansdm/filled_dem_processing/raw_prj_10_m.img"
+
+tmpdir = os.path.expanduser("~") + "/filled_dem_processing"
+tmpGDB = "tempGDB.gdb"
+if not os.path.isdir(tmpdir):
+	os.mkdir(tmpdir)
+env.workspace = tmpdir
+if not arcpy.Exists(tmpdir+"/"+tmpGDB):
+	arcpy.CreateFileGDB_management(tmpdir, tmpGDB)
+env.workspace = tmpGDB
+
+file_dem = tmpdir + "/raw_prj_10_m.img"
+if not os.path.exists(file_dem):
+	arcpy.Copy_management(dem_net, file_dem)
 env.snapRaster = file_dem
 
 # dir_hydro = "T:/Projects/Wisconsin_River/GIS_Datasets/Hydrology"
@@ -20,8 +34,8 @@ flowlines_ras = "flowLines_clip_PolylineToRas"
 llckbodys_ras = "nonLndLckedLkes_clip_Polygon"
 
  # subprocess.Popen("mpiexec -n 8 pitremove")
-tmpdir = os.path.expanduser("~") + "/filled_dem_processing"
-sde = "C:/Users/evansdm/AppData/Roaming/ESRI/Desktop10.1/ArcCatalog/DNR SDE PRODUCTION.sde"# sde path in app data roaming
+
+
 env.workspace = sde
 
 # desc = arcpy.Describe(fl_hydro)
@@ -29,18 +43,9 @@ env.workspace = sde
 flow_lines = "W23324.WD_HYDRO_FLOWLINE_LN_24K"
 water_bdys = "W23324.WD_HYDRO_WATERBODY_AR_24K"
 
-if not os.path.isdir(tmpdir):
-	os.mkdir(tmpdir)
-env.workspace = tmpdir
-
-tmpGDB = "tempGDB.gdb"
-if not arcpy.Exists(tmpdir+"/"+tmpGDB):
-	arcpy.CreateFileGDB_management(tmpdir, tmpGDB)
-env.workspace = tmpGDB
-
 hydro_path = sde+"/"+fl_hydro
 
-arcpy.MakeFeatureLayer_management(hydro_path+"/"+water_bdys, "nonLndLcked", "LANDLOCK_CODE = 0")
+arcpy.MakeFeatureLayer_management(hydro_path+"/" + water_bdys, "nonLndLcked", "LANDLOCK_CODE = 0")
 arcpy.CopyFeatures_management("nonLndLcked", "nonLndLcked")
 
 arcpy.MakeFeatureLayer_management(hydro_path+"/"+flow_lines, "flowLines", "LANDLOCK_CODE = 0")
