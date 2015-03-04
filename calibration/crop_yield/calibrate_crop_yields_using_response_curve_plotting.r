@@ -1,6 +1,6 @@
 wd <- 'H:\\WRB\\Scenarios\\Default\\TxtInOut'
 options(stringsAsFactors = F)
-bio_calib <- read.csv("C:/Users/evansdm/Documents/bio_calibration.csv")
+bio_calib <- read.csv("~/bio_calibration.csv")
 # formatting Observed Data
 obsData_full <- read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/upDated_NASSstats_30092014.csv", stringsAsFactors=F)
 
@@ -38,7 +38,7 @@ for (crop in unique(bio_calib$crop)){
     meanObsYld <- mean(obsDat$YLD)
     
     #Linear model predicting bio e
-    bioeMod <- lm(formula = bio_e ~ yld, data = simDat)
+    bioeMod <- lm(bio_e ~ yld, data = simDat)
     # fitted bio e
     predBioE <- predict(bioeMod, newdata = data.frame(yld = meanObsYld))
     cropCalibBioE <- rbind(cropCalibBioE, c(crop, meanObsYld, predBioE))

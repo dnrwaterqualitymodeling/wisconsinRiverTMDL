@@ -6,171 +6,58 @@ from arcpy.sa import *
 arcpy.CheckOutExtension("Spatial")
 
 dem_net = "T:/Projects/Wisconsin_River/GIS_Datasets/DEM/raw_prj_10_m.img"
-# sde = "C:/Users/evansdm/AppData/Roaming/ESRI/Desktop10.1/ArcCatalog/DNR SDE PRODUCTION.sde"# sde path in app data roaming
-sde = "C:/Users/ruesca/AppData/Roaming/ESRI/Desktop10.1/ArcCatalog/dnrSdeReadOnly.sde"
+sde = "C:/Users/evansdm/AppData/Roaming/ESRI/Desktop10.1/ArcCatalog/DNR SDE PRODUCTION.sde"# sde path in app data roaming
+# sde = "C:/Users/ruesca/AppData/Roaming/ESRI/Desktop10.1/ArcCatalog/dnrSdeReadOnly.sde"
 fl_hydro = 'W23324.WD_HYDRO_DATA_24K'
 sbbsns = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/subbasins.shp"
-
+flow_lines = "W23324.WD_HYDRO_FLOWLINE_LN_24K"
+water_bdys = "W23324.WD_HYDRO_WATERBODY_AR_24K"
+flowlines_ras = "flowLines_ras"
+llckbodys_ras = "lakes_ras"
 
 tmpdir = os.path.expanduser("~") + "/filled_dem_processing"
 tmpGDB = "tempGDB.gdb"
 if not os.path.isdir(tmpdir):
 	os.mkdir(tmpdir)
 env.workspace = tmpdir
-if not arcpy.Exists(tmpdir+"/"+tmpGDB):
-	arcpy.CreateFileGDB_management(tmpdir, tmpGDB)
-env.workspace = tmpGDB
 
 file_dem = tmpdir + "/raw_prj_10_m.img"
 if not os.path.exists(file_dem):
 	arcpy.Copy_management(dem_net, file_dem)
 env.snapRaster = file_dem
 
-# dir_hydro = "T:/Projects/Wisconsin_River/GIS_Datasets/Hydrology"
-# file_hydro_in = dir_hydro +"/WI_River_Hydro_Flowline_24K.shp"
-# file_dem = dir_dem + "/wrb_dem.tif"
-
-flowlines_ras = "flowLines_clip_PolylineToRas"
-llckbodys_ras = "nonLndLckedLkes_clip_Polygon"
-
- # subprocess.Popen("mpiexec -n 8 pitremove")
-
-
-env.workspace = sde
-
-# desc = arcpy.Describe(fl_hydro)
-
-flow_lines = "W23324.WD_HYDRO_FLOWLINE_LN_24K"
-water_bdys = "W23324.WD_HYDRO_WATERBODY_AR_24K"
+if not arcpy.Exists(tmpdir+"/"+tmpGDB):
+	arcpy.CreateFileGDB_management(tmpdir, tmpGDB)
+env.workspace = tmpGDB
 
 hydro_path = sde+"/"+fl_hydro
 
-arcpy.MakeFeatureLayer_management(hydro_path+"/" + water_bdys, "nonLndLcked", "LANDLOCK_CODE = 0")
-arcpy.CopyFeatures_management("nonLndLcked", "nonLndLcked")
+for fc in ["WATERBODY_AR_24k", "FLOWLINE_LN_24K"]:
+	arcpy.FeatureClassToFeatureClass_conversion(hydro_path + "/W23324.WD_HYDRO_" + fc,
+		env.workspace,
+		fc,
+		"LANDLOCK_CODE = 0")
+	arcpy.Clip_analysis(fc, sbbsns, fc+ "_clip")
+	ExtractByMask(file_dem, fc + "_clip").save(fc+"_ras")
+	out_null = IsNull(fc+"_ras")
+	out_null.save(fc + "_null_ras")
 
-arcpy.MakeFeatureLayer_management(hydro_path+"/"+flow_lines, "flowLines", "LANDLOCK_CODE = 0")
-arcpy.CopyFeatures_management("flowLines", "flowLines")
+tobeNA = Raster("WATERBODY_AR_24k_null_ras") + Raster("FLOWLINE_LN_24K_null_ras")
+arcpy.Clip_management(tobeNA, "#", "clipped_tobe_NA", sbbsns, -3.40282e+038, "ClippingGeometry")
+SetNull("clipped_tobe_NA", "clipped_tobe_NA", 'Value < 2').save("flows_lakes_NA")
+zero_or_na = Minus("flows_lakes_NA", 2)
+Plus(zero_or_na, file_dem).save(tmpdir + "/burned_dem.tif")
 
-arcpy.Clip_analysis("nonLndLcked", sbbsns, "nonLndLcked_clip")
-arcpy.Clip_analysis("flowLines", sbbsns, "flowLines_clip")
-
-arcpy.RepairGeometry_management("flowLines_clip")
-arcpy.RepairGeometry_management("nonLndLcked_clip")
-
-# arcpy.AddField_management("flowLines_clip", "dumDum", "SHORT")
-# arcpy.AddField_management("nonLndLcked_clip", "dumDum", "SHORT")
-
-# arcpy.CalculateField_management("flowLines_clip", "dumDum", "dumDum = 1")
-# arcpy.CalculateField_management("nonLndLcked_clip", "dumDum", "dumDum = 1")
-
-# arcpy.CopyFeatures_management("flowLines_clip", "C:/Users/evansdm/filled_dem_processing/flowLines_clip.shp")
-# arcpy.CopyFeatures_management("nonLndLcked_clip", "C:/Users/evansdm/filled_dem_processing/nonLndLckedLkes_clip.shp")
-
-ExtractByMask(file_dem, "flowLines_clip").save("flowLines_ras")
-ExtractByMask(file_dem, "nonLndLcked_clip").save("lakes_ras")
-
-tst = SetNull("flowLines_ras", 0, "Value > 1")
-# Con("flowLines_ras", -9999, Raster(file_dem), "Value > 1").save("con_test")
-
-# dem_na_flow = SetNull("flowLines_ras", file_dem, "VALUE > 1")
-# dem_na_flow.save("dem_na_flow_3")
-# SetNull("lakes_ras", dem_na_flow, "Value > 1").save("C:/Users/evansdm/filled_dem_processing/na_burned_dem.tif")
-
-## ... manually converted to raster
-
-dem_na_flow = SetNull(flowlines_ras, Raster(file_dem), "VALUE = 1")
-SetNull(llckbodys_ras, dem_na_flow, "VALUE = 1").save("C:/Users/evansdm/filled_dem_processing/na_burned_dem.tif")
-
-
+SetNull(tmpdir+"/na_burned_dem_v4.tif", tmpdir+"/na_burned_dem_v4.tif", "Value < 1 ").save(tmpdir+"/burned_dem.tif")
 ## feed to tau dem
 # run tau dem pit removal
-mipexec = "mpiexec -n 8 pitremove"
-inDEM = ""
+mipexec = "mpiexec -n 4 pitremove -z "
+in_dem = tmpdir+"/burned_dem.tif"
+out_dem = tmpdir + "/filled_dem.tif"
 
-### rasterizing flow lines
-# gdal_rasterize = "C:/Program Files/GDAL/gdal_rasterize.exe"
-# no_dat_val = " -9999"#" -3.4028230607370965e+038"
-# burn_val = " -1"#" -3.4028230607370965e+038"
-# shp_flwlnes = "C:/Users/evansdm/filled_dem_processing/flowLines_clip.shp"
-# tif_flwlnes = "C:/Users/evansdm/filled_dem_processing/flowLines_clip.tif"
+cmd = mipexec + in_dem + " -fel " + out_dem
 
-# lyr_name = os.path.basename(shp_flwlnes).replace(".shp","")
-# " -a_nodata" + no_dat_val +\
-# " -of HFA" + \
-# " -ot Int32" +\	
-# " -tr 10 10" + \
-# cmd = gdal_rasterize + \
-	# " -b 1" \
-	# " -at" + \
-	# " -i" + \
-	# " -burn" + burn_val +\
-	# " -l " + lyr_name + " " +\
-	# shp_flwlnes + " " +\
-	# file_dem
-# p = subprocess.Popen(cmd)
-# p.wait()
-
-
-
-# arcpy.PolylineToRaster_conversion("flowLines_clip", "dumDum", "flowlines_ras", "MAXIMUM_COMBINED_LENGTH", "dumDum", 10)
-# arcpy.PolygonToRaster_conversion("nonLndLcked_clip", "dumDum", llckbodys_ras, "MAXIMUM_COMBINED_AREA", "dumDum", 10)
-
-
-
-## set landlocked lake and flowline rasters to null
-# Con(Raster(flowlines_ras) > 2, 1, 0).save(file_hydro_ras_1m)
-
-
-
-
-
-
-
-
-
-
-
-
-
-hydro_ras = "rasterized_hydro.tif"
-file_hydro_ras_1m = "rasterized_hydro_1m.tif"
-file_hydro_ras_1m_nas = "rasterized_hydro_1m_wnaos.tif"
-dem_less_200m_hydro = "wrb_dem_burned_hydro.tif"
-dem_filled_no_nulls = "wrb_filled_no_nulls.tif"
-
-#Rasterize hydro streams and 
-arcpy.PolylineToRaster_conversion(file_hydro_in, "ORIG_HRZ_S", hydro_ras, "", "", 10)
-rasterize landlocked lakes and on network lakes?
-
-#set hydro layer to 1
-Con(Raster(hydro_ras) > 2, 1, 0).save(file_hydro_ras_1m)
-SetNull(file_hydro_ras_1m, file_hydro_ras_1m, "VALUE = 1").save(file_hydro_ras_1m_nas)
-set lake areas to Null
-
-
-(dem + file_hydro_ras_1m_nas).save("dem_wNas.tif")
-make lake and stream areas na in dem
-
-run tau dem pit removal
-fill result
-
-subtract dem from filled
-
-print 'dunzo'
-
-#Subtract from DEM
-# (Raster(file_dem) - Raster(file_hydro_ras_200m_zeros)).save(dem_less_200m_hydro)
-
-#Fill
-# hydro_null = SetNull(Raster(file_hydro_ras_200m_zeros), Raster(file_hydro_ras_200m_zeros), "Value > 100")
-# dem_hydro_null = SetNull(Raster(file_hydro_ras_200m), Raster(file_dem), "Value = 1") 
-# Fill(dem_hydro_null).save(dem_filled_no_nulls)
-# Fill(dem_less_200m_hydro, 150).save(dem_filled_no_nulls)
-
-
-# (dem_filled_no_nulls + hydro_null).save("wrb_filled.tif")
-# Set DEM_Stream overlay area to NA
-# SetNull(dem_filled_no_nulls, dem_filled_no_nulls, "VALUE ").save(file_hydro_ras_200m)
+p = subprocess.Popen(cmd)
+p.wait()
 
 print("Dunzo.")
-
