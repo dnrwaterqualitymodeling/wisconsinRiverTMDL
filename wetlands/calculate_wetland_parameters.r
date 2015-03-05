@@ -2,8 +2,8 @@ arguments = commandArgs(trailingOnly = T)
 strt = arguments[1]
 stp = arguments[2]
 
-strt = 1
-stp = 3
+# strt = 1
+# stp = 3
 
 library(rgdal)
 library(rgeos)
@@ -20,9 +20,12 @@ file_wetland_parm = paste("wetland_parameters_",strt,"to",stp,".csv",sep='')
 # 
 gd_dir <- "T:/Projects/Wisconsin_River/GIS_Datasets"
 # orginal dem
-dem <- raster(paste(gd_dir, 'DEM','wrb_dem.tif',sep ='/'))
+dem <- raster(paste(gd_dir, 'DEM','raw_prj_10_m.img',sep ='/'))
 # filled dem
-dem_fl <- raster(paste(gd_dir, 'DEM','wrb_filled.tif',sep ='/'))
+dem_fl <- raster(paste(gd_dir, 'DEM','filled_dem_hydro_burned.img',sep ='/'))
+
+# sinks
+# sinks = raster(paste(gd_dir, "DEM", "sinks.tif",sep="/"))
 
 dir_out_maps = "wetland_maps"
 if (!exists(paste(wd, dir_out_maps, sep = '/'))){
@@ -89,16 +92,28 @@ for (s in strt:stp){#length(subbasins@data$Subbasin)) {
     # dem and filled dem clipped
     dem_sb <- mask(crop(dem, e_buffer), subbasin_buffer) 
     filled_sb <- mask(crop(dem_fl, e_buffer), subbasin_buffer) 
+	dem_sb = crop(dem_sb, filled_sb)
+	filled_sb = crop(filled_sb, dem_sb)
+	
     #processing lc
     lc_sb <- mask(crop(lc_lm, e_buffer), subbasin_buffer)
+	lc_sb = crop(lc_sb, dem_sb)
     # ponds, ponds = 1, else NA
     ponds_sb <- mask(crop(ponds, e_buffer), subbasin_buffer)
+	ponds_sb = crop(ponds_sb, dem_sb)
     # masking those wetlands that are coincident with ponds
     lc_sb <- mask(lc_sb, ponds_sb, inverse = T)
     
     # subbasin sinks and sink binary
     sinks_sb <- filled_sb - dem_sb
-	sinks_sb <- mask(sinks_sb, ponds_sb, inverse = T)
+	# sinks_sb <- mask(crop(sinks, e_buffer), subbasin_buffer)
+	# err = try(sinks_sb <- mask(sinks_sb, ponds_sb, inverse = T),
+		# silent=T)
+	
+	# if (attr(err,"class") == "try-error"){
+		
+	# }
+	
     sinks_sb_crp <- mask(sinks_sb, subbasin)
     sinkBin_sb <- sinks_sb
 	
@@ -145,30 +160,30 @@ for (s in strt:stp){#length(subbasins@data$Subbasin)) {
 			file_wetland_parm,
 			row.names = F)
 	}
-	# png(file_name_map)
-	# plot(subbasin, main = paste("Subbasin",s))
-	# plot(ponds_sb, add = T, col="#0000ff50", legend = F)
-	# plot(sinkBin_sb_crp, add = T, col="#ff000050", legend = F)
-	# legend(
-		# "topleft",
-		# legend=c("Ponds", "Max Wetland SA"),
-		# fill = c("#0000ff50", "#ff000050")
-		# )
+	png(file_name_map)
+	plot(subbasin, main = paste("Subbasin",s))
+	plot(ponds_sb, add = T, col="#0000ff50", legend = F)
+	plot(sinkBin_sb_crp, add = T, col="#ff000050", legend = F)
+	legend(
+		"topleft",
+		legend=c("Ponds", "Max Wetland SA"),
+		fill = c("#0000ff50", "#ff000050")
+		)
 	
-	# dev.off()
+	dev.off()
 	
-	# print("Exporting files...")
-	# writeRaster(
-		# sinkBin_sb_crp, 
-		# paste(wd, "/", dir_out_files,"/Max_SA_Subbasin_",s,".tif",sep=''),
-		# NAflag=-9999,
-		# overwrite=TRUE)
+	print("Exporting files...")
+	writeRaster(
+		sinkBin_sb_crp, 
+		paste(wd, "/", dir_out_files,"/Max_SA_Subbasin_",s,".tif",sep=''),
+		NAflag=-9999,
+		overwrite=TRUE)
 
-	# writeRaster(
-		# wet_n_crp, 
-		# paste(wd, "/", dir_out_files,"/Normal_SA_Subbasin_",s,".tif",sep=''),
-		# NAflag=-9999,
-		# overwrite=TRUE)
+	writeRaster(
+		wet_n_crp, 
+		paste(wd, "/", dir_out_files,"/Normal_SA_Subbasin_",s,".tif",sep=''),
+		NAflag=-9999,
+		overwrite=TRUE)
 
 	print("###################")
 
@@ -179,37 +194,4 @@ write.csv(
 	file_wetland_parm,
 	row.names = F)
 
-## Creating layers of max and normal surface area
-if (file.exists(gdal_path)){
-	gdalbuildvrt = "gdalbuildvrt"
-
-	for (lvl in c("Max", "Normal")){
-		file_list = list.files(
-			paste(wd, "/", dir_out_files, sep=''),
-			pattern = lvl,
-			full.names=T)
-		tmpf_tif_list = tempfile("tif_list_", fileext='.txt')
-		write(paste(file_list, sep='\n'), tmpf_tif_list)
-		
-		outfile = paste(lvl, "_wetland_surface_area.vrt",sep='')
-		
-		tmpf = tempfile("buildvrt_", fileext = ".bat")
-		cd = paste("cd", gdal_path)
-
-		cmd = paste(
-			gdalbuildvrt,
-			'-vrtnodata "-9999"',
-			'-srcnodata "-9999"',
-			"-input_file_list",
-			tmpf_tif_list,
-			paste(wd,
-				outfile,
-				sep='/')
-		)
-
-		lnes = paste(cd, cmd, sep='\n')
-		write(lnes, tmpf)
-		system(tmpf)
-	}
-} else {print("GDAL not found on C drive")}
 
