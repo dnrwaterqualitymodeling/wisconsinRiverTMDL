@@ -1,6 +1,6 @@
 txtinout = "D:/TxtInOut"
 dir_out = "D:/bio_e_calibration"
-td = "Y:\\"
+td = "Y:/"
 r = '"C:\\Program Files\\R\\R-3.1.2\\bin\\x64\\Rscript.exe"'
 cal_script = "D:/wisconsinRiverTMDL/calibration/crop_yield/calibrate_crop_yields_using_response_curve.r"
 
