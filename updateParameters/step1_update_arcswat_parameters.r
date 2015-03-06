@@ -10,109 +10,25 @@ library(foreign)
 options(stringsAsFactors=F)
 options(warn=1)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
+projectDir = "C:/Users/ruesca/Desktop/WRB"
+# projectDir = "H:/WRB"
 mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
 wetland_geometry_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/wetlands/wetland_parameters.csv"
 pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
 reservoir_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/hydrology/dams_parameters.csv"
 gw_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/alphaBflowSubbasin_lookup.csv"
 op_db_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/OpSchedules.mdb"
-# ps_files = list.files(
-	# "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/point_sources",
-	# "^recday_[0-9]+\\.txt$",
-	# full.names=T
-# )
-# should be swat_lookup.csv?
+file_bio_e = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/crop/Bio_E_Calibration_Report.csv"
 lu_op_xwalk_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/landuse_operation_crosswalk.csv"
 background_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/phosphorus/background_P_from_EPZ.txt"
 soil_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Soil_Phosphorus/soil_phosphorus_by_subbasin.txt"
 
-projectDir = "C:/Users/ruesca/Desktop/WRB"
-# projectDir = "H:/WRB"
 
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 
 ## for irrigation
 ## 0 is off, 1 from reach, 3 from shallow aquifer
 irr_sca = 3 
-
-#############################################
-# The point source block below does not work because ArcSWAT cannot handle the size of the TimeSeries table it creates
-# If there is a workaround, it's possible the code below could be useful.
-#############################################
-
-# UPDATE POINT SOURCES
-
-# py_file = tempfile(fileext=".py")
-# write(paste("import arcpy; arcpy.Compact_management('", inDb, "')", sep=""), py_file)
-
-# UPDATE PP TABLE
-# wipe_TimeSeries = TRUE
-# con = odbcConnectAccess(inDb)
-# if (wipe_TimeSeries){
-	# sqlQuery(con, "DELETE FROM TimeSeries WHERE TSTypeID > 0")
-# }
-# close(con)
-
-# sb_hydroid_lu = read.dbf(paste(projectDir, "Watershed", "Shapes", "monitoring_points1.dbf", sep="/"), as.is=T)
-# TSTypes = seq(1,35,2)
-
-# dates = seq(as.Date("1990-01-01"), as.Date("2013-12-31"), "day")
-# dates = format(dates, "%m/%d/%Y")
-
-# sb_count = 0
-# for (ps_file in ps_files) {
-	# ps_file = gsub("/", "\\\\", ps_file)
-	# ps_data = read.csv(ps_file)
-	
-	# sb = str_extract(basename(ps_file), "[0-9]+")
-	# if (all(cbind(ps_data[c("Floday","Sedday","Minpday")]) == 0)) {
-		# print(paste("Skipping subbasin", sb))
-		# next}
-	# sb_count = sb_count + 1
-	# print(paste("Subbasin:",sb))
-	# query = paste(
-		# "UPDATE pp SET DAILYREC = '",
-		# ps_file,
-		# "', TYPE = 10 WHERE SUBBASIN = ",
-		# sb,
-		# sep="")
-	# stdout = sqlQuery(con, query)
-	# hydroid = subset(sb_hydroid_lu, Subbasin == sb & Type == "P")$HydroID
-	# strt_time = proc.time()[3]
-	# i = 0
-	# pb = txtProgressBar(0,1)
-	# for (dt in dates) {
-		# i = i + 1
-		# for (TSType in TSTypes) {
-			# setTxtProgressBar(pb, i/nrow(ps_data))
-			# if (TSType == 1) {
-				# v = ps_data$Floday[i]
-			# } else if (TSType == 3) {
-				# v = ps_data$Sedday[i]
-			# } else if (TSType == 15) {
-				# v = ps_data$Minpday[i]
-			# } else {
-				# v = 0
-			# }
-			# query = paste(
-				# "INSERT INTO TimeSeries (FeatureID,TSTypeID,TSDateTime,TSValue) VALUES (",
-				# hydroid,
-				# ",",
-				# TSType,
-				# ",'",
-				# dt,
-				# "',",
-				# v,
-				# ");",
-				# sep=""
-			# )
-			# stdout = sqlQuery(con, query)
-		# }
-		
-	# }
-	# close(pb)
-	# print(paste("Elapsed time: ", proc.time()[3]-strt_time))
-# }
 
 # UPDATE SLOPE AND SLOPE LENGTH BASED ON RECCS IN BAUMGART, 2005
 mean_slope = read.table(mean_slope_file, header=T)
@@ -551,6 +467,25 @@ for (hydgrp in LETTERS[1:4]) {
 	}
 }
 
+#### UPDATE PLANT.DAT: 
+######## 	insert calibrated BIO E and correct issue with Forest, re: PB's suggestion
+pth_plant.dat = paste(projectDir, "/plant.dat",sep='')
+df_bio_e = read.csv(file_bio_e)
+
+for (crop in c("CORN", "CSIL", "SOYB", "ALFA")) {
+	if (crop == "CSIL") {
+		bio_e <- df_bio_e[which(df_bio_e$Crop == "CORN"), 'FittedBioE']
+	} else {
+		bio_e <- df_bio_e[which(df_bio_e$Crop == crop), 'FittedBioE']
+	}
+	query = paste("UPDATE crop SET BIO_E = ", bio_e, " WHERE CPNM = '", crop, "';", sep="")
+	print(query)
+	stdout = sqlQuery(con_swat2012, query)
+}
+
+# fixing forest ALAI_MIN parameter PB's suggestion
+
+# stdout = sqlQuery(con_swat2012, "UPDATE crop SET ALAI_MIN = 0 WHERE CPNM = 'FRST';")
 
 odbcCloseAll()
 

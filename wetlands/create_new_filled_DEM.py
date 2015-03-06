@@ -6,7 +6,7 @@ from arcpy.sa import *
 arcpy.CheckOutExtension("Spatial")
 
 dem_net = "T:/Projects/Wisconsin_River/GIS_Datasets/DEM/raw_prj_10_m.img"
-sde = "C:/Users/evansdm/AppData/Roaming/ESRI/Desktop10.1/ArcCatalog/DNR SDE PRODUCTION.sde"# sde path in app data roaming
+sde = "C:/Users/evansdm/AppData/Roaming/ESRI/Desktop10.1/ArcCatalog/DNR SDE PRODUCTION.sde" # sde path in app data roaming
 # sde = "C:/Users/ruesca/AppData/Roaming/ESRI/Desktop10.1/ArcCatalog/dnrSdeReadOnly.sde"
 fl_hydro = 'W23324.WD_HYDRO_DATA_24K'
 sbbsns = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/subbasins.shp"

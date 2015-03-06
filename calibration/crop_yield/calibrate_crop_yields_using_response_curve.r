@@ -4,7 +4,11 @@
 ## soyb 25.00
 ## alfa 20.00
 #   This should be run with MONTHLY output (code 0)
-wd = "H:\\WRB\\Scenarios\\Default\\TxtInOut"
+arguments = commandArgs(trailingOnly = T)
+txtinout = arguments[1]
+dir_out = arguments[2]
+
+wd = "~/Desktop/WRB/Scenarios/Default/TxtInOut"
 
 file.cio = readLines(paste(wd, "file.cio", sep = "\\"))
 iprint.ind = which(substr(file.cio, 23, 28) == "IPRINT")
@@ -20,7 +24,7 @@ file.cio[69] = "   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
 file.cio[71] = "   0    0    0    0    0    0    0    0    0    0    0    0    0    0    0   0   0   0   0   0"
 writeLines(file.cio, paste(wd, "file.cio", sep = "\\"))
 # ---
-source("./Code/calibration/functions_query_output.r")
+source("wisconsin_river_tmdl/Code/calibration/functions_query_output.r")
 setwd(wd)
 
 file.copy("C:/SWAT/ArcSWAT/SWAT_64rel.exe", paste(wd, "SWAT_64rel.exe", sep="\\"))
@@ -45,8 +49,8 @@ for (crop in c("CORN", "SOYB", "ALFA")) {
         dat = dat[10:length(dat)]
         
         select_cols = list(
-            cols = c("LULC", "SUB", "HRU", "AREA", "MON", "YLD"),
-            dtypes = c(as.character, as.integer, as.integer, as.numeric, as.integer, as.numeric)
+            cols = c("LULC", "SUB", "HRU", "AREA", "MON", "BIOM", "YLD"),
+            dtypes = c(as.character, as.integer, as.integer, as.numeric, as.integer, as.numeric, as.numeric)
         )
         modData = matrix(NA, nrow=length(dat), ncol=length(select_cols$cols))
         modData = as.data.frame(modData)

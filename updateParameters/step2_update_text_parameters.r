@@ -2,10 +2,14 @@ library(stringr)
 
 options(stringsAsFactors=F)
 
-# projectDir = "C:/Users/ruesca/Desktop/WRB"
-projectDir = "H:/WRB"
+projectDir = "C:/Users/ruesca/Desktop/WRB"
+# projectDir = "H:/WRB"
 
-file_bio_e = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/crop/Bio_E_Calibration_Report.csv"
+###########################################
+# NOTE: This script should be run AFTER   #
+# re-write SWAT Input Files, which is run #
+# in ArcSWAT or SWATEditor                #
+###########################################
 
 ## UPDATE POINT SOURCE TEXT FILES AND FIG.FIG
 ps_files = list.files(
@@ -23,7 +27,8 @@ for (ps_file in ps_files) {
 	indx = grep(ptrn, fig.fig)
 	indx = indx - 1 
 	lne = fig.fig[indx]
-	lne = gsub("reccnst       11",
+	lne = gsub(
+		"reccnst       11",
 		"recday        10",
 		lne)
 	fig.fig[indx] = lne
@@ -77,28 +82,6 @@ for (ps_file in ps_files) {
 	out_file = paste(txtinout, "/", sb, "p.dat", sep="")
 	writeLines(ps_data_str, out_file)
 }
-
-#### UPDATE PLANT.DAT: 
-######## 	insert calibrated BIO E and correct issue with Forest, re: PB's suggestion
-pth_plant.dat = paste(projectDir, "/Scenarios/Default/TxtInOut/plant.dat",sep='')
-
-df_bio_e = read.csv(file_bio_e)
-
-plant.dat = readLines(pth_plant.dat)
-
-for (crop in c("CORN", "SOYB", "ALFA")) {
-    bio_e <- df_bio_e[which(df_bio_e$Crop == crop), 'FittedBioE']
-    # plant.dat = readLines(paste(wd, "plant.dat", sep="\\"))
-    plant.dat.ind = which(substr(plant.dat, 7, 10) == crop)
-    substr(plant.dat[plant.dat.ind + 1], 3, 7) = format(bio_e, digits=2, nsmall=2)
-    
-}
-# fixing forest parameter PB's suggestion
-plant.dat.ind = which(substr(plant.dat, 7, 10) == "FRST") #"FRSD"
-substr(plant.dat[plant.dat.ind + 3],80, 84) = sprintf("%2.3f", 0)
-
-writeLines(plant.dat, pth_plant.dat)
-
 
 
 

@@ -22,10 +22,10 @@ gdal_path = "C:/Program Files/GDAL"
 rscript = "~/Documents/R/R-3.1.1/bin/x64/Rscript.exe"
 wtlndsscrpt = "~/Documents/Code/wetlands/calculate_wetland_parameters.r"
 
-ln1 = paste("start", rscript, wtlndsscrpt, 1, 84, "\nPAUSE")
-ln2 = paste("start", rscript, wtlndsscrpt, 85, 168, "\nPAUSE")
-ln3 = paste("start", rscript, wtlndsscrpt, 169, 252, "\nPAUSE")
-ln4 = paste("start ", rscript, wtlndsscrpt, 253, 337, "\nPAUSE")
+ln1 = paste("start", rscript, wtlndsscrpt, 1, 84)
+ln2 = paste("start", rscript, wtlndsscrpt, 85, 168)
+ln3 = paste("start", rscript, wtlndsscrpt, 169, 252)
+ln4 = paste("start ", rscript, wtlndsscrpt, 253, 337)
 
 tmpf = tempfile(fileext=".bat")
 writeLines(
