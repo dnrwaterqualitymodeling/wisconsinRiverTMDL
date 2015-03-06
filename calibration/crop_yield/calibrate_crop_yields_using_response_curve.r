@@ -15,6 +15,7 @@ bio_e = arguments[5]
 
 source("https://raw.githubusercontent.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/master/calibration/functions_query_output.r")
 
+td = dir.create(paste(td, "txtinout_", sample(100000:999999, 1), sep="")) 
 file.copy(txtinout,
 	td,
 	recursive = T)
