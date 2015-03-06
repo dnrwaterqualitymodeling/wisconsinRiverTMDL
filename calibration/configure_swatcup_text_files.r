@@ -1,20 +1,24 @@
 # CHANGE THESE ###########
 # SWAT project
 
-projectDir = "D:/WRB.Sufi2.SwatCup"
+projectDir = "C:/Users/ruesca/Desktop/WRB.Sufi2.SwatCup"
 simCount = 2001
-subbasinCount = 338
+subbasinCount = 337
 startYr = 2002
 endYr = 2013
-objFuncCode = 8
+objFuncCode = 5
+
+setInternet2(TRUE)
 # 1=mult,2=sum,3=r2,4=chi2,5=NS,6=br2,7=ssqr,8=PBIAS,9=RSR
 # Observations -- variable name, column index in output.rch, subbasin ID, observed data
-obsDir = "D:/usgs_raw"
-gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
+# obsDir = "D:/usgs_raw"
+obsDir = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration"
+gage_subbasin_lu = read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
+# gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
     colClasses=c("character", "character", "integer", "integer", "character"))
 monthly = T
 # to use only winter and spring months
-use_only_winter_spring = T
+use_only_winter_spring = F
 #   assumed to be December to June
 mnths = c(
     "December", 

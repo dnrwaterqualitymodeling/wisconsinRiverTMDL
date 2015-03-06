@@ -11,8 +11,10 @@ regions = readOGR(
 	dsn="T:/Projects/Wisconsin_River/GIS_Datasets/Water_Budget",
 	layer="WRB_Budget_Divisions")
 
+
 file_subbasin_region_lu = "T:/Projects/Wisconsin_River/GIS_Datasets/Water_Budget/subbasin_region_lookup.txt"
 setwd("C:/Users/ruesca/Desktop/WRB_sensitivity")
+
 vars = list(
 	c("streamflow", "Annual Average streamflow (cms)"),
 	c("sediment", "Average Daily Sediment Load (tons)"),
@@ -20,7 +22,7 @@ vars = list(
 )
 
 sb_region_lu = read.delim(file_subbasin_region_lu)
-nc_files = list.files(pattern="\\.nc$")
+nc_files = list.files("H:/netCDF_files", pattern="\\.nc$")
 regional_all = NULL
 for (nc_file in nc_files) {
 	nc = open.ncdf(nc_file)

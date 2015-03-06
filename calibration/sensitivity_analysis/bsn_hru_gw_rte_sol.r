@@ -228,7 +228,6 @@ if (ext == 'sol'){
 	}
 }
 
-
 p.rg = cbind(p.mn, p.mx)
 p.mat = apply(p.rg, 1, function(x,iter) {seq(x[1], x[2], length.out=iter)}, iter=iter)
 p.mat = t(p.mat)
