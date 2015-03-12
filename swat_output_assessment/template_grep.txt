@@ -1,0 +1,23 @@
+SCEN=
+for SB in 
+do
+	echo Working on $SB
+	if [ "$SB" -lt 10 ]
+	then
+		SPCNUM=4
+		ZROES=0000
+	elif [ "$SB" -gt 9 ] && [ "$SB" -lt 100 ]
+	then 
+		SPCNUM=3
+		ZROES=000
+	else
+		SPCNUM=2
+		ZROES=00
+	fi
+	echo "	extracting from output.hru"
+	mkdir $SCEN/output_hru
+	egrep $ZROES$SB[0-9]{4} H:/WRB/Scenarios/Default/TxtInOut/output.hru > $SCEN/output_hru/$SB.txt
+	echo "	extracting from output.rch"
+	mkdir $SCEN/output_rch
+	egrep REACH[[:space:]]{$SPCNUM}$SB H:/WRB/Scenarios/Default/TxtInOut/output.rch > $SCEN/output_rch/$SB.txt
+done
