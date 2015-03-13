@@ -1,6 +1,6 @@
 txtinout = "D:/TxtInOut"
 dir_out = "D:/bio_e_calibration"
-td = "Y:\\"
+td = "Y:/"
 r = '"C:\\Program Files\\R\\R-3.1.2\\bin\\x64\\Rscript.exe"'
 cal_script = "D:/wisconsinRiverTMDL/calibration/crop_yield/calibrate_crop_yields_using_response_curve.r"
 
@@ -27,7 +27,7 @@ for (crop in c("CORN", "SOYB", "ALFA")) {
 
 running = T
 while (running == T) {
-	ps = grep("(CORN|SOYB|ALFA)_[1-9]+",readLines(textConnection(system('tasklist /v',intern=TRUE))),value=TRUE)
+	ps = grep("(CORN|SOYB|ALFA)_[1-9]+",system('tasklist /v',intern=TRUE),value=TRUE)
 	if (length(ps) > 0) {
 		Sys.sleep(1)
 	} else {
@@ -36,7 +36,7 @@ while (running == T) {
 }
 
 all_d = NULL
-for (f in list.files(dir_out, full.names=T)) {
+for (f in list.files(dir_out, pattern="^(CORN|SOYB|ALFA)_[1-9]+", full.names=T)) {
 	d = read.csv(f)
 	all_d = rbind(all_d, d)
 }

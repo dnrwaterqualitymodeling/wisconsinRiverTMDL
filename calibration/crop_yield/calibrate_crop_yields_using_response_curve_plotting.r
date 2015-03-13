@@ -1,9 +1,10 @@
-wd <- 'H:\\WRB\\Scenarios\\Default\\TxtInOut'
 options(stringsAsFactors = F)
-bio_calib <- read.csv("~/bio_calibration.csv")
+bio_calib <- read.csv("D:/bio_e_calibration/bio_e_calibration.csv")
+dir_out = "D:/bio_e_calibration"
 # formatting Observed Data
-obsData_full <- read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/upDated_NASSstats_30092014.csv", stringsAsFactors=F)
+obsData_full <- read.csv("D:/upDated_NASSstats_30092014.csv", stringsAsFactors=F)
 
+setwd(dir_out)
 obsData_full$DATE <- as.Date(as.character(paste(obsData_full[,'Year'],1,1,sep ='-')))
 obsData_full <- obsData_full[obsData_full$DATE>='2002-01-01',]
 cropTab <- data.frame( 

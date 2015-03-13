@@ -13,7 +13,7 @@ ESCO,bsn,0.01,1,a,no response,0
 ESCO,hru,0.01,1,a,,0
 EVLAI,bsn,0,10,a,no response,0
 FFCB,bsn,0,1,a,little to no response,0
-GW_DELAY,gw,0,500,a,,0
+GW_DELAY,gw,0,500,a,,1
 GW_REVAP,gw,0.02,0.2,a,,0
 GWQMN,gw,0,5000,a,,0
 HRU_SLP,hru,-0.5,0.5,r,,0
@@ -28,10 +28,11 @@ SMFMX,bsn,0,10,a,some response,0
 SMTMP,bsn,-2,10,a,some response,0
 SPCON,bsn,0,0.01,a,no response,0
 SPEXP,bsn,1,1.5,a,no response,0
-SURLAG,bsn,0.05,24,a,no response,1
+SURLAG,bsn,0.05,24,a,no response,0
 SURLAG,hru,0,10,a,,0
 TIMP,bsn,0.01,1,a,some response,0
 CN2,mgt,-0.5,0.5,r,,0
+CNOP,mgt,-0.5,0.5,r,,0
 SOL_AWC,sol,-0.5,0.5,r,,0
 SOL_ALB,sol,0,0.25,a,,0
 SOL_K,sol,-0.5,0.5,r,,0

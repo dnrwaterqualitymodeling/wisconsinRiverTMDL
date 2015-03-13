@@ -12,97 +12,53 @@ options(stringsAsFactors = FALSE)
 # only interested in streamflow currently...
 vars = list(
 	c("streamflow", "Annual Average streamflow (cms)")#,
-	# c("sediment", "Average Daily Sediment Load (tons)"),
-	# c("phosphorus", "Average Daily P Load (kg)")
+	c("sediment", "Average Daily Sediment Load (tons)"),
+	c("phosphorus", "Average Daily P Load (kg)")
 )
-pal = brewer.pal(2, 'Set1')
-files_nc = list.files("H:/netCDF_files", "*.nc")
+
+pal = brewer.pal(6, 'Set1')
+files_nc = list.files("H:/WRB_sensitivity", "*.nc")
 
 for (fl in files_nc){
-	nc_file = paste("H:/netCDF_files/", fl, sep='')
-
-	nc_file = "D:/WRB_sensitivity/SURLAG_bsn.nc"
-
-	nc = open.ncdf(nc_file)
-	
-	param = strsplit(nc_file, "\\.")[[1]][1]
-	param = basename(param)
-	d = get.var.ncdf(nc, varid="streamflow", start=c(1,1,1), count=c(-1,-1,-1))
-	pdf(paste("T:/Projects/Wisconsin_River/Model_Documents/TMDL_report/",param, "_entire_record.pdf",sep = ''))
-	print(paste("Beginning to plot", param))
-	print("")
-	print("###################################")
-	pb = txtProgressBar(0,1)
-	for (sub in 1:338){
-		setTxtProgressBar(pb, sub/338)
-		print(paste("working on subbasin",sub))
-		sb = d[,sub,]
-
-		# file_name = paste(param,"subbasin",sub,sep='_')
+	for (i in 1:3){
+		var = vars[[i]][1]
+		nc_file = paste("H:/WRB_sensitivity/", fl, sep='')
+		# nc_file= paste("H:/WRB_sensitivity/CH_N2_rte.nc")
+		nc = open.ncdf(nc_file)
 		
-		# pdf(paste(file_name, "_entire_record.pdf",sep = ''))
-		for (i in 1:6){
-			
-			iter = c(1,5,10,15,20,25)[i]
-
-			iter = sb[,iter]
-			
-			iter = zoo(iter, 
-				seq(
-					as.Date("2002-01-01"), 
-					as.Date("2013-12-31"), 
-					by = 'day'))
-			colr = pal[i]
-			if (i == 1){
-				plot(iter,
-					type='l',
-					col=colr,
-					ylab='cumecs',
-					xlab='time',
-					main=paste("Subbasin", sub,"Entire Record"))
-			} else {
-				lines(iter,
-					col=colr)
-			}
-			legend('topright',
-				legend=c(
-					"Iteration 1",
-					"Iteration 5",
-					"Iteration 10",
-					"Iteration 15",
-					"Iteration 20",
-					"Iteration 25"),
-				fill=pal)
-		}
-		# dev.off()
-
-		strting = seq(from=as.Date("2002-01-01"),
-			by='year',
-			length.out=12)
-
-		# pdf(paste(file_name, "_yearly.pdf", sep = ''))
-		for (yr in strting){
-			
-			time_period = seq(from=as.Date(yr), by='day',length.out=365)
+		param = strsplit(nc_file, "\\.")[[1]][1]
+		param = basename(param)
+		d = get.var.ncdf(nc, varid=var, start=c(1,1,1), count=c(-1,-1,-1))
+		pdf(paste(param,"_",var,".pdf",sep=""),width=11,height=6)
+		print(paste("Beginning to plot", param))
+		print("")
+		print("###################################")
+		pb = txtProgressBar(0,1)
+		for (sub in 1:337){
+			setTxtProgressBar(pb, sub/337)
+			# print(paste("working on subbasin",sub))
+			sb = d[,sub,]
+			# file_name = paste(param,"subbasin",sub,sep='_')
+			# pdf(paste(file_name, "_entire_record.pdf",sep = ''))
 			for (i in 1:6){
-				 iter = c(1,5,10,15,20,25)[i]
-
+				iter = c(1,5,10,15,20,25)[i]
 				iter = sb[,iter]
-				iter = iter = zoo(iter, 
-					seq(as.Date("2002-01-01"), 
+				
+				iter = zoo(iter, 
+					seq(
+						as.Date("2002-01-01"), 
 						as.Date("2013-12-31"), 
 						by = 'day'))
-				
 				colr = pal[i]
 				if (i == 1){
-					plot(iter[time_period],
+					plot(iter,
 						type='l',
 						col=colr,
-						ylab='cumecs',
-						xlab='time',
-						main=paste("Subbasin", sub,":", format(as.Date(yr),'%Y')))
+						ylab=vars[[i]][2],
+						xlab='Date',
+						main=paste("Subbasin", sub,"Entire Record"))
 				} else {
-					lines(iter[time_period],
+					lines(iter,
 						col=colr)
 				}
 				legend('topright',
@@ -113,14 +69,54 @@ for (fl in files_nc){
 						"Iteration 15",
 						"Iteration 20",
 						"Iteration 25"),
-				fill=pal)
+					fill=pal)
 			}
-		}
-		# dev.off()
-	}
-	dev.off()
-}
+			# dev.off()
 
+			strting = seq(from=as.Date("2002-01-01"),
+				by='year',
+				length.out=12)
+
+			# pdf(paste(file_name, "_yearly.pdf", sep = ''))
+			for (yr in strting){
+				
+				time_period = seq(from=as.Date(yr), by='day',length.out=365)
+				for (i in 1:6){
+					iter = c(1,5,10,15,20,25)[i]
+					iter = sb[,iter]
+					iter = iter = zoo(iter, 
+						seq(as.Date("2002-01-01"), 
+							as.Date("2013-12-31"), 
+							by = 'day'))
+					
+					colr = pal[i]
+					if (i == 1){
+						plot(iter[time_period],
+							type='l',
+							col=colr,
+							ylab=vars[[i]][2],
+							xlab='Date',
+							main=paste("Subbasin", sub,":", format(as.Date(yr),'%Y')))
+					} else {
+						lines(iter[time_period],
+							col=colr)
+					}
+					legend('topright',
+						legend=c(
+							"Iteration 1",
+							"Iteration 5",
+							"Iteration 10",
+							"Iteration 15",
+							"Iteration 20",
+							"Iteration 25"),
+					fill=pal)
+				}
+			}
+			# dev.off()
+		}
+		dev.off()
+	}
+}
 
 
 

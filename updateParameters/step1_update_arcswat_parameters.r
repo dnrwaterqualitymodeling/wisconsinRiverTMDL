@@ -10,8 +10,8 @@ library(foreign)
 options(stringsAsFactors=F)
 options(warn=1)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
-projectDir = "C:/Users/ruesca/Desktop/WRB"
-# projectDir = "H:/WRB"
+# projectDir = "C:/Users/ruesca/Desktop/WRB"
+projectDir = "H:/WRB"
 mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
 wetland_geometry_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/wetlands/wetland_parameters.csv"
 pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
@@ -28,7 +28,7 @@ inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 
 ## for irrigation
 ## 0 is off, 1 from reach, 3 from shallow aquifer
-irr_sca = 3 
+irr_sca = 3
 
 # UPDATE SLOPE AND SLOPE LENGTH BASED ON RECCS IN BAUMGART, 2005
 mean_slope = read.table(mean_slope_file, header=T)
@@ -275,7 +275,9 @@ for (row in 1:nrow(mgt1)) {
 	#	these lines set the necessary parameters, later they get turned on.
 	if (lu %in% pot_veggie_landuses){
 		irri_mgt1_query = paste(
-			"UPDATE mgt1 SET IRRSC = 3, IRRNO = ",
+			"UPDATE mgt1 SET IRRSC =",
+			irr_sca,
+			", IRRNO = ",
 			row_data$SUBBASIN,
 			" WHERE SUBBASIN = ",
 			as.character(row_data$SUBBASIN),
@@ -283,7 +285,7 @@ for (row in 1:nrow(mgt1)) {
 			lu,
 			"';",
 			sep='')
-		out = sqlQuery(con_mgt2, irri_mgt1_query)
+			out = sqlQuery(con_mgt2, irri_mgt1_query)
 	}
 	
 	operation = opSched[gsub(" " , "", as.character(opSched$SID)) == opCode,]
@@ -370,9 +372,11 @@ irri_query = paste(
 		" WHERE MGT_OP = 10;",
 		sep=''
 )
-stout = sqlQuery(con_mgt2, irri_query)
-# }
-
+if (irr_sca == 0){
+		#print("NOT TURNING ON IRRIGATION")
+} else {
+	stout = sqlQuery(con_mgt2, irri_query)
+}
 
 # CNOP
 hydgrp_lu = unique(sqlQuery(con_mgt2, "SELECT SOIL, HYDGRP from sol")) # for CNOP

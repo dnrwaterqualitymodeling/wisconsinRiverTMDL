@@ -15,11 +15,12 @@ bio_e = arguments[5]
 
 source("https://raw.githubusercontent.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/master/calibration/functions_query_output.r")
 
-td = dir.create(paste(td, "txtinout_", sample(100000:999999, 1), sep="")) 
+td = paste(td, "txtinout_", sample(100000:999999, 1), sep="")
+dir.create(td)
 file.copy(txtinout,
 	td,
 	recursive = T)
-txtinout = paste(td, "TxtInOut", sep="\\")
+txtinout = paste(td, "TxtInOut", sep="/")
 
 file.cio = readLines(paste(txtinout, "file.cio", sep = "\\"))
 iprint.ind = which(substr(file.cio, 23, 28) == "IPRINT")

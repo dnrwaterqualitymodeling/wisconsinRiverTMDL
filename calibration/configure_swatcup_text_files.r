@@ -1,25 +1,26 @@
 # CHANGE THESE ###########
 # SWAT project
 
-projectDir = "C:/Users/ruesca/Desktop/WRB.Sufi2.SwatCup"
+projectDir = "D:/WRB.Sufi2.SwatCup"
 simCount = 2001
 subbasinCount = 337
 startYr = 2002
 endYr = 2013
 objFuncCode = 5
+monthly = F
 
-setInternet2(TRUE)
-# 1=mult,2=sum,3=r2,4=chi2,5=NS,6=br2,7=ssqr,8=PBIAS,9=RSR
-# Observations -- variable name, column index in output.rch, subbasin ID, observed data
-# obsDir = "D:/usgs_raw"
-obsDir = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration"
-gage_subbasin_lu = read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
-# gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
-    colClasses=c("character", "character", "integer", "integer", "character"))
-monthly = T
 # to use only winter and spring months
 use_only_winter_spring = F
 #   assumed to be December to June
+# 1=mult,2=sum,3=r2,4=chi2,5=NS,6=br2,7=ssqr,8=PBIAS,9=RSR
+# Observations -- variable name, column index in output.rch, subbasin ID, observed data
+obsDir = "D:/usgs_raw"
+# obsDir = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration"
+# gage_subbasin_lu = read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
+gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
+    colClasses=c("character", "character", "integer", "integer", "character"))
+setInternet2(TRUE)
+
 mnths = c(
     "December", 
     "January", 
@@ -53,13 +54,15 @@ mnths = c(
 	# c("v__EPCO.hru",0,1)
 # )
 parameterization = rbind(
-	c("v__SFTMP.bsn",-20,20),
-	c("v__SMTMP.bsn",-20,20),
-	c("v__SMFMX.bsn",0,20),
-	c("v__SMFMN.bsn",0,20),
-	c("v__TIMP.bsn",0,1),
-	c("a__WET_K.pnd",0,1),
-	c("r__WET_MXVOL.pnd",2,11)
+	c("v__SFTMP.bsn",-5,5),
+	c("v__SMTMP.bsn",-5,5),
+	c("v__ESCO.hru", 0.9, 1),
+	c("v__SURLAG.hru", 0.05, 24),
+	c("r__ALPHA_BF.gw", -0.99, -0.5),
+	c("v__GW_DELAY.gw", 0, 500),
+	c("r__CNOP.mgt", -0.05, 0.05),
+	c("v__CH_N2.sub", 0.023, 0.15),
+	c("r__WET_MXVOL.pnd",0,2)
 )
 
 # Don't change these

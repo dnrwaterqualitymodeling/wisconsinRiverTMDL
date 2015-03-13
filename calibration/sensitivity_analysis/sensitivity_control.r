@@ -4,10 +4,11 @@ options(stringsAsFactors=F)
 par_inf_tbl = read.csv("https://raw.githubusercontent.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/master/calibration/sensitivity_analysis/basin_sensitivity_parameters.csv")
 par_inf_tbl = subset(par_inf_tbl, run==1)
 # unchanging parameters
+
 txtinout = "D:/TxtInOut"
 dir_out = "D:/WRB_sensitivity"
 temp_dir = "Y:/temp_directory"
-script_sensitivity = "D:/wisconsinRiverTMDL/calibration/sensitivity_analysis/bsn_sub_hru_gw.r"
+script_sensitivity = "D:/wisconsinRiverTMDL/calibration/sensitivity_analysis/bsn_hru_gw_rte_sol.r"
 iter = 25
 
 bat_files = NULL
@@ -38,6 +39,7 @@ for (p.i in 1:nrow(par_inf_tbl)){
 		p,
 		'"',
 		'"C:\\Program Files\\R\\R-3.1.2\\bin\\x64\\Rscript.exe"',
+		# '"C:\\Users\\evansdm\\Documents\\R\\R-3.1.1\\bin\\x64\\Rscript.exe"',
 		script_sensitivity,
 		txtinout,
 		dir_out,
