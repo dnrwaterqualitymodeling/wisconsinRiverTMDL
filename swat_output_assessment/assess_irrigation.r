@@ -36,7 +36,7 @@ system(bat)
 extr_subs_fun(
 	subbasins=c(5,59,65,73,74,75,76,77,107,141,142,143,144,145,149,176,178,191,193,199,208,216,228,234,247,248,251,254,255,257,260,296,311,330,333),
 	src_folder=gsub("\\\\","/",wd),
-	dst_folder="H:/WRB/Scenarios/irrigation_assessment/sca0_eff90_mx90_asq02")
+	dst_folder="H:/")
 # file.copy(wd, "H:/WRB/Scenarios/irrigation_assessment/sca3_eff50_mx90_asq02", recursive=T)
 #######-----#######-----#######-----#######-----#######
 wd = "H:/WRB/Scenarios/irrigation_assessment"
@@ -142,16 +142,15 @@ for (scen in scenarios){
 		# names(rch.dat) = c("SUB","MON","AREA","FLOW","SED","PHO")
 		# rch.dat$DATE = mod_per
 		# rch.dat$SCENARIO = scen
-		
+
 		# sbDat.rch = rbind(sbDat.rch, rch.dat)
 	}
 }
-new_scen_name = c("No Irrigation", "Draw from Reach", "Draw from Shallow Aquifer")
-for (sc in 1:3){
-	sbDat.hru$SCENARIO[which(sbDat.hru$SCENARIO == scenarios[sc])] = new_scen_name[sc]
-}
 bkup = sbDat.hru
-
+# new_scen_name = c("No Irrigation", "Draw from Reach", "Draw from Shallow Aquifer")
+# for (sc in 1:3){
+	# sbDat.hru$SCENARIO[which(sbDat.hru$SCENARIO == scenarios[sc])] = new_scen_name[sc]
+# }
 # sbDat.hru = subset(sbDat.hru, SURQ_GEN > 0)
 
 sderr = function(x){
@@ -164,18 +163,18 @@ sderr = function(x){
 }
 
 mean_tbl = aggregate(
-	cbind(SURQ_CNT, SURQ_GEN, GW_Q, GW_RCHG, DAILYCN, ET, YLD, BIOM ) ~ SUB + SCENARIO, 
+	cbind(SURQ_CNT, SURQ_GEN, GW_Q, GW_RCHG, DAILYCN, ET, SA_ST, BIOM, LATQ) ~ SUB + SCENARIO, 
 	data=sbDat.hru,
 	FUN=mean,
 	na.rm=TRUE)
 se_tbl = aggregate(
-	cbind(SURQ_CNT, SURQ_GEN, GW_Q, GW_RCHG, DAILYCN, ET, YLD, BIOM ) ~ SUB + SCENARIO, 
+	cbind(SURQ_CNT, SURQ_GEN, GW_Q, GW_RCHG, DAILYCN, ET, SA_ST, BIOM, LATQ) ~ SUB + SCENARIO, 
 	data=sbDat.hru,
 	FUN=sderr)
 smry_tbl = merge(mean_tbl, se_tbl, by=c("SCENARIO", "SUB"))
 
 # c("#7fc97f", "#beaed4", "#ffff99")
-pdf("irrigation_scenarios.pdf")
+pdf("irrigation_scenarios.pdf", height=11,width=8)
 ## gw q
 limits = aes(ymin=(GW_Q.x - GW_Q.y),
 	ymax=(GW_Q.x + GW_Q.y))	
@@ -183,7 +182,7 @@ gplt_gwq = ggplot(smry_tbl, aes(x=factor(SUB), y=GW_Q.x, fill=SCENARIO))
 dodge = position_dodge(width=0.9)
 gplt_gwq = gplt_gwq + geom_bar(stat="identity", position=dodge)
 gplt_gwq = gplt_gwq + scale_fill_manual(values=c("dodgerblue4",	"darkolivegreen4",	"goldenrod1")) + geom_errorbar(limits, position=dodge, width=0.25)
-gplt_gwq+ theme_bw() + labs(x="Subbasin") + coord_flip() 
+gplt_gwq+ theme_bw() + labs(x="Subbasin", y="GW Discharge to Reach") + coord_flip() 
 
 #surq
 limits = aes(ymin=(SURQ_CNT.x - SURQ_CNT.y),
@@ -192,7 +191,7 @@ gplt_surq_cnt = ggplot(smry_tbl, aes(x=factor(SUB), y=SURQ_CNT.x, fill=SCENARIO)
 dodge = position_dodge(width=0.9)
 gplt_surq_cnt = gplt_surq_cnt + geom_bar(stat="identity", position=dodge)
 gplt_surq_cnt = gplt_surq_cnt + scale_fill_manual(values=c("dodgerblue4", "darkolivegreen4", "goldenrod1")) + geom_errorbar(limits, position=dodge, width=0.25)
-gplt_surq_cnt+ theme_bw()+ coord_flip()
+gplt_surq_cnt+ theme_bw() + labs(x="Subbasin",y="Surface Runoff Contribution to Reach") + coord_flip()
 
 # gwrch
 limits = aes(ymin=(GW_RCHG.x - GW_RCHG.y),
@@ -201,7 +200,7 @@ gplt_gw_rchg = ggplot(smry_tbl, aes(x=factor(SUB), y=GW_RCHG.x, fill=SCENARIO))
 dodge = position_dodge(width=0.9)
 gplt_gw_rchg = gplt_gw_rchg + geom_bar(stat="identity", position=dodge)
 gplt_gw_rchg = gplt_gw_rchg + scale_fill_manual(values=c("dodgerblue4", "darkolivegreen4", "goldenrod1")) + geom_errorbar(limits, position=dodge, width=0.25)
-gplt_gw_rchg+ theme_bw()+ coord_flip()
+gplt_gw_rchg+ theme_bw() + labs(x="Subbasin",y="Water Entering Aquifers") + coord_flip()
 
 # BIOM
 limits = aes(ymin=(BIOM.x - BIOM.y),
@@ -210,7 +209,7 @@ gplt_BIOM = ggplot(smry_tbl, aes(x=factor(SUB), y=BIOM.x, fill=SCENARIO))
 dodge = position_dodge(width=0.9)
 gplt_BIOM = gplt_BIOM + geom_bar(stat="identity", position=dodge)
 gplt_BIOM = gplt_BIOM + scale_fill_manual(values=c("dodgerblue4", "darkolivegreen4", "goldenrod1")) + geom_errorbar(limits, position=dodge, width=0.25)
-gplt_BIOM+ theme_bw()+ coord_flip()
+gplt_BIOM+ theme_bw() + labs(x="Subbasin",y="Biomass") + coord_flip()
 
 # DAILYCN
 limits = aes(ymin=(DAILYCN.x - DAILYCN.y),
@@ -219,7 +218,7 @@ gplt_DAILYCN = ggplot(smry_tbl, aes(x=factor(SUB), y=DAILYCN.x, fill=SCENARIO))
 dodge = position_dodge(width=0.9)
 gplt_DAILYCN = gplt_DAILYCN + geom_bar(stat="identity", position=dodge)
 gplt_DAILYCN = gplt_DAILYCN + scale_fill_manual(values=c("dodgerblue4", "darkolivegreen4", "goldenrod1")) + geom_errorbar(limits, position=dodge, width=0.25)
-gplt_DAILYCN + theme_bw() + coord_flip()
+gplt_DAILYCN + theme_bw() + labs(x="Subbasin",y="Daily Curve Number") + coord_flip()
 
 # ET
 limits = aes(ymin=(ET.x - ET.y),
@@ -228,7 +227,7 @@ gplt_ET = ggplot(smry_tbl, aes(x=factor(SUB), y=ET.x, fill=SCENARIO))
 dodge = position_dodge(width=0.9)
 gplt_ET = gplt_ET + geom_bar(stat="identity", position=dodge)
 gplt_ET = gplt_ET + scale_fill_manual(values=c("dodgerblue4", "darkolivegreen4", "goldenrod1")) + geom_errorbar(limits, position=dodge, width=0.25)
-gplt_ET + theme_bw()+ coord_flip()
+gplt_ET + theme_bw() + labs(x="Subbasin",y="ET") + coord_flip()
 
 # SURQ_GEN
 limits = aes(ymin=(SURQ_GEN.x - SURQ_GEN.y),
@@ -237,7 +236,7 @@ gplt_SURQ_GEN = ggplot(smry_tbl, aes(x=factor(SUB), y=SURQ_GEN.x, fill=SCENARIO)
 dodge = position_dodge(width=0.9)
 gplt_SURQ_GEN = gplt_SURQ_GEN + geom_bar(stat="identity", position=dodge)
 gplt_SURQ_GEN = gplt_SURQ_GEN + scale_fill_manual(values=c("dodgerblue4", "darkolivegreen4", "goldenrod1")) + geom_errorbar(limits, position=dodge, width=0.25)
-gplt_SURQ_GEN + theme_bw()+ coord_flip()
+gplt_SURQ_GEN + theme_bw() + labs(x="Subbasin",y="Surface Runoff Generated") + coord_flip()
 
 # SA_ST
 limits = aes(ymin=(SA_ST.x - SA_ST.y),
@@ -246,7 +245,7 @@ gplt_SA_ST = ggplot(smry_tbl, aes(x=factor(SUB), y=SA_ST.x, fill=SCENARIO))
 dodge = position_dodge(width=0.9)
 gplt_SA_ST = gplt_SA_ST + geom_bar(stat="identity", position=dodge)
 gplt_SA_ST = gplt_SA_ST + scale_fill_manual(values=c("dodgerblue4", "darkolivegreen4", "goldenrod1")) + geom_errorbar(limits, position=dodge, width=0.25)
-gplt_SA_ST + theme_bw()+ coord_flip()
+gplt_SA_ST + theme_bw() + labs(x="Subbasin",y="Amt of Water in Shall Aquifer") + coord_flip()
 
 # LATQ
 limits = aes(ymin=(LATQ.x - LATQ.y),
@@ -255,16 +254,45 @@ gplt_LATQ = ggplot(smry_tbl, aes(x=factor(SUB), y=LATQ.x, fill=SCENARIO))
 dodge = position_dodge(width=0.9)
 gplt_LATQ = gplt_LATQ + geom_bar(stat="identity", position=dodge)
 gplt_LATQ = gplt_LATQ + scale_fill_manual(values=c("dodgerblue4", "darkolivegreen4", "goldenrod1")) + geom_errorbar(limits, position=dodge, width=0.25)
-gplt_LATQ + theme_bw()+ coord_flip()
-
+gplt_LATQ + theme_bw() + labs(x="Subbasin", y="Lateral Flow to Reach") + coord_flip()
 
 dev.off()
 
+###### ----- Reach Data ----- ######
+sb = subset(sbDat.rch, SUB == 145)
 
-for (scen in scenarios){
-	hru.scen = subset(tst.hru, SCENARIO == scen)
-	print(sum(hru.scen$IRR))
+scen_tbl = data.frame(
+	scenario = scenarios,
+	colrs = c("dodgerblue4", "darkolivegreen4", "goldenrod1","darkorchid3"),
+	scen_name = c("No Irrigation", "Draw from Reach", "Draw from Shallow Aquifer", "from Aquifer, Half Max")
+)
+scen_tbl$rgb_colrs = rbind(col2rgb(scen_tbl$colrs),alpha=rep(200,4)) 
+for (i in 1:4){
+	scen = scenarios[i]
+	sb_scen = subset(sb, SCENARIO == scen)
+	if (i == i){
+		plot(FLOW ~ DATE,
+			data=sb_scen,
+			type="l",
+			col=rgb(t(as.matrix(scen_tbl$rgb_colrs[,i])),maxColorValue=255)
+		)
+	} else {
+		lines(FLOW ~ DATE,
+			data=sb_scen,
+			col=rgb(t(as.matrix(scen_tbl$rgb_colrs[,i])),maxColorValue=255)
+		)
+	}
+	legend(
+		"topleft",
+		legend=scen_tbl$scen_name,
+		fill=scen_tbl$colrs
+	)
 }
+
+# for (scen in scenarios){
+	# hru.scen = subset(tst.hru, SCENARIO == scen)
+	# print(sum(hru.scen$IRR))
+# }
 
 ## potato vegetable from subbasin 145
 # pdf("Subbasin_145.pdf",width=11,height=8)
@@ -406,35 +434,35 @@ for (scen in scenarios){
 	# "CSIL", "#fdc08680",
 	# "ALFA", "#ffff9980"
 
-hru_data[which(hru_data$mean_sand > 50), "sandy_flag"] = "Sandy"
-hru_data[which(hru_data$mean_sand <= 50), "sandy_flag"] = "Not Sandy"
+# hru_data[which(hru_data$mean_sand > 50), "sandy_flag"] = "Sandy"
+# hru_data[which(hru_data$mean_sand <= 50), "sandy_flag"] = "Not Sandy"
 
 # hru_data[which(hru_data.sbst$ET > (3*sd(hru_data.sbst$ET) + mean(hru_data.sbst$ET))), "ET"] = NA
 
-hru_data_sbst = subset(hru_data, BIOM > 0)
+# hru_data_sbst = subset(hru_data, BIOM > 0)
 
-pet_gwq = ggplot(hru_data, aes(x=PET, y=GW_Q, color = LULC)) + geom_point(shape=20, size = 3)
-pet_gwq + facet_grid(Scenario ~ sandy_flag ) + scale_color_manual(values=c("#7fc97f80", "#beaed480", "#ffff9980"))
+# pet_gwq = ggplot(hru_data, aes(x=PET, y=GW_Q, color = LULC)) + geom_point(shape=20, size = 3)
+# pet_gwq + facet_grid(Scenario ~ sandy_flag ) + scale_color_manual(values=c("#7fc97f80", "#beaed480", "#ffff9980"))
 
-lai_dailycn = ggplot(hru_data, aes(x=LAI, y=DAILYCN, color = LULC)) + geom_point(shape=20, size = 3)
-lai_dailycn + facet_grid(Scenario ~ sandy_flag) + scale_color_manual(values=c("#7fc97f80", "#beaed480", "#ffff9980"))+ theme_bw()
+# lai_dailycn = ggplot(hru_data, aes(x=LAI, y=DAILYCN, color = LULC)) + geom_point(shape=20, size = 3)
+# lai_dailycn + facet_grid(Scenario ~ sandy_flag) + scale_color_manual(values=c("#7fc97f80", "#beaed480", "#ffff9980"))+ theme_bw()
 
-irri = ggplot(subset(hru_data, BIOM > 0), aes(y=ET, x=GW_Q, color = LULC)) + geom_point(shape=20, size = 3)
-irri = irri + facet_grid(Scenario + sandy_flag ~ . ) + scale_color_manual(values=c("#7fc97f80", "#beaed480", "#ffff9980")) 
-irri + theme_bw() + ggtitle("ET and Baseflow (GW_Q) for irrigated \nand non irrigated and sandy and non-sandy")
+# irri = ggplot(subset(hru_data, BIOM > 0), aes(y=ET, x=GW_Q, color = LULC)) + geom_point(shape=20, size = 3)
+# irri = irri + facet_grid(Scenario + sandy_flag ~ . ) + scale_color_manual(values=c("#7fc97f80", "#beaed480", "#ffff9980")) 
+# irri + theme_bw() + ggtitle("ET and Baseflow (GW_Q) for irrigated \nand non irrigated and sandy and non-sandy")
 
-et_irr = ggplot(hru_data, aes(y=BIOM, x=DATE, color = LULC)) 
-et_irr + geom_line(size=0.5) + facet_grid(Scenario~ . ) + scale_color_manual(values=c("#7fc97f", "#beaed4", "#ffff99"))
+# et_irr = ggplot(hru_data, aes(y=BIOM, x=DATE, color = LULC)) 
+# et_irr + geom_line(size=0.5) + facet_grid(Scenario~ . ) + scale_color_manual(values=c("#7fc97f", "#beaed4", "#ffff99"))
 
-et_gwq = ggplot(hru_data, aes(x=IRR, y=GW_Q, color = LULC)) + geom_point(shape=20, size = 3)
-et_gwq + facet_grid(Scenario ~ sandy_flag ) #+ coord_flip()
+# et_gwq = ggplot(hru_data, aes(x=IRR, y=GW_Q, color = LULC)) + geom_point(shape=20, size = 3)
+# et_gwq + facet_grid(Scenario ~ sandy_flag ) #+ coord_flip()
 
 
-et_irri = ggplot(hru_data.sbst, aes(x=ET, y=IRRI, color = LULC)) + geom_point(shape=20, size = 3)
-et_irri + facet_grid(Scenario ~ .) + coord_flip()
+# et_irri = ggplot(hru_data.sbst, aes(x=ET, y=IRRI, color = LULC)) + geom_point(shape=20, size = 3)
+# et_irri + facet_grid(Scenario ~ .) + coord_flip()
 
-gwrchg_irri = ggplot(hru_data.sbst, aes(x=GWRCHG, y=IRRI, color = LULC)) + geom_point(shape=20, size = 3)
-gwrchg_irri + facet_grid(Scenario ~ .) + coord_flip()
+# gwrchg_irri = ggplot(hru_data.sbst, aes(x=GWRCHG, y=IRRI, color = LULC)) + geom_point(shape=20, size = 3)
+# gwrchg_irri + facet_grid(Scenario ~ .) + coord_flip()
 
 
 ## plotting reaches with irrigation

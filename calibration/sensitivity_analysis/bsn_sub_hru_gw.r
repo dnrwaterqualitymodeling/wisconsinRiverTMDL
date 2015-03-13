@@ -13,13 +13,15 @@ iter = as.integer(arguments[9])
 ##
 # txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
 # dir_out = "H:/WRB_sensitivity"
-# temp_dir = "D:/temp_dir"
+# temp_dir = "H:/temp_directory"
 # p = "CN2"
 # ext = "mgt"
 # mn = -0.5
 # mx = 0.5
 # method = "r"
 # iter = 2
+
+# Potential argument, hard code for now
 horizon_number = c(1)#c(1,2,3,4,5)
 
 logfile = paste(dir_out, '/',p,'.log',sep='')
@@ -118,7 +120,7 @@ file.cio.dat[59] = "               1    | IPRINT: print code (month, day, year)"
 ##### Reach output variables
 file.cio.dat[65] = "   2   6  44   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
 ##### Subbasin output variables
-file.cio.dat[67] = "   4   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
+file.cio.dat[67] = "   9  10  12  14  15   0   0   0   0   0   0   0   0   0   0"
 ##### HRU output variables
 file.cio.dat[69] = "   6   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
 ##### HRU data to be printed
@@ -231,18 +233,28 @@ p.mat = apply(p.rg, 1, function(x,iter) {seq(x[1], x[2], length.out=iter)}, iter
 p.mat = t(p.mat)
 
 dimI = dim.def.ncdf( "iteration", "unitless", 1:iter)
-dimS = dim.def.ncdf( "subbasin", "ID", 1:338)
+dimS = dim.def.ncdf( "subbasin", "ID", 1:337)
 dimT = dim.def.ncdf( "Time", "days since 2001-12-31", 1:4383)
 
 # Make varables of various dimensionality, for illustration purposes
 mv = 1.e30 # missing value to use
-q.var = var.def.ncdf( "streamflow", "cms", list(dimT,dimS,dimI), mv)
+
+q.var = var.def.ncdf( "water_yield", "mm", list(dimT,dimS,dimI), mv)
 s.var = var.def.ncdf( "sediment", "metric tons", list(dimT,dimS,dimI), mv)
-p.var = var.def.ncdf( "phosphorus", "kilograms", list(dimT,dimS,dimI), mv)
+org.p.var = var.def.ncdf( "org_phosphorus", "kilograms", list(dimT,dimS,dimI), mv)
+sol.p.var = var.def.ncdf( "sol_phosphorus", "kilograms", list(dimT,dimS,dimI), mv)
+min.p.var = var.def.ncdf( "sed_phosphorus", "kilograms", list(dimT,dimS,dimI), mv)
+
+
+
+# q.in.var = var.def.ncdf( "streamflow_in", "cms", list(dimT,dimS,dimI), mv)
+# q.out.var = var.def.ncdf( "streamflow_out", "cms", list(dimT,dimS,dimI), mv)
+# s.var = var.def.ncdf( "sediment", "metric tons", list(dimT,dimS,dimI), mv)
+# p.var = var.def.ncdf( "phosphorus", "kilograms", list(dimT,dimS,dimI), mv)
 
 nc = create.ncdf(
 	paste(dir_out, "/", p, "_", ext, ".nc", sep=""),
-	list(q.var,s.var,p.var))
+	list(q.var,s.var,org.p.var,sol.p.var,min.p.var))
 
 # For each iteration, rewrite all necessary files,
 #	then run swat, and collect the data from each run.
@@ -263,45 +275,58 @@ for (i in 1:iter){
 	writeLines(paste("cd ", wd, "\nSWAT_64rel.exe", sep=""), bat) 
 	system(bat)
 	print("Processing SWAT output...")
-	dat = readLines(paste(wd, "output.rch", sep="\\"))
+	dat = readLines(paste(wd, "output.sub", sep="\\"))
 	dat = dat[10:length(dat)]
 	dat = gsub("\\s+", ",", dat)
-	dat = gsub("REACH,", "", dat)
+	dat = gsub("BIGSUB,", "", dat)
 	dat = strsplit(dat, ",")
 	nrows = length(dat)
 	ncols = length(dat[[1]])
 	dat = unlist(dat)
 	dat = matrix(dat, nrow=nrows, ncol=ncols, byrow=T)
 	dat = apply(dat, 2, as.numeric)
-	dat = subset(dat, select=c(1, 3, 5:7))
-	colnames(dat) = c("sub", "mon", "flow", "sed", "totpkg")
+	dat = subset(dat, select=c(1,4:8))
+	colnames(dat) = c("sub","wat_yld", "sed", "org_p", "sol_p", "min_p")
 	
 	dat = dat[order(dat[,1]),]
 	
 	q = matrix(
+		dat[,2], 
+		nrow=4383, 
+		ncol=337)
+	sed = matrix(
 		dat[,3], 
 		nrow=4383, 
-		ncol=338)
-	sed = matrix(
+		ncol=337)
+	org.pho = matrix(
 		dat[,4], 
 		nrow=4383, 
-		ncol=338)
-	pho = matrix(
+		ncol=337)
+	sol.pho = matrix(
 		dat[,5], 
 		nrow=4383, 
-		ncol=338)
+		ncol=337)
+	min.pho = matrix(
+		dat[,6], 
+		nrow=4383, 
+		ncol=337)
 	
-	dim(q) = c(4383, 338, 1)
-	dim(sed) = c(4383, 338, 1)
-	dim(pho) = c(4383, 338, 1)
+	dim(q) = c(4383, 337, 1)
+	dim(sed) = c(4383, 337, 1)
+	dim(org.pho) = c(4383, 337, 1)
+	dim(sol.pho) = c(4383, 337, 1)
+	dim(min.pho) = c(4383, 337, 1)
 	print("Writing output to netCDF...")
 	put.var.ncdf(nc, q.var, q, start=c(1,1,i), count=c(-1,-1,1))
 	put.var.ncdf(nc, s.var, sed, start=c(1,1,i), count=c(-1,-1,1))
-	put.var.ncdf(nc, p.var, pho, start=c(1,1,i), count=c(-1,-1,1))
+	put.var.ncdf(nc, org.p.var, org.pho, start=c(1,1,i), count=c(-1,-1,1))
+	put.var.ncdf(nc, sol.p.var, sol.pho, start=c(1,1,i), count=c(-1,-1,1))
+	put.var.ncdf(nc, min.p.var, min.pho, start=c(1,1,i), count=c(-1,-1,1))
+	
 	write(
 		paste("Completed iteration", i, "at", Sys.time()),
 		logfile,
-		append = T)
+		append=T)
 }
 close.ncdf(nc)
 

@@ -10,8 +10,11 @@ source("./Code/figures/function_proper_legend.r")
 
 subbasins = readOGR(
 	dsn="T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro",
-	layer="subbasins_minus_urban_boundaries")
-basin = gUnionCascaded
+	layer="subbasins")
+basin = readOGR(
+	dsn=getwd(),
+	layer="arc_basins")
+
 regions = readOGR(
 	dsn="T:/Projects/Wisconsin_River/GIS_Datasets/Water_Budget",
 	layer="WRB_Budget_Divisions")
@@ -20,13 +23,13 @@ file_subbasin_region_lu = "./Code/calibration/sensitivity_analysis/subbasin_regi
 
 # setwd("H:/sensitivity_text_files")
 vars = list(
-	c("streamflow", "Annual Average streamflow (cms)")#,
-	# c("sediment", "Average Daily Sediment Load (tons)"),
-	# c("phosphorus", "Average Daily P Load (kg)")
+	c("streamflow", "Annual Average streamflow (cms)"),
+	c("sediment", "Average Daily Sediment Load (tons)"),
+	c("phosphorus", "Average Daily P Load (kg)")
 )
 
 sb_region_lu = read.delim(file_subbasin_region_lu)
-out_subbasin_files = list.files("H:/sensitivity_text_files",pattern="^subbasin*",full.name=T)
+out_subbasin_files = list.files("H:/WRB_Sensitivity",pattern="^subbasin*",full.name=T)
 out_regional_file = "H:/sensitivity_text_files/regional_sensitivity.txt"
 
 all_params = NULL
@@ -39,9 +42,10 @@ for (sub_file in out_subbasin_files) {
 }
 # for easy merging
 names(all_params)[1] = "Subbasin"
-pal.brew = brewer.pal(9,"RdYlGn")
+pal.brew = brewer.pal(9,"YlGnBu")
 
 for (v in vars){
+	print(v)
 	toClass = all_params[v[1]]
 	toClass = as.matrix(toClass)
 	prop_int = classIntervals(toClass, 9, 'kmeans')
@@ -68,6 +72,7 @@ for (v in vars){
 			bty = 'n',
             fill = pal.brew,
             title = paste(param))
+		plot(basin, add=T)
 	}
 	dev.off()
 }

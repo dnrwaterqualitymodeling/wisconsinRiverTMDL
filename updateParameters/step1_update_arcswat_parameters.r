@@ -28,7 +28,7 @@ inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 
 ## for irrigation
 ## 0 is off, 1 from reach, 3 from shallow aquifer
-irr_sca = 0
+irr_sca = 3
 
 # UPDATE SLOPE AND SLOPE LENGTH BASED ON RECCS IN BAUMGART, 2005
 mean_slope = read.table(mean_slope_file, header=T)
@@ -377,9 +377,6 @@ if (irr_sca == 0){
 } else {
 	stout = sqlQuery(con_mgt2, irri_query)
 }
-
-# }
-
 
 # CNOP
 hydgrp_lu = unique(sqlQuery(con_mgt2, "SELECT SOIL, HYDGRP from sol")) # for CNOP
