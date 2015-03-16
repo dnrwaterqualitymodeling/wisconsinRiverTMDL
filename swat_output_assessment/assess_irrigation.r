@@ -34,8 +34,9 @@ writeLines(paste("cd ", wd, "\nSWAT_64rel.exe", sep=""), bat)
 system(bat)
 ##### grabbing potato veggie subbasins
 extr_subs_fun(
-	subbasins=c(5,59,65,73,74,75,76,77,107,141,142,143,144,145,149,176,178,191,193,199,208,216,228,234,247,248,251,254,255,257,260,296,311,330,333),
+	subbasins=c(162),#c(5,59,65,73,74,75,76,77,107,141,142,143,144,145,149,176,178,191,193,199,208,216,228,234,247,248,251,254,255,257,260,296,311,330,333),
 	src_folder=gsub("\\\\","/",wd),
+	hru=T,
 	dst_folder="H:/")
 # file.copy(wd, "H:/WRB/Scenarios/irrigation_assessment/sca3_eff50_mx90_asq02", recursive=T)
 #######-----#######-----#######-----#######-----#######

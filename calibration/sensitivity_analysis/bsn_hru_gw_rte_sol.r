@@ -1,27 +1,27 @@
 # to run a sensitivity analysis for basin parameters
-arguments = commandArgs(trailingOnly = T)
-txtinout = arguments[1]
-dir_out = arguments[2]
-temp_dir = arguments[3]
-p = arguments[4]
-ext = arguments[5]
-mn = as.numeric(arguments[6])
-mx = as.numeric(arguments[7])
-method = arguments[8]
-iter = as.integer(arguments[9])
+# arguments = commandArgs(trailingOnly = T)
+# txtinout = arguments[1]
+# dir_out = arguments[2]
+# temp_dir = arguments[3]
+# p = arguments[4]
+# ext = arguments[5]
+# mn = as.numeric(arguments[6])
+# mx = as.numeric(arguments[7])
+# method = arguments[8]
+# iter = as.integer(arguments[9])
 # run = as.integer(arguments[9])
 ##
 
-# txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
-# dir_out = "H:/WRB_sensitivity"
-# temp_dir = "H:/temp_directory"
-# p = "CN2"
-# ext = "mgt"
-# mn = -0.5
-# mx = 0.5
-# method = "r"
+txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
+dir_out = "H:/WRB_sensitivity"
+temp_dir = "H:/temp_directory"
+p = "CN2"
+ext = "mgt"
+mn = -0.5
+mx = 0.5
+method = "r"
 
-# iter = 2
+iter = 25
 
 # Potential argument, hard code for now
 horizon_number = c(1)#c(1,2,3,4,5)

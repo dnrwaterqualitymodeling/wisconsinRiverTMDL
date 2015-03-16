@@ -6,10 +6,28 @@ dir_proj = "H:/WRB_sensitivity"
 file_reg_sens = paste(dir_proj, "regional_sensitivity.txt", sep="/")
 
 dat = read.delim(file_reg_sens)
-dat = subset(dat, Region == "Global")
+dat = subset(dat, Region == "Global" & delta_mean > 0)
 
-ggplt = ggplot(all_var, aes(x=Parameter, y=delta_mean/max(delta_mean), fill = Variable))
-ggplt + geom_bar(stat="identity", position = "dodge") + coord_flip() + theme_bw() + ggtitle("Global Sensitivity")#+ facet_grid(. ~ var)
+dat$relative_rank = NA
+for (var in unique(dat$Variable)){
+	indx = which(dat$Variable == var)
+	dat$relative_rank[indx] = dat$delta_mean[indx]/max(dat$delta_mean[indx])
+}
+ png("C:/Users/evansdm/Documents/miscellaneous/sensitivity_fig_for_symp.png",res=900,units='in',height=8,width=6.6)
+ggplt = ggplot(dat, aes(x=Parameter, y=relative_rank, fill = Variable))
+ggplt = ggplt + geom_bar(stat="identity", position = "dodge") + coord_flip() + theme_bw() + ggtitle("Global Sensitivity")#+ facet_grid(. ~ var)
+ggplt = ggplt + theme(
+	axis.text.x=element_text(size=15),
+	axis.text.y=element_text(size=13, angle = 40),
+	axis.title.x=element_text(size=20),
+	axis.title.y=element_text(size=20),
+	plot.title=element_text(size=22),
+	legend.title=element_text(size=15),
+	legend.text=element_text(size=12)) + 
+	scale_fill_manual(name="Variable", values=c("darkolivegreen4", "goldenrod1", "dodgerblue4")) +
+	labs(y="Relative Rank")
+plot(ggplt)
+dev.off()
 # leaving out of the figure
 # exclde = c("CHD_rte", "CHW2_rte", "HRU_SLP_hru", "SLSOIL_hru", "ADJ_PKR_bsn", "FFCB_bsn")
 exclde = NULL
