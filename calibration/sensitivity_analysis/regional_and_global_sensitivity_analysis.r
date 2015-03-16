@@ -2,17 +2,11 @@ library(ncdf)
 library(rgdal)
 library(raster)
 
-options(stringsAsFactors = FALSE)
+options(stringsAsFactors=FALSE)
 
-subbasins = readOGR(
-	dsn="T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro",
-	layer="subbasins_minus_urban_boundaries")
-regions = readOGR(
-	dsn="T:/Projects/Wisconsin_River/GIS_Datasets/Water_Budget",
-	layer="WRB_Budget_Divisions")
+file_subbasin_region_lu = "D:/Water_Budget/subbasin_region_lookup.txt"
+setwd("D:/WRB_sensitivity")
 
-file_subbasin_region_lu = "T:/Projects/Wisconsin_River/GIS_Datasets/Water_Budget/subbasin_region_lookup.txt"
-setwd("C:/Users/ruesca/Desktop/WRB_sensitivity")
 vars = list(
 	c("streamflow", "Annual Average streamflow (cms)"),
 	c("sediment", "Average Daily Sediment Load (tons)"),
@@ -20,7 +14,9 @@ vars = list(
 )
 
 sb_region_lu = read.delim(file_subbasin_region_lu)
-nc_files = list.files(pattern="\\.nc$")
+
+nc_files = list.files(".", pattern="\\.nc$")
+
 regional_all = NULL
 for (nc_file in nc_files) {
 	nc = open.ncdf(nc_file)
@@ -66,11 +62,11 @@ for (nc_file in nc_files) {
 		regional_all = rbind(regional_all, regional_means)
 		
 	}
-	subbasin_all = cbind(1:338, subbasin_all)
+	subbasin_all = cbind(1:337, subbasin_all)
 	subbasin_all = data.frame(subbasin_all)
 	names(subbasin_all) = c("subbasin", vars[[1]][1], vars[[2]][1], vars[[3]][1])
 	
-	file_name = paste("subbasin_", p, "_sensitivity.txt", sep="")
+	file_name = paste("subbasin_", p, "_sensitivity_tst.txt", sep="")
 	write.table(
 		subbasin_all,
 		file_name,

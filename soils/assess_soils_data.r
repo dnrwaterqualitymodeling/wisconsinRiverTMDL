@@ -1,7 +1,6 @@
 options(stringsAsFactors=F)
 library(ggplot2)
-library(scatterplot3d)
-library(car)
+library(plotrix)
 
 dir_net_soil = "T:/Projects/Wisconsin_River/GIS_Datasets/Soils"
 
@@ -55,6 +54,19 @@ swat_soils["Data_Type"] = "WRB_Custom"
 dat = rbind(dfault_soils, swat_soils)
 dat = subset(dat, !is.na(HYDGRP))
 
+# par(mai=c(0,0,0,0), mfrow=c(2, 4))
+
+for (src in unique(dat$Data_Type)){
+	sbst = dat[which(dat$Data_Type == src), c("sand", "silt", "clay", "HYDGRP")]
+	for (num in 1:4){
+		grp = LETTERS[num]
+		txts = sbst[which(sbst$HYDGRP == grp),c("sand", "silt", "clay")]
+		pdf(paste(src,"_",grp,".pdf")
+		soil.texture(txts, pch=grp, col.symbols=num)
+		dev.off()
+	}
+}
+#####
 setwd(dir_net_soil)
 png("new_clusters_texture_distribution_assessment.png",
 	height = 8.5,
@@ -77,7 +89,7 @@ scatterplot3d(
 	angle=angl)
 }
 dev.off()
-scatter3d(sand ~ clay + SOL_AWC | factor(HYDGRP),
+scatter3d(sand ~ clay + silt | factor(HYDGRP),
 	data = swat_soils,
 	surface.alpha = 0,
 	neg.res.col = '#000001ff',

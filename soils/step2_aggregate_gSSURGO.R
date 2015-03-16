@@ -457,8 +457,8 @@ update_soils_tbl = tempfile(fileext='.bat')
 
 writeLines(
 	paste(
-		"C:\\Users\\ruesca\\Documents\\R\\R-3.1.2\\bin\\i386\\Rscript.exe",
-		"C:\\Users\\ruesca\\Documents\\wisconsin_river_tmdl\\Code\\soils\\step2_5_updateSWAT_soils_table.R"),
+		"C:\\Users\\evansdm\\Documents\\R\\R-3.1.1\\bin\\i386\\Rscript.exe",
+		"C:\\Users\\evansdm\\Documents\\Code\\soils\\step2_5_updateSWAT_soils_table.R"),
 	update_soils_tbl)
 
 system(update_soils_tbl)
