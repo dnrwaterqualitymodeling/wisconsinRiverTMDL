@@ -31,6 +31,7 @@ for (p.i in 1:nrow(par_inf_tbl)){
 		p,
 		'"',
 		'"C:\\Program Files\\R\\R-3.1.2\\bin\\x64\\Rscript.exe"',
+		# '"C:\\Users\\evansdm\\Documents\\R\\R-3.1.1\\bin\\x64\\Rscript.exe"',
 		script_sensitivity,
 		txtinout,
 		dir_out,

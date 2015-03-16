@@ -1,4 +1,14 @@
+<<<<<<< HEAD
 extr_subs_fun <- function(subbasins, src_folder, dst_folder, git_bin="C:\\Users\\evansdm\\AppData\\Local\\Programs\\Git\\bin"){
+=======
+extr_subs_fun <- function(
+	subbasins,
+	src_folder,
+	dst_folder,
+	hru=T,
+	rch=T,
+	git_bin="C:\\Users\\evansdm\\AppData\\Local\\Programs\\Git\\bin"){
+>>>>>>> 7d24adf0a78a22ccf0fc0935890e7afac9525984
 	### Function to extract specific subbassins from output.hru and output.rch
 	### This function requires GIT
 	### subbasins is a vector of subbasin ids
@@ -14,12 +24,29 @@ extr_subs_fun <- function(subbasins, src_folder, dst_folder, git_bin="C:\\Users\
 		tmplt[2] = paste("for SB in", sb)
 		tmplt[19] = gsub(dflt, src_folder, tmplt[19])
 		tmplt[22] = gsub(dflt, src_folder, tmplt[22])
+<<<<<<< HEAD
+=======
+		if (!hru){
+			tmplt[17] = paste("#", tmplt[17])
+			tmplt[18] = paste("#", tmplt[18])
+			tmplt[19] = paste("#", tmplt[19])
+		}
+		if (!rch){
+			tmplt[20] = paste("#", tmplt[20])
+			tmplt[21] = paste("#", tmplt[21])
+			tmplt[22] = paste("#", tmplt[22])
+		}
+>>>>>>> 7d24adf0a78a22ccf0fc0935890e7afac9525984
 		tmpf = tempfile(fileext=".sh")
 		writeLines(tmplt, tmpf)
 		tmpfiles = c(tmpfiles, tmpf)
 	}
+<<<<<<< HEAD
 	# git_bin = "~\\AppData\\Local\\Programs\\Git\\bin"
 	# git_bin = path.expand(git_bin)
+=======
+
+>>>>>>> 7d24adf0a78a22ccf0fc0935890e7afac9525984
 	cwd = getwd()
 	setwd(git_bin)
 	lnes = paste("cd", git_bin) 
