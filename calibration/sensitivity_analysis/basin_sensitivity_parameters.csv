@@ -31,8 +31,8 @@ SPEXP,bsn,1,1.5,a,no response,0
 SURLAG,bsn,0,24,a,no response,0
 SURLAG,hru,0,24,a,,1
 TIMP,bsn,0.01,1,a,some response,1
-CN2,mgt,-0.5,0.5,r,,1
-CNOP,mgt,-0.5,0.5,r,,0
+CN2,mgt,-0.05,0.05,r,,1
+CNOP,mgt,-0.05,0.05,r,,0
 SOL_AWC,sol,-0.5,0.5,r,,1
 SOL_ALB,sol,-0.5,0.5,r,,1
 SOL_K,sol,-0.5,0.5,r,,1

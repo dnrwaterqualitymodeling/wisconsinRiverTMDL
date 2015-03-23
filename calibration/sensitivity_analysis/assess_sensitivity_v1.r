@@ -2,7 +2,10 @@ options(stringsAsFactors=F)
 library(ggplot2)
 library(Hmisc)
 
-dir_proj = "H:/WRB_sensitivity"
+dir_proj = "C:/Users/ruesca/Desktop/WRB_sensitivity_sub"
+# vars = c("streamflow", "phosphorus", "sediment")
+vars = c("water_yield", "sediment", "org_phosphorus", "sol_phosphorus", "sed_phosphorus")
+
 file_reg_sens = paste(dir_proj, "regional_sensitivity.txt", sep="/")
 
 dat = read.delim(file_reg_sens)
@@ -39,8 +42,7 @@ exclde = NULL
 # var_dat = subset(var_dat, !(parameter %in% exclde))
 
 all_var = data.frame()
-for (var in c("streamflow", "phosphorus", "sediment")){
-	
+for (var in vars){
 	tm_priod = paste(var, c("_annual_mean", "_spring_mean"),sep='')
 	ann = subset(dat, (Variable %in% tm_priod[1] & Region == "Global"))
 	spr = subset(dat, (Variable %in% tm_priod[2] & Region == "Global"))

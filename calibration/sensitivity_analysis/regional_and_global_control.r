@@ -1,34 +1,39 @@
-
-setwd("D:/WRB_sensitivity")
-nc_files = list.files(pattern="\\.nc$")
 script_sensitivity = "D:/wisconsinRiverTMDL/calibration/sensitivity_analysis/regional_and_global_sensitivity_analysis.r"
-bat_files = NULL
+dir_nc = "D:/WRB_sensitivity_sub"
+dir_out = dir_nc
+
+nc_files = list.files(dir_nc, pattern="\\.nc$", full.names=T)
+
+pat = paste("(", paste(basename(nc_files), collapse="|"), ")", sep="")
+pat = gsub("\\.", "\\\\.", pat)
+
 # loop on parameter name
 processors = 0
 for (nc_file in nc_files) {
 	processors = processors + 1
 	# Create an empty temporary batch file for every 32 parameters
-	if ((processors %% 32) == 1){
-		tmp_bat = tempfile(fileext = ".bat")
-		bat_lines = NULL
-		bat_files = c(bat_files, tmp_bat)
-	}
+	tmp_bat = tempfile(fileext = ".bat")
 	cmd = paste(
 		"start",
 		'"',
-		sub("\\.nc$", "", basename(nc_file), "\\."),
+		basename(nc_file),
 		'"',
 		'"C:\\Program Files\\R\\R-3.1.2\\bin\\x64\\Rscript.exe"',
 		script_sensitivity,
 		nc_file,
+		dir_out
 		sep = " ")
-	bat_lines = rbind(bat_lines, cmd)
-	if ((processors %% 32) == 0 | processors == length(nc_files)) {
-		writeLines(bat_lines, tmp_bat)
+	writeLines(cmd, tmp_bat)
+	
+	go.to.next = F
+	while (!go.to.next) {
+		ps = grep(pat, system('tasklist /v', intern=TRUE), value=TRUE)
+		if (length(ps) <= 32) {
+			go.to.next = T
+		} else {
+			Sys.sleep(1)
+			go.to.next = F
+		}
 	}
+	system(tmp_bat)
 }
-for (bat_file in bat_files) {
-	print(bat_file)
-	system(bat_file)
-}
-

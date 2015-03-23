@@ -1,10 +1,17 @@
 library(ncdf)
 
-setwd("D:/WRB_sensitivity")
+setwd("D:/WRB_sensitivity_sub")
+file_subbasin_region_lu = "D:/Water_Budget/subbasin_region_lookup.txt"
+
 vars = list(
-	c("streamflow", "Annual Average streamflow (cms)"),
-	c("sediment", "Average Daily Sediment Load (tons)"),
-	c("phosphorus", "Average Daily P Load (kg)")
+	c("water_yield", "Annual Average water yield (mm)"),
+	c("sediment", "Average daily sediment yield (metric tons/ha)"),
+	c("org_phosphorus", "Average daily organic P yield (kg/ha)"),
+	c("sol_phosphorus", "Average daily organic P yield (kg/ha)"),
+	c("sed_phosphorus", "Average daily organic P yield (kg/ha)")
+	# c("streamflow", "Annual Average streamflow (cms)"),
+	# c("sediment", "Average Daily Sediment Load (tons)"),
+	# c("phosphorus", "Average Daily P Load (kg)")
 )
 aggregate_by_region = T
 
@@ -24,7 +31,7 @@ for (nc_file in nc_files) {
 		pdf_file = paste(p, "_", v[1], ".pdf", sep="")
 		pdf(pdf_file, width=8.5, height=11)
 		par(mfrow=c(4,3))
-		for (i in 1:338) {
+		for (i in 1:337) {
 			plot(1:25, subbasin_means[i,], 
 				ylab=v[2], xlab="Iteration",
 				main=paste("Subbasin", i))
