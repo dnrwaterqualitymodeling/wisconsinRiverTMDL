@@ -6,12 +6,7 @@ dir_proj = "H:/WRB_sensitivity"
 file_reg_sens = paste(dir_proj, "regional_sensitivity.txt", sep="/")
 
 dat = read.delim(file_reg_sens)
-<<<<<<< HEAD
-dat = subset(dat, Region == "Global")
 
-ggplt = ggplot(all_var, aes(x=Parameter, y=delta_mean/max(delta_mean), fill = Variable))
-ggplt + geom_bar(stat="identity", position = "dodge") + coord_flip() + theme_bw() + ggtitle("Global Sensitivity")#+ facet_grid(. ~ var)
-=======
 dat = subset(dat, Region == "Global" & delta_mean > 0)
 
 dat$relative_rank = NA
@@ -34,7 +29,7 @@ ggplt = ggplt + theme(
 	labs(y="Relative Rank")
 plot(ggplt)
 dev.off()
->>>>>>> 7d24adf0a78a22ccf0fc0935890e7afac9525984
+
 # leaving out of the figure
 # exclde = c("CHD_rte", "CHW2_rte", "HRU_SLP_hru", "SLSOIL_hru", "ADJ_PKR_bsn", "FFCB_bsn")
 exclde = NULL
