@@ -1,8 +1,8 @@
 # CHANGE THESE ###########
 # SWAT project
 
-projectDir = "D:/WRB.Sufi2.SwatCup"
-simCount = 2001
+projectDir = "H:/WRB.Sufi2.SwatCup"#"D:/WRB.Sufi2.SwatCup"
+simCount = 20#2001
 subbasinCount = 337
 startYr = 2002
 endYr = 2013
@@ -83,7 +83,6 @@ parameterization = rbind(
 
 # Don't change these
 source("https://raw.githubusercontent.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/master/calibration/functions_query_output.r")
-#source("C:/Users/evansdm/Documents/Code/calibration/functions_query_output.r")
 
 gage_subbasin_lu = subset(gage_subbasin_lu, Keep == 1)
 gage_subbasin_lu = gage_subbasin_lu[c("USGS_ID", "WRB_SubbasinID")]

@@ -2,23 +2,26 @@ options(stringsAsFactors=F)
 library(ggplot2)
 library(Hmisc)
 
-dir_proj = "C:/Users/ruesca/Desktop/WRB_sensitivity_sub"
-# vars = c("streamflow", "phosphorus", "sediment")
-vars = c("water_yield", "sediment", "org_phosphorus", "sol_phosphorus", "sed_phosphorus")
-
-file_reg_sens = paste(dir_proj, "regional_sensitivity.txt", sep="/")
+dir_proj = "H:/WRB_sensitivity"
+dir_sens = "T:/Projects/Wisconsin_River/GIS_Datasets/Sensitivity_Analysis"
+file_reg_sens = paste(dir_sens, "regional_sensitivity.txt", sep="/")
 
 dat = read.delim(file_reg_sens)
+dat = subset(dat, region == "Global" & value > 0)
 
-dat = subset(dat, Region == "Global" & delta_mean > 0)
+dat = subset(dat,  grepl("_annual_mean", variable) | grepl("_spring_mean", variable))
+dat = subset(dat, !(grepl("org_p" , variable) | grepl("sed_p" , variable) | grepl("sol_p" , variable)))
 
 dat$relative_rank = NA
-for (var in unique(dat$Variable)){
-	indx = which(dat$Variable == var)
-	dat$relative_rank[indx] = dat$delta_mean[indx]/max(dat$delta_mean[indx])
+for (var in unique(dat$variable)){
+	indx = which(dat$variable == var)
+	dat$relative_rank[indx] = dat$value[indx]/max(dat$value[indx])
 }
- png("C:/Users/evansdm/Documents/miscellaneous/sensitivity_fig_for_symp.png",res=900,units='in',height=8,width=6.6)
-ggplt = ggplot(dat, aes(x=Parameter, y=relative_rank, fill = Variable))
+
+dat$variable = capitalize(gsub("_", " ", dat$variable))
+
+png("C:/Users/evansdm/Documents/miscellaneous/sensitivity_fig_for_symp.png",res=900,units='in',height=11,width=8)
+ggplt = ggplot(dat, aes(x=reorder(parameter, relative_rank), y=relative_rank, fill = variable))
 ggplt = ggplt + geom_bar(stat="identity", position = "dodge") + coord_flip() + theme_bw() + ggtitle("Global Sensitivity")#+ facet_grid(. ~ var)
 ggplt = ggplt + theme(
 	axis.text.x=element_text(size=15),
@@ -28,8 +31,9 @@ ggplt = ggplt + theme(
 	plot.title=element_text(size=22),
 	legend.title=element_text(size=15),
 	legend.text=element_text(size=12)) + 
-	scale_fill_manual(name="Variable", values=c("darkolivegreen4", "goldenrod1", "dodgerblue4")) +
-	labs(y="Relative Rank")
+
+	scale_fill_manual(name="Variable", values=c("#a6cee3", "#1f78b4","#fdbf6f","#ff7f00","#fb9a99", "#e31a1c")) +
+	labs(y="Relative Rank", x="Parameter")
 plot(ggplt)
 dev.off()
 

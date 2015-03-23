@@ -73,9 +73,32 @@ png("new_clusters_texture_distribution_assessment.png",
 	width = 11,
 	units = 'in',
 	res=500)
-text = ggplot(dat, aes(x=CLAY1, y=SILT1, color=SAND1, shape=HYDGRP)) + theme_bw()  + ggtitle("Particle Size Distribution of \n Comparing WR Method to SWAT Default")
+text = ggplot(dat, aes(x=SOL_BD, y=SOL_AWC, color=clay, shape=HYDGRP)) + theme_bw()  #+ ggtitle("Particle Size Distribution of \n Comparing WR Method to SWAT Default")
 text = text + geom_point(size=5) + scale_shape_manual(values = c("A","B","C","D")) 
 text + facet_grid(Data_Type ~ HYDGRP)
+dev.off()
+
+gpltSol1 = ggplot(dat, aes(x=Data_Type, y= USLE_K, fill=Data_Type)) + theme_bw()
+gpltSol1 = gpltSol1 + geom_boxplot() + facet_grid(. ~ HYDGRP) + scale_fill_manual(values=c("#f1a34080", "#998ec380")) + theme(
+	axis.ticks.x=element_blank(),axis.text.x=element_blank()) +
+	labs(y="Erodibility", x=" ")
+
+gpltSol2 = ggplot(dat, aes(x=Data_Type, y= SOL_AWC, fill=Data_Type)) + theme_bw()
+gpltSol2 = gpltSol2 + geom_boxplot() + facet_grid(. ~ HYDGRP)+ scale_fill_manual(values=c("#f1a34080", "#998ec380")) + theme(
+	axis.ticks.x=element_blank(),axis.text.x=element_blank()) +
+	labs(y="Available Water",x=" ")
+
+gpltSol3 = ggplot(dat, aes(x=Data_Type, y= clay, fill=Data_Type)) + theme_bw()
+gpltSol3 = gpltSol3 + geom_boxplot() + facet_grid(. ~ HYDGRP)+ scale_fill_manual(values=c("#f1a34080", "#998ec380")) + #theme(
+	# axis.ticks.x=element_blank(),axis.text.x=element_blank()) +
+	labs(y="Clay %",x=" ")
+
+png("new_clusters_distribution_assessment.png",
+	height = 8.5,
+	width = 11,
+	units = 'in',
+	res=500)
+multiplot(gpltSol1,gpltSol2,gpltSol3)
 dev.off()
 
 pdf("scatterplot_tests.pdf")
