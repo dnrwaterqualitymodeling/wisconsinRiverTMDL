@@ -1,7 +1,7 @@
 # library(RODBC)
 setInternet2(TRUE)
 #source("https://raw.githubusercontent.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/master/validation/functions_query_output.r")
-
+source("~/Code/calibration/functions_query_output.r")
 
 # CHANGE THESE ###########
 # SWAT project

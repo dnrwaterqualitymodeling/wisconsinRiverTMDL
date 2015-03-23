@@ -347,8 +347,6 @@ for (row in 1:nrow(mgt1)) {
 ### IRRIGATION PARAMETERS
 # already have a slot in wrb.mdb (from opschedules) for every year in potato veggie ops
 
-
-
 wstrs_id = 1
 auto_wstrs = 1
 irr_eff = 90
