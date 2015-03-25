@@ -25,19 +25,19 @@ model_period = seq(as.Date("2002-01-01"), as.Date("2013-12-31"), "1 day")
 for (obs_file in obs_files) {
 	obsData_raw = read.table(obs_file, skip=2, sep="\t", header=T)
 	obsData_raw = obsData_raw[-1,]
+	obsData_raw[obsData_raw[,4] == "Ice", 4] = NA
     obsData = obsData_raw[obsData_raw[,5] == "A",]
     obsData = data.frame(DATE = as.Date(as.character(obsData[,3])),
         FLOW=as.numeric(as.character(obsData[,4])))
-	# construct boolean for subsetting #########################################
+	# construct boolean for subsetting
 	mam_days = model_period[
 			as.integer(format(model_period, "%m")) %in% 1:12 #currently for june, july, aug, or 3:5 for mar, april, may
 	]
 	ten_pct_exc = quantile(obsData$FLOW, 0.1)
 	# twnty5_pct_exc = quantile(obsData$FLOW, 0.25)
 	bool = as.Date(obsData_raw$datetime) %in% mam_days &
-		as.numeric(as.character(obsData_raw[,4])) <= ten_pct_exc 
-		# as.numeric(as.character(obsData_raw[,4])) <= (ten_pct_exc)	#>= ten_pct_exc
-	############################################################################
+		as.numeric(as.character(obsData_raw[,4])) >= ten_pct_exc
+
 	sub_data = subset(obsData_raw, bool)
 	out_file = paste(out_dir, basename(obs_file), sep="/")
 	raw_txt = readLines(obs_file)
