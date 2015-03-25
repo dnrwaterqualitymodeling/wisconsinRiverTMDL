@@ -1,10 +1,14 @@
 library(stringr)
 options(stringsAsFactors=T)
 
+dir_exc = "entire_90_pct_exc"
+exc_val = 0.10
+
 cal_dir = 
 	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration"
-out_dir = paste(cal_dir, "spring_10_pct_exc", sep="/")
-subset_dir = paste(cal_dir, "/10_pct_exceedance_mam", sep="")
+out_dir = paste(cal_dir, dir_exc, sep="/")
+pdf(paste(out_dir, "/",dir_exc,".pdf",sep=''), width=11, height=8)
+# subset_dir = paste(cal_dir, "/10_pct_exceedance_mam", sep="")
 gauge_basin_lu_file =
 	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv"
 
@@ -26,11 +30,13 @@ for (obs_file in obs_files) {
         FLOW=as.numeric(as.character(obsData[,4])))
 	# construct boolean for subsetting #########################################
 	mam_days = model_period[
-			as.integer(format(model_period, "%m")) %in% 3:5
+			as.integer(format(model_period, "%m")) %in% 1:12 #currently for june, july, aug, or 3:5 for mar, april, may
 	]
-	ten_pct_exc = quantile(obsData$FLOW, 0.9)
+	ten_pct_exc = quantile(obsData$FLOW, 0.1)
+	# twnty5_pct_exc = quantile(obsData$FLOW, 0.25)
 	bool = as.Date(obsData_raw$datetime) %in% mam_days &
-		as.numeric(as.character(obsData_raw[,4]) >= ten_pct_exc
+		as.numeric(as.character(obsData_raw[,4])) <= ten_pct_exc 
+		# as.numeric(as.character(obsData_raw[,4])) <= (ten_pct_exc)	#>= ten_pct_exc
 	############################################################################
 	sub_data = subset(obsData_raw, bool)
 	out_file = paste(out_dir, basename(obs_file), sep="/")
@@ -46,6 +52,29 @@ for (obs_file in obs_files) {
 		row.names=F,
 		col.names=F,
 		quote=F)
+	gage =  gsub(".txt", "", basename(obs_file))
+	
+	obsData_raw[,4] = as.numeric(as.character(obsData_raw[,4]))
+	obsData_raw["datetime"] = as.Date(obsData_raw[,"datetime"])
+	sub_data[,4] = as.numeric(as.character(sub_data[,4]))
+	sub_data["datetime"] = as.Date(sub_data[,"datetime"])
+	total_data = nrow(sub_data)
+	sub_data = merge(sub_data, 
+		data.frame(datetime=seq(
+			as.Date(sub_data$datetime[1]), as.Date(sub_data$datetime[nrow(sub_data)]),by='1 day')),
+		all.x=T, all.y=T
+	)
+	plot(y=obsData_raw[,4], x=obsData_raw$datetime,type='l', main=paste("Gauge:",gage))
+	lines(y=sub_data[,4], x=sub_data$datetime, col="#FF0000",lty=1,lwd=2)
+	legend(
+		"topright",
+		legend=c("Full", "Subset"),
+		lty=c(1,1),
+		lwd=c(1,2),
+		col=c("black",'red'))
+	text(x=
+		as.Date(format(as.Date(sub_data$datetime[1]),"%Y"),"%Y"), y=min(obsData_raw[,4]), paste("Subset size:",total_data))
+	
 }
-		
+dev.off()
 
