@@ -16,7 +16,7 @@ pat = paste("\\s(", paste(par_inf_tbl$param, collapse="|"), ")\\s", sep="")
 # loop on parameter name
 for (p.i in 1:nrow(par_inf_tbl)){
 	# Create an empty temporary batch file for every 32 parameters
-	tmp_bat = tempfile(fileext = ".bat")
+	tmp_bat = tempfile(fileext = ".sh")
 
 	# Grabbing the parameters
 	p = par_inf_tbl$param[p.i]

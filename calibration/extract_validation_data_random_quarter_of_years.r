@@ -6,6 +6,7 @@ val_dir = paste(usgs_raw_dir, "/validation", sep="")
 cal_dir = paste(usgs_raw_dir, "/calibration", sep="")
 gauge_basin_lu_file = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv"
 fraction_for_validation = 1/4
+full_yr_threshold = 1/2
 summ_table_file =
 		"T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/validation_subset_summary_random_quarter_of_years.txt"
 
@@ -38,7 +39,7 @@ for (obs_file in obs_files) {
 	n_obs_in_yr$YR = as.character(n_obs_in_yr$YR) 
 	full_yrs = subset(
 		merge(n_obs_in_yr, n_days_in_yr),
-		N_OBS >= N_DAY * (2/3)) # Only use years with 95% of days observing flow
+		N_OBS >= N_DAY * full_yr_threshold) # Only use years with 2/3 of days observing flow
 	# if there are less than 4 years with 2/3 of days observing flow,
 	# 	do not subset.
 	obs_full_yrs = subset(
@@ -54,9 +55,10 @@ for (obs_file in obs_files) {
 	n_obs_in_yr$VALIDATION[is.na(n_obs_in_yr$VALIDATION)] = 0	
 	summ_table = rbind(summ_table, n_obs_in_yr)
 	
+	
 	# Seperate files into calibration and validation datasets
 	for (val_bool in c(0,1)) {
-		sub_yrs = full_yrs$YR[full_yrs$VALIDATION == val_bool]
+		sub_yrs = full_yrs$YR[n_obs_in_yr$VALIDATION == val_bool]
 		sub_bool = with(obsData_raw,
 			format(as.Date(datetime), "%Y") %in% sub_yrs
 		)
@@ -73,4 +75,5 @@ for (obs_file in obs_files) {
 }
 write.table(summ_table, summ_table_file, row.names=F, sep="\t", quote=F)
 		
+
 
