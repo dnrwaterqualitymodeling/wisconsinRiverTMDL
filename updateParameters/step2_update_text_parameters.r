@@ -34,7 +34,8 @@ for (ps_file in ps_files) {
 	fig.fig[indx] = lne
 }
 
-file.copy(paste(txtinout, "fig.fig", sep="/"), paste(txtinout, "fig.fig_bkp", sep="/"))
+file.copy(paste(txtinout, "fig.fig", sep="/"),
+	paste(txtinout, "fig.fig_bkp", sep="/"))
 writeLines(fig.fig, paste(txtinout, "fig.fig", sep="/"))
 
 dates = seq(as.Date("1990-01-01"), as.Date("2013-12-31"), "1 day")
