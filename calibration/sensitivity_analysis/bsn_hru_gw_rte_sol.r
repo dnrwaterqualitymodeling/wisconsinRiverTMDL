@@ -19,12 +19,12 @@ dir_out = "H:/WRB_sensitivity"
 temp_dir = "H:/temp_directory"
 p = "CNOP"
 ext = "mgt"
-mn = -0.5
-mx = 0.5
+mn = -0.1
+mx = 0.1
 method = "r"
-operation = "planting" ### or "tillage", default to ""
+operation = "tillage"# ### or "planting"
 
-collect_reach_data = TRUE
+collect_reach_data = FALSE
 iter = 25
 
 if (p == "CNOP"){p = paste(p, operation, sep="_")}
@@ -304,6 +304,7 @@ for (i in 1:iter){
 		for (fl in 1:length(p.file.list)){
 			p.mat = p.mat.list[[fl]]
 			new.vals = p.mat[,i]
+			new.vals[new.vals>100] = 100
 			new.vals = formatC(new.vals, digits=dgts, width=pstion[2]-pstion[1],format="f")
 			indices = which(substr(p.file.list[[fl]], 17, 18) == opnum)
 			for (indx in 1:length(indices)){
