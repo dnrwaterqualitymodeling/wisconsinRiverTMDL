@@ -10,8 +10,8 @@ library(foreign)
 options(stringsAsFactors=F)
 options(warn=1)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
-# projectDir = "C:/Users/ruesca/Desktop/WRB"
-projectDir = "H:/WRB"
+projectDir = "C:/Users/ruesca/Desktop/WRB"
+# projectDir = "H:/WRB"
 mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
 wetland_geometry_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/wetlands/wetland_parameters.csv"
 pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
@@ -377,8 +377,8 @@ if (irr_sca == 0){
 }
 
 # CNOP
-hydgrp_lu = unique(sqlQuery(con_mgt2, "SELECT SOIL, HYDGRP from sol")) # for CNOP
-crop_cn_lu = unique(sqlQuery(con_swat2012, "SELECT ICNUM, CN2A, CN2B, CN2C, CN2D from crop")) # for CNOP
+hydgrp_lu = unique(sqlQuery(con_mgt2, "SELECT SOIL, HYDGRP from sol"))
+crop_cn_lu = unique(sqlQuery(con_swat2012, "SELECT ICNUM, CN2A, CN2B, CN2C, CN2D from crop"))
 
 # Update CNOP for planting operations
 for (hydgrp in LETTERS[1:4]) {
@@ -418,6 +418,7 @@ till_codes = list(
 	c('64', "bare_soil") # Moldboard plow
 ) 
 
+# Upate CNOP for tillage operations
 for (hydgrp in LETTERS[1:4]) {
 	for (till in till_codes) {
 		soils = hydgrp_lu[hydgrp_lu$HYDGRP == hydgrp, "SOIL"]

@@ -46,8 +46,7 @@ exclde = NULL
 # var_dat = subset(var_dat, !(parameter %in% exclde))
 
 all_var = data.frame()
-for (var in c("streamflow", "phosphorus", "sediment")){
-	
+for (var in vars){
 	tm_priod = paste(var, c("_annual_mean", "_spring_mean"),sep='')
 	ann = subset(dat, (Variable %in% tm_priod[1] & Region == "Global"))
 	spr = subset(dat, (Variable %in% tm_priod[2] & Region == "Global"))
