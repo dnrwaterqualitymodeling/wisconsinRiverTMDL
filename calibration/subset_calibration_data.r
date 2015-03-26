@@ -2,6 +2,7 @@ library(stringr)
 options(stringsAsFactors=T)
 
 dir_exc = "entire_90_pct_exc"
+annual_basis = TRUE
 exc_val = 0.10
 
 cal_dir = 
@@ -33,12 +34,24 @@ for (obs_file in obs_files) {
 	mam_days = model_period[
 			as.integer(format(model_period, "%m")) %in% 1:12 #currently for june, july, aug, or 3:5 for mar, april, may
 	]
-	ten_pct_exc = quantile(obsData$FLOW, 0.1)
-	# twnty5_pct_exc = quantile(obsData$FLOW, 0.25)
-	bool = as.Date(obsData_raw$datetime) %in% mam_days &
-		as.numeric(as.character(obsData_raw[,4])) >= ten_pct_exc
-
-	sub_data = subset(obsData_raw, bool)
+	pct_exc = quantile(obsData$FLOW, exc_val)
+	if (annual_basis){
+		sub_data = data.frame()
+		model_years = unique(format(model_period, "%Y"))
+		for (yr in model_years){
+			bool = format(as.Date(obsData_raw$datetime),"%Y") == yr 
+			annual_sub_data = subset(obsData_raw, bool)
+			annual_pct_exc = quantile(obsData[which(format(obsData$DATE, "%Y") == yr),"FLOW"], exc_val)
+			exc_bool = as.numeric(as.character(annual_sub_data[,4])) <= annual_pct_exc
+			annual_sub_data = subset(annual_sub_data, exc_bool)
+			sub_data = rbind(sub_data, annual_sub_data)
+		}
+	} else {
+		bool = as.Date(obsData_raw$datetime) %in% mam_days &
+			as.numeric(as.character(obsData_raw[,4])) >= pct_exc
+		sub_data = subset(obsData_raw, bool)
+	}
+	
 	out_file = paste(out_dir, basename(obs_file), sep="/")
 	raw_txt = readLines(obs_file)
 	header_lines = grep("#", raw_txt)
@@ -59,6 +72,11 @@ for (obs_file in obs_files) {
 	sub_data[,4] = as.numeric(as.character(sub_data[,4]))
 	sub_data["datetime"] = as.Date(sub_data[,"datetime"])
 	total_data = nrow(sub_data)
+	obsData_raw = merge(obsData_raw, 
+		data.frame(datetime=seq(
+			as.Date(obsData_raw[1,3]), as.Date(obsData_raw[nrow(obsData_raw),3]),by='1 day')),
+		all.x=T, all.y=T
+	)
 	sub_data = merge(sub_data, 
 		data.frame(datetime=seq(
 			as.Date(sub_data$datetime[1]), as.Date(sub_data$datetime[nrow(sub_data)]),by='1 day')),
