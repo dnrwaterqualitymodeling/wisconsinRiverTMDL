@@ -5,10 +5,10 @@ par_inf_tbl = read.csv("https://raw.githubusercontent.com/dnrwaterqualitymodelin
 par_inf_tbl = subset(par_inf_tbl, run==1)
 # unchanging parameters
 
-txtinout = "D:/TxtInOut"
-dir_out = "D:/WRB_sensitivity_sub"
-temp_dir = "Y:/temp_directory"
-script_sensitivity = "D:/wisconsinRiverTMDL/calibration/sensitivity_analysis/bsn_hru_gw_rte_sol.r"
+txtinout = "/media/d/TxtInOut"
+dir_out = "/media/d/WRB_sensitivity_sub"
+temp_dir = "/media/d/temp_directory"
+script_sensitivity = "/media/d/wisconsinRiverTMDL/calibration/sensitivity_analysis/bsn_hru_gw_rte_sol.r"
 iter = 25
 
 pat = paste("\\s(", paste(par_inf_tbl$param, collapse="|"), ")\\s", sep="")

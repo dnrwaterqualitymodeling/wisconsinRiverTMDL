@@ -14,7 +14,7 @@ monthly = F
 # 1=mult,2=sum,3=r2,4=chi2,5=NS,6=br2,7=ssqr,8=PBIAS,9=RSR
 # Observations -- 
 #	variable name, column index in output.rch, subbasin ID, observed data
-obsDir = "D:/usgs_raw/calibration/spring_10_pct_exc"
+obsDir = "D:/usgs_raw/calibration/entire_90_pct_exc"
 #obsDir =
 #	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration/spring_10_pct_exc"
 #gage_subbasin_lu =
@@ -72,11 +72,12 @@ setInternet2(TRUE)
 #)
 
 parameterization = rbind(
-	c("v__SFTMP.bsn",-2,2),
-	c("v__SMTMP.bsn",-2,2),
-	c("v__TIMP.bsn",0.01,1),
-	c("r__CN2.mgt",-0.05,0.05),
-	c("v__SURLAG.hru",1,8)
+	c("r__ALPHA_BF.gw",-0.9,0),
+	c("v__GW_DELAY.gw",0,500),
+	c("v__GW_REVAP.gw",0.02,2),
+	c("v__GWQMN.gw",0,0),
+	c("v__RCHRG_DP",0,1),
+	c("v__REVAPMN",1,8)
 )
 
 # parameterization = rbind(
