@@ -13,11 +13,21 @@ monthly = F
 use_only_winter_spring = F
 #   assumed to be December to June
 # 1=mult,2=sum,3=r2,4=chi2,5=NS,6=br2,7=ssqr,8=PBIAS,9=RSR
+<<<<<<< HEAD
 # Observations -- variable name, column index in output.rch, subbasin ID, observed data
 # Directory where subsetting observations are found
 obsDir = "D:/usgs_raw/calibration/entire_90_pct_exc"
 # obsDir = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration"
 # gage_subbasin_lu = read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
+=======
+# Observations -- 
+#	variable name, column index in output.rch, subbasin ID, observed data
+obsDir = "D:/usgs_raw/calibration/entire_90_pct_exc"
+#obsDir =
+#	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration/spring_10_pct_exc"
+#gage_subbasin_lu =
+#	read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
+>>>>>>> 15be45b6254d39dd6ebf12e4d769b95ada07dfba
 gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
     colClasses=c("character", "character", "integer", "integer", "character"))
 setInternet2(TRUE)
@@ -68,14 +78,13 @@ mnths = c(
 # )
 # for baseflow conditions
 parameterization = rbind(
-	c("r__ALPHA_BF.gw", -0.99, -0.4),
-	c("v__GW_DELAY.gw", 0, 200),
-	c("v__RCHRG_DP.gw", 0, 1),
-	c("v__GWQMN.gw", 2, 1000),
-	c("v__GW_REVAP.gw", 0.02, 0.2),
-    c("v__REVAPMN.gw", 0, 100),
-	c("v__SHALLST.gw", 5, 50000),
-	c("v__DEEPSTST.gw", 5, 50000)
+	c("r__ALPHA_BF.gw",-0.9,0),
+	c("v__GW_DELAY.gw",0,500),
+	c("v__GW_REVAP.gw",0.02,2),
+	c("v__GWQMN.gw",0,0),
+	c("v__RCHRG_DP",0,1),
+	c("v__REVAPMN",1,8)
+
 )
 
 # Don't change these

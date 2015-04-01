@@ -17,15 +17,17 @@ collect_reach_data = as.logical(arguments[11])
 #txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
 #dir_out = "H:/WRB_sensitivity"
 #temp_dir = "H:/temp_directory"
-txtinout = "C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut"
-dir_out = "C:/Users/ruesca/Desktop/WRB_sensitivity"
-temp_dir = "C:/Users/ruesca/Desktop/temp_directory"
-p = "CH_N2"
-ext = "rte"
-mn = 0.025
-mx = 0.1
-method = "v"
-operation = "tillage"# ### or "planting"
+#txtinout = "C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut"
+#dir_out = "C:/Users/ruesca/Desktop/WRB_sensitivity"
+#temp_dir = "C:/Users/ruesca/Desktop/temp_directory"
+#p = "CH_N2"
+#ext = "rte"
+#mn = 0.025
+#mx = 0.1
+#method = "v"
+#operation = "tillage"# ### or "planting"
+
+
 
 collect_reach_data = FALSE
 iter = 25
@@ -43,6 +45,7 @@ write(
 
 library(ncdf)
 options(stringsAsFactors=F)
+Sys.setlocale('LC_ALL','C')
 
 # these are all the codes in SWAT_lookup.csv that are above 9, assuming 9 = cranberries
 ag_codes = c(
@@ -107,13 +110,14 @@ unlink(output.files)
 
 if (!file.exists(temp_dir)){dir.create(temp_dir)}
 
-td = paste(temp_dir, "\\", p, "_", ext, sep="")
+td = paste(temp_dir, "/", p, "_", ext, sep="")
 # td = "C:/Users/evansdm/AppData/Local/Temp/Rtmpm45Zcz/SLSUBBSN"
 if (!file.exists(td)) {dir.create(td)} 
-wd = paste(td, basename(txtinout), sep="\\")
+wd = paste(td, basename(txtinout), sep="/")
 # wd = "C:/Users/evansdm/AppData/Local/Temp/Rtmpm45Zcz/SLSUBBSN/TxtInOut"
 print("Beginning to copy files...")
-file.copy(txtinout, td, recursive=T)
+system(paste("cp -r", txtinout, td))
+#file.copy(txtinout, td, recursive=T)
 print("Copying complete.")
 
 setwd(wd)
@@ -336,11 +340,12 @@ for (i in 1:iter){
 			writeLines(p.file.list[[fl]], names(p.file.list)[fl])
 		}
 	}
-	bat = tempfile(pattern="runswat_", fileext=".bat")
-	writeLines(paste("cd ", wd, "\nSWAT_64rel.exe", sep=""), bat) 
+	bat = tempfile(pattern="runswat_", fileext=".sh")
+	writeLines(paste("cd ", wd, "\n./swat2012_627", sep=""), bat)
+	system(paste("chmod +x", bat))
 	system(bat)
 	print("Processing SWAT output...")
-	dat = readLines(paste(wd, output.file, sep="\\"))
+	dat = readLines(paste(wd, output.file, sep="/"))
 	dat = dat[10:length(dat)]
 	dat = gsub("\\s+", ",", dat)
 	dat = gsub(paste(first_col,",",sep=''), "", dat)
