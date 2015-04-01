@@ -1,4 +1,6 @@
 param,ext,minVal,maxVal,method,note,run
+WET_MXVOL,pnd,-0.5,3,r,,1
+CNOP_tillage,mgt,-0.05,0.05,r,,1
 ADJ_PKR,bsn,0.5,2,a,,0
 EPCO,bsn,0.01,1,a,no response,0
 ESCO,bsn,0.01,1,a,no response,0
@@ -36,7 +38,7 @@ HRU_SLP,hru,-0.5,0.5,r,,0
 ERORGP,hru,0,1,a,,0
 SLSOIL,hru,0,150,a,,0
 CN2,mgt,-0.05,0.05,r,,0
-CNOP,mgt,-0.05,0.05,r,,0
+CNOP_planting,mgt,-0.05,0.05,r,,1
 USLE_P,mgt,-0.5,0.5,r,,0
 BIOMIX,mgt,0,1,a,,0
 FILTERW,mgt,0,50,a,,0
@@ -55,5 +57,4 @@ SOL_K,sol,-0.5,0.5,r,,0
 SOL_Z,sol,-0.5,0.5,r,,0
 SOL_BD,sol,-0.5,0.5,r,,0
 USLE_K,sol,-0.5,0.5,r,,0
-WET_MXVOL,pnd,-0.5,3,r,,1
 PND_EVOL,pnd,-0.5,3,r,,1

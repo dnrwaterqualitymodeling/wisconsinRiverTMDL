@@ -9,31 +9,28 @@ mn = as.numeric(arguments[6])
 mx = as.numeric(arguments[7])
 method = arguments[8]
 iter = as.integer(arguments[9])
-operation = arguments[10]
-collect_reach_data = as.logical(arguments[11])
+# operation = arguments[10]
+# collect_reach_data = as.logical(arguments[11])
 # run = as.integer(arguments[9])
 ##
 #
-#txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
-#dir_out = "H:/WRB_sensitivity"
-#temp_dir = "H:/temp_directory"
-#txtinout = "C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut"
-#dir_out = "C:/Users/ruesca/Desktop/WRB_sensitivity"
-#temp_dir = "C:/Users/ruesca/Desktop/temp_directory"
-#p = "CH_N2"
-#ext = "rte"
-#mn = 0.025
-#mx = 0.1
-#method = "v"
-#operation = "tillage"# ### or "planting"
+# txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
+# dir_out = "H:/WRB_sensitivity"
+# temp_dir = "H:/temp_directory"
+# txtinout = "C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut"
+# dir_out = "C:/Users/ruesca/Desktop/WRB_sensitivity"
+# temp_dir = "C:/Users/ruesca/Desktop/temp_directory"
+# p = "CNOP"
+# ext = "mgt"
+# mn = -0.05
+# mx = 0.05
+# method = "r"
+# iter = 5
 
-
-
+# operation = "planting"#"tillage"#
 collect_reach_data = FALSE
-iter = 25
 
-if (p == "CNOP"){p = paste(p, operation, sep="_")}
-
+# if (p == "CNOP"){p = paste(p, operation, sep="_")}
 # Potential argument, hard code for now
 horizon_number = c(1)#c(1,2,3,4,5)
 
@@ -45,7 +42,7 @@ write(
 
 library(ncdf)
 options(stringsAsFactors=F)
-Sys.setlocale('LC_ALL','C')
+# Sys.setlocale('LC_ALL','C')
 
 # these are all the codes in SWAT_lookup.csv that are above 9, assuming 9 = cranberries
 ag_codes = c(
@@ -94,9 +91,6 @@ ag_codes = c(
 		"SPOT")
 
 # matrix of begining and ending values for where values are in text files
-# for
-# 	bsn, hru, gw, rte
-# 
 place_vals = data.frame(
 	file_ext = c('bsn','hru','gw','rte','mgt','pnd'),
 	beginnings = c(9,8,8,7,12,5),
@@ -107,17 +101,14 @@ output.files = list.files(txtinout, pattern="^output", full.names=T)
 unlink(output.files)
 
 # Move txintout to a parameter-specific folder
-
 if (!file.exists(temp_dir)){dir.create(temp_dir)}
 
 td = paste(temp_dir, "/", p, "_", ext, sep="")
-# td = "C:/Users/evansdm/AppData/Local/Temp/Rtmpm45Zcz/SLSUBBSN"
 if (!file.exists(td)) {dir.create(td)} 
 wd = paste(td, basename(txtinout), sep="/")
-# wd = "C:/Users/evansdm/AppData/Local/Temp/Rtmpm45Zcz/SLSUBBSN/TxtInOut"
 print("Beginning to copy files...")
-system(paste("cp -r", txtinout, td))
-#file.copy(txtinout, td, recursive=T)
+# system(paste("cp -r", txtinout, td))
+file.copy(txtinout, td, recursive=T)
 print("Copying complete.")
 
 setwd(wd)
@@ -164,6 +155,7 @@ for (p.file in p.files){
 #### processing for CNOP
 #### currently trying to set up for calibrating planting CNOP differently from tilling
 if (substr(p,1,4) == "CNOP"){
+	operation = substr(p, 6, nchar(p))
 	### for tillage
 	if (operation == "planting"){
 		opnum = " 1"
@@ -213,8 +205,6 @@ if (substr(p,1,4) == "CNOP"){
 	
 	endin_loc = horz_col_position$ending.poz[which(horz_col_position$horz.num %in% horizon_number)]
 	begin_loc = endin_loc - 6
-	# begin_loc = 33
-	# endin_loc = 39
 	
 	dec.places = 2
 #################################
@@ -340,9 +330,8 @@ for (i in 1:iter){
 			writeLines(p.file.list[[fl]], names(p.file.list)[fl])
 		}
 	}
-	bat = tempfile(pattern="runswat_", fileext=".sh")
-	writeLines(paste("cd ", wd, "\n./swat2012_627", sep=""), bat)
-	system(paste("chmod +x", bat))
+	bat = tempfile(pattern="runswat_", fileext=".bat")
+	writeLines(paste("cd ", wd, "\nSWAT_64rel.exe", sep=""), bat) 
 	system(bat)
 	print("Processing SWAT output...")
 	dat = readLines(paste(wd, output.file, sep="/"))
