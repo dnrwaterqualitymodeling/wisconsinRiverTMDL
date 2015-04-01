@@ -68,24 +68,57 @@ setInternet2(TRUE)
 #	c("r__CN2.mgt",-0.05,0.05),
 #	c("v__CH_N2.sub",0.023,0.15),
 #	c("r__WET_MXVOL.pnd",0,2),
-#	c("r__PND_MXVOL.pnd",0,2)
+#	c("r__PND_EVOL.pnd",0,2)
 #)
 
-parameterization = rbind(
-	c("r__ALPHA_BF.gw",-0.9,0),
-	c("v__GW_DELAY.gw",0,500),
-	c("v__GW_REVAP.gw",0.02,2),
-	c("v__GWQMN.gw",0,0),
-	c("v__RCHRG_DP",0,1),
-	c("v__REVAPMN",1,8)
-)
+#parameterization = rbind(
+#	c("r__ALPHA_BF.gw",-0.9,0),
+#	c("v__GW_DELAY.gw",0,500),
+#	c("v__GW_REVAP.gw",0.02,2),
+#	c("v__GWQMN.gw",0,0),
+#	c("v__RCHRG_DP",0,1),
+#	c("v__REVAPMN",1,8)
+#)
 
 # parameterization = rbind(
 	# c("r__CNOP.mgt", -0.05, 0.05)
 # )
 
+parameterization = rbind(
+	c("r__CN2.mgt",-0.05,0.05),
+	c("v__ESCO.hru",0.3,0.9),
+	c("r__WET_MXVOL.pnd",0,2),
+	c("r__PND_EVOL.pnd",0,2)
+)
+
 # Don't change these
 source("https://raw.githubusercontent.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/master/calibration/functions_query_output.r")
+
+# Change absolute values for ponds and wetlands
+file_abs_vol = paste(projectDir, "Absolute_SWAT_Values.txt", sep="/")
+abs_vol = readLines(file_abs_vol)
+abs_vol[405] = 
+	"PND_PSA		        0	  100000	    	        Surface area of ponds when filled to principal spillway"
+abs_vol[406] = 
+	"PND_PVOL	        0	  100		    	Volume of water needed to fill ponds to the principal spillway."
+abs_vol[407] = 
+	"PND_ESA		        0	  100000		    	 Surface area of ponds when filled to emergency spillway."
+abs_vol[408] = 
+	"PND_EVOL	        0	  200		    	 Volume of water stored in ponds when filled to the emergency spillway."
+abs_vol[409] = 
+	"PND_VOL		        0	  100		      	Initial volume of water in ponds."
+
+abs_vol[429] = 
+	"WET_NSA		        0	  100000	    	        Surface area of wetlands at normal water level ."
+abs_vol[430] = 
+	"WET_NVOL	        0	  300		    	Volume of water stored in wetlands when filled to normal water level ."
+abs_vol[431] = 
+	"WET_MXSA	        0	  100000	    	        Surface area of wetlands at maximum water level ."
+abs_vol[432] = 
+	"WET_MXVOL	        0	  300		    	Volume of water stored in wetlands when filled to maximum water level ."
+abs_vol[433] = 
+	"PND_VOL		        0	  100		      	Initial volume of water in ponds."
+writeLines(abs_vol, file_abs_vol)
 
 gage_subbasin_lu = subset(gage_subbasin_lu, Keep == 1)
 gage_subbasin_lu = gage_subbasin_lu[c("USGS_ID", "WRB_SubbasinID")]
