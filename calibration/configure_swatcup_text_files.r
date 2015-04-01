@@ -2,16 +2,13 @@
 # SWAT project
 
 projectDir = "D:/WRB.Sufi2.SwatCup"
-#projectDir = "C:/Users/ruesca/Desktop/WRB.Sufi2.SwatCup"
-simCount = 500
+simCount = 512
 subbasinCount = 337
 startYr = 2002
 endYr = 2013
 objFuncCode = 5
 monthly = F
 
-#   assumed to be December to June
-# 1=mult,2=sum,3=r2,4=chi2,5=NS,6=br2,7=ssqr,8=PBIAS,9=RSR
 # Observations -- 
 #	variable name, column index in output.rch, subbasin ID, observed data
 obsDir = "D:/usgs_raw/calibration/entire_90_pct_exc"
@@ -19,6 +16,7 @@ obsDir = "D:/usgs_raw/calibration/entire_90_pct_exc"
 #	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration/spring_10_pct_exc"
 #gage_subbasin_lu =
 #	read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
+
 gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
     colClasses=c("character", "character", "integer", "integer", "character"))
 setInternet2(TRUE)
@@ -47,41 +45,17 @@ setInternet2(TRUE)
 	# c("v__BIOMIX.mgt",0,1),
 	# c("v__EPCO.hru",0,1)
 # )
-# parameterization = rbind(
-	# c("r__SFTMP.bsn",-20,20),
-	# c("v__SMTMP.bsn",-20,20),
-	# c("v__SMFMX.bsn",0,20),
-	# c("v__SMFMN.bsn",0,20),
-	# c("v__TIMP.bsn",0,1),
-	# c("a__WET_K.pnd",0,1),
-	# c("r__WET_MXVOL.pnd",2,11)
-# )
-
-#parameterization = rbind(
-#	c("v__SFTMP.bsn",-2,2),
-#	c("v__SMTMP.bsn",-2,2),
-#	c("v__ESCO.hru",0.01,1),
-#	c("v__SURLAG.hru",0.05,24),
-#	c("r__ALPHA_BF.gw",-0.99,-0.5),
-#	c("v__GW_DELAY.gw",0,500),
-#	c("v__GWQMN.gw",0,5000),
-#	c("r__CN2.mgt",-0.05,0.05),
-#	c("v__CH_N2.sub",0.023,0.15),
-#	c("r__WET_MXVOL.pnd",0,2),
-#	c("r__PND_EVOL.pnd",0,2)
-#)
-
-#parameterization = rbind(
-#	c("r__ALPHA_BF.gw",-0.9,0),
-#	c("v__GW_DELAY.gw",0,500),
-#	c("v__GW_REVAP.gw",0.02,2),
-#	c("v__GWQMN.gw",0,0),
-#	c("v__RCHRG_DP",0,1),
-#	c("v__REVAPMN",1,8)
-#)
 
 # parameterization = rbind(
-	# c("r__CNOP.mgt", -0.05, 0.05)
+	# c("v__SFTMP.bsn",-5,5),
+	# c("v__SMTMP.bsn",-5,5),
+	# c("v__ESCO.hru", 0.9, 1),
+	# c("v__SURLAG.hru", 0.05, 24),
+	# c("r__ALPHA_BF.gw", -0.99, -0.5),
+	# c("v__GW_DELAY.gw", 0, 500),
+	# c("r__CNOP.mgt", -0.05, 0.05),
+	# c("v__CH_N2.sub", 0.023, 0.15),
+	# c("r__WET_MXVOL.pnd",0,2)
 # )
 
 parameterization = rbind(
@@ -93,6 +67,7 @@ parameterization = rbind(
 
 # Don't change these
 source("https://raw.githubusercontent.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/master/calibration/functions_query_output.r")
+#source("C:/Users/evansdm/Documents/Code/calibration/functions_query_output.r")
 
 # Change absolute values for ponds and wetlands
 file_abs_vol = paste(projectDir, "Absolute_SWAT_Values.txt", sep="/")
