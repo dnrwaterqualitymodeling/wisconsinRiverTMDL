@@ -42,7 +42,6 @@ write(
 
 library(ncdf)
 options(stringsAsFactors=F)
-# Sys.setlocale('LC_ALL','C')
 
 # these are all the codes in SWAT_lookup.csv that are above 9, assuming 9 = cranberries
 ag_codes = c(

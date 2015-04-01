@@ -6,25 +6,52 @@ library(raster)
 wd = "T:/Projects/Wisconsin_River/GIS_Datasets"
 setwd(wd)
 lake_volume_data = read.csv("ponds/WRT_07_19_13.csv")
+wb_file = paste(wd, "ponds/lake_pond.shp", sep="/")
 wb = readOGR("ponds/waterbodies.gdb", "lake_pond")
 watersheds = readOGR("Watersheds/HUC_Subwatersheds", "WRB_HUC16_WTM")
-subbasins = readOGR("T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro",
-                    "subbasins_minus_urban_boundaries")
+subbasins_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/subbasins_honoring_hucs.shp"
 dem = raster("DEM/raw_prj_10_m.img")
-demFill = raster("DEM/wrb_fill")
+demFill = raster("DEM/filled_dem_hydro_burned.img")
+ogr2ogr = "C:\\OSGeo4W64\\bin\\ogr2ogr.exe"
 
 proj4string(watersheds) = proj4string(wb)
 proj4string(subbasins) = proj4string(wb)
 
 # Erase urban boundaries from waterbody and watershed layers and convert back to
 # spatialPolygonsDataFrame (otherwise saved in spatialPolygons)
-subbasins_dissolve = gUnionCascaded(subbasins)
+subbasins = readOGR(
+	dirname(subbasins_file),
+	strsplit(basename(subbasins_file))[[1]][1])
+
 wb_df = wb@data
 watersheds_df = watersheds@data
-wb = gIntersection(wb, subbasins_dissolve, drop_not_poly=T, byid=T)
-watersheds = gIntersection(watersheds, subbasins_dissolve, drop_not_poly=T, byid=T)
-watersheds = SpatialPolygonsDataFrame(watersheds,
-    data=data.frame(watersheds_df, row.names=row.names(watersheds)))
+
+wb_clip = tempfile(pattern="wb_clip_", fileext=".shp")
+wb_clip = gsub("\\\\", "/", wb_clip)
+
+system(paste(
+	ogr2ogr,
+	"-clipsrc",
+	subbasins_file,
+	wb_clip,
+	wb_file
+	))
+
+wb = gIntersection(
+	wb,
+	dissolve_subbasins,
+	drop_lower_td=T,
+	byid=T)
+watersheds = gIntersection(
+	watersheds,
+	dissolve_subbasins,
+	drop_lower_td=T,
+	byid=T)
+watersheds = SpatialPolygonsDataFrame(
+	watersheds,
+    data=data.frame(
+		watersheds_df,
+		row.names=row.names(watersheds)))
 wb_df = wb_df[row.names(wb_df) %in% row.names(wb),]
 wb = SpatialPolygonsDataFrame(wb, data=data.frame(wb_df, row.names=row.names(wb)))
 
@@ -83,11 +110,21 @@ for (s in subbasins@data$Subbasin) {
     subbasin = subset(subbasins, Subbasin == s)
     # If there are no land-locked watersheds in the subbasin, move onto the next iteration
     if (any(gContains(subbasin, watersheds_ll, byid=T)[,1]) == F) {next}
-    contained_watersheds = subset(watersheds_ll, gContains(subbasin, watersheds_ll, byid=T)[,1])
+    contained_watersheds = subset(
+		watersheds_ll,
+		gContains(
+			subbasin,
+			watersheds_ll,
+			byid=T)[,1])
     dissolve_watersheds = gUnionCascaded(contained_watersheds)
     # If there are no land-locked WATERBODIES in the landlocked watersheds, move onto the next iteration
     if (any(gContains(dissolve_watersheds, wb, byid=T)[,1]) == F) {next}
-    contained_ponds = subset(wb, gContains(dissolve_watersheds, wb, byid=T)[,1])
+    contained_ponds = subset(
+		wb,
+		gContains(
+			dissolve_watersheds,
+			wb,
+			byid=T)[,1])
     e = alignExtent(dissolve_watersheds, dem)
     mask_dem = mask(crop(dem, e), dissolve_watersheds)
     mask_dem_fill = mask(crop(demFill, e), dissolve_watersheds)
@@ -113,13 +150,13 @@ for (s in subbasins@data$Subbasin) {
     row = data.frame(
         subbasin = subbasin@data$Subbasin,
         PND_FR = gArea(contained_watersheds) / gArea(subbasin),
-        PND_PSA = gArea(contained_ponds) / 10e4,
+        PND_PSA = gArea(contained_ponds) / 1e4,
         PND_PVOL = sum(contained_ponds$Volume..acre.ft., na.rm=T) * 8.107132,
-        PND_ESA = totalArea / 10e4,
+        PND_ESA = totalArea / 1e4,
         PND_EVOL = (sum(contained_ponds$Volume..acre.ft., na.rm=T) * 8.107132) + 
-            (totalVolumeChange / 10e4)
+            (totalVolumeChange / 1e4)
     )
     geometry_table = rbind(geometry_table, row)
 }
 
-write.csv(geometry_table, file="ponds/pond_geometry_20140908.csv", row.names=F)
+write.csv(geometry_table, file="ponds/pond_geometry.csv", row.names=F)
