@@ -6,54 +6,28 @@ library(raster)
 wd = "T:/Projects/Wisconsin_River/GIS_Datasets"
 setwd(wd)
 lake_volume_data = read.csv("ponds/WRT_07_19_13.csv")
-wb_file = paste(wd, "ponds/lake_pond.shp", sep="/")
-wb = readOGR("ponds/waterbodies.gdb", "lake_pond")
-watersheds = readOGR("Watersheds/HUC_Subwatersheds", "WRB_HUC16_WTM")
-subbasins_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/subbasins_honoring_hucs.shp"
-dem = raster("DEM/raw_prj_10_m.img")
-demFill = raster("DEM/filled_dem_hydro_burned.img")
-ogr2ogr = "C:\\OSGeo4W64\\bin\\ogr2ogr.exe"
-
-proj4string(watersheds) = proj4string(wb)
-proj4string(subbasins) = proj4string(wb)
+file_wb = paste(wd, "ponds/processing_files/ponds_clipped_to_basin.shp", sep="/")
+file_watersheds = paste(wd, "ponds/processing_files/huc_16s.shp", sep="/")
+file_subbasins = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/subbasins_honoring_hucs.shp"
+file_dem = paste(wd, "DEM/raw_prj_10_m.img", sep="/")
+file_demFill = paste(wd, "DEM/filled_dem_hydro_burned.img", sep="/")
 
 # Erase urban boundaries from waterbody and watershed layers and convert back to
 # spatialPolygonsDataFrame (otherwise saved in spatialPolygons)
 subbasins = readOGR(
-	dirname(subbasins_file),
-	strsplit(basename(subbasins_file))[[1]][1])
+	dirname(file_subbasins),
+	strsplit(basename(file_subbasins), "\\.")[[1]][1])
+wb = readOGR(
+	dirname(file_wb),
+	strsplit(basename(file_wb), "\\.")[[1]][1])
+watersheds = readOGR(
+	dirname(file_watersheds),
+	strsplit(basename(file_watersheds), "\\.")[[1]][1])
+dem = raster(file_dem)
+demFill = raster(file_demFill)
 
-wb_df = wb@data
-watersheds_df = watersheds@data
-
-wb_clip = tempfile(pattern="wb_clip_", fileext=".shp")
-wb_clip = gsub("\\\\", "/", wb_clip)
-
-system(paste(
-	ogr2ogr,
-	"-clipsrc",
-	subbasins_file,
-	wb_clip,
-	wb_file
-	))
-
-wb = gIntersection(
-	wb,
-	dissolve_subbasins,
-	drop_lower_td=T,
-	byid=T)
-watersheds = gIntersection(
-	watersheds,
-	dissolve_subbasins,
-	drop_lower_td=T,
-	byid=T)
-watersheds = SpatialPolygonsDataFrame(
-	watersheds,
-    data=data.frame(
-		watersheds_df,
-		row.names=row.names(watersheds)))
-wb_df = wb_df[row.names(wb_df) %in% row.names(wb),]
-wb = SpatialPolygonsDataFrame(wb, data=data.frame(wb_df, row.names=row.names(wb)))
+proj4string(watersheds) = proj4string(wb)
+proj4string(subbasins) = proj4string(wb)
 
 # lake_volume_data = read.xlsx("ponds/WRT_07_19_13.xlsx", sheetName="data")
 lake_volume_data$Volume..acre.ft.[lake_volume_data$Volume..acre.ft. == 0] = NA
@@ -61,7 +35,7 @@ lake_volume_data$Max.Depth..ft.[lake_volume_data$Max.Depth..ft.] = NA
 
 wb_vol = merge(wb@data,
     lake_volume_data,
-    by.x="WATERBODY_WBIC",
+    by.x="WATERBOD_2",
     by.y="WBIC",
     all.x=T,
     all.y=F
@@ -85,7 +59,7 @@ wb_vol$Volume..acre.ft.[area_depth_ind] = exp(predict(area_depth_model, wb_vol[a
 
 wb@data = wb_vol
 
-wb_ll = wb_vol[which(wb_vol$LANDLOCK_CODE == 1),]
+wb_ll = wb_vol[which(wb_vol$LANDLOCK_C == 1),]
 watersheds_ll = subset(watersheds, CATCHID %in% wb_ll$HYDROID)
 
 catchids_ll = watersheds_ll@data$CATCHID
@@ -99,13 +73,11 @@ while (!end) {
     }
 }
 watersheds_ll = subset(watersheds, CATCHID %in% catchids_ll)
-dissolve_subbasins = gUnionCascaded(subbasins)
-watersheds_ll = subset(watersheds_ll, gContains(dissolve_subbasins, watersheds_ll, byid=T)[,1])
 writeOGR(watersheds_ll, "ponds", "landlocked_watersheds", driver = "ESRI Shapefile")
 
 geometry_table = data.frame()
 for (s in subbasins@data$Subbasin) {
-#     if (s == 3) {break}
+#    if (s == 3) {break}
     print(paste("Subbasin number", s))
     subbasin = subset(subbasins, Subbasin == s)
     # If there are no land-locked watersheds in the subbasin, move onto the next iteration
