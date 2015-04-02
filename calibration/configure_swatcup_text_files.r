@@ -75,24 +75,24 @@ abs_vol = readLines(file_abs_vol)
 abs_vol[405] = 
 	"PND_PSA		        0	  100000	    	        Surface area of ponds when filled to principal spillway"
 abs_vol[406] = 
-	"PND_PVOL	        0	  100		    	Volume of water needed to fill ponds to the principal spillway."
+	"PND_PVOL	        0	  10000000		    	Volume of water needed to fill ponds to the principal spillway."
 abs_vol[407] = 
 	"PND_ESA		        0	  100000		    	 Surface area of ponds when filled to emergency spillway."
 abs_vol[408] = 
-	"PND_EVOL	        0	  200		    	 Volume of water stored in ponds when filled to the emergency spillway."
+	"PND_EVOL	        0	  10000000		    	 Volume of water stored in ponds when filled to the emergency spillway."
 abs_vol[409] = 
-	"PND_VOL		        0	  100		      	Initial volume of water in ponds."
+	"PND_VOL		        0	  10000000		      	Initial volume of water in ponds."
 
 abs_vol[429] = 
 	"WET_NSA		        0	  100000	    	        Surface area of wetlands at normal water level ."
 abs_vol[430] = 
-	"WET_NVOL	        0	  300		    	Volume of water stored in wetlands when filled to normal water level ."
+	"WET_NVOL	        0	  10000000		    	Volume of water stored in wetlands when filled to normal water level ."
 abs_vol[431] = 
 	"WET_MXSA	        0	  100000	    	        Surface area of wetlands at maximum water level ."
 abs_vol[432] = 
-	"WET_MXVOL	        0	  300		    	Volume of water stored in wetlands when filled to maximum water level ."
+	"WET_MXVOL	        0	  10000000		    	Volume of water stored in wetlands when filled to maximum water level ."
 abs_vol[433] = 
-	"PND_VOL		        0	  100		      	Initial volume of water in ponds."
+	"PND_VOL		        0	  10000000		      	Initial volume of water in ponds."
 writeLines(abs_vol, file_abs_vol)
 
 gage_subbasin_lu = subset(gage_subbasin_lu, Keep == 1)
