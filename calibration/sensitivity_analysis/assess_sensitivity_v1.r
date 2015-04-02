@@ -2,38 +2,63 @@ options(stringsAsFactors=F)
 library(ggplot2)
 library(Hmisc)
 
-dir_proj = "H:/WRB_sensitivity"
+exclde = c("CHD_rte", "CHW2_rte", "HRU_SLP_hru", "SLSOIL_hru", "ADJ_PKR_bsn", "FFCB_bsn", "SLSUBBSN_hru")
+
+dir_proj = "H:/WRB_sensitivity_sub"
 dir_sens = "T:/Projects/Wisconsin_River/GIS_Datasets/Sensitivity_Analysis"
 file_reg_sens = paste(dir_sens, "regional_sensitivity.txt", sep="/")
 
 dat = read.delim(file_reg_sens)
 dat = subset(dat, region == "Global" & value > 0)
-
-dat = subset(dat,  grepl("_annual_mean", variable) | grepl("_spring_mean", variable))
+dat = subset(dat,  grepl("_mean", variable))
+# dat = subset(dat,  grepl("_annual_mean", variable) | grepl("_spring_mean", variable))
 dat = subset(dat, !(grepl("org_p" , variable) | grepl("sed_p" , variable) | grepl("sol_p" , variable)))
+dat = subset(dat, !(parameter %in% exclde))
+
+## for grabbing variable
+dat["var_type"] = apply(
+	dat,
+	MARGIN=1,
+	FUN=function(x){
+		splt = capitalize(strsplit(x['variable'],"_")[[1]][1])
+		if (splt == "Tot"){
+			splt = "Total phosphorus"
+		}
+		return(splt)
+	}
+)
+### for grabbing season
+dat["season"] = apply(
+	dat,
+	MARGIN=1,
+	FUN=function(x){
+		splt = strsplit(x['variable'],"_")[[1]]
+		splt = splt[length(splt)-1]
+		return(capitalize(splt))
+	}
+)
 
 dat$relative_rank = NA
-for (var in unique(dat$variable)){
-	indx = which(dat$variable == var)
+for (var in unique(dat$var_type)){
+	indx = which(dat$var_type == var)
 	dat$relative_rank[indx] = dat$value[indx]/max(dat$value[indx])
 }
 
-dat$variable = capitalize(gsub("_", " ", dat$variable))
-
-png("C:/Users/evansdm/Documents/miscellaneous/sensitivity_fig_for_symp.png",res=900,units='in',height=11,width=8)
-ggplt = ggplot(dat, aes(x=reorder(parameter, relative_rank), y=relative_rank, fill = variable))
-ggplt = ggplt + geom_bar(stat="identity", position = "dodge") + coord_flip() + theme_bw() + ggtitle("Global Sensitivity")#+ facet_grid(. ~ var)
+png("~/miscellaneous/sensitivity_fig_v2.png",res=900,units='in',height=11,width=8)
+# ggplt = ggplot(dat, aes(x=reorder(parameter, value), y=value, fill = variable))
+ggplt = ggplot(dat, aes(x=reorder(parameter, relative_rank), y=relative_rank, fill = var_type))
+ggplt = ggplt + geom_bar(stat="identity", position = "dodge") + coord_flip() + theme_bw()
+ggplt = ggplt + facet_grid(var_type ~ season)
 ggplt = ggplt + theme(
-	axis.text.x=element_text(size=15),
-	axis.text.y=element_text(size=13, angle = 40),
-	axis.title.x=element_text(size=20),
-	axis.title.y=element_text(size=20),
-	plot.title=element_text(size=22),
-	legend.title=element_text(size=15),
-	legend.text=element_text(size=12)) + 
-
-	scale_fill_manual(name="Variable", values=c("#a6cee3", "#1f78b4","#fdbf6f","#ff7f00","#fb9a99", "#e31a1c")) +
-	labs(y="Relative Rank", x="Parameter")
+	axis.text.y=element_text(size=6, angle=0),
+	axis.text.x=element_text(size=10, angle=40)) + 
+	
+	scale_fill_manual(
+		name="Variable", values=c(
+			"#1f78b4",
+			"#ff7f00",
+			"#e31a1c")) +
+	labs(y="Rank Sensitivity", x="Parameter")
 plot(ggplt)
 dev.off()
 
@@ -120,3 +145,13 @@ dev.off()
 				# return(NA)
 			# }
 		# }) 
+		
+# ggplt = ggplt + theme(
+	# axis.text.x=element_text(size=15),
+	# axis.text.y=element_text(size=8, angle=40),
+	# axis.title.x=element_text(size=8, angle=40),
+	# axis.title.y=element_text(size=20),
+	# plot.title=element_text(size=22),
+	# legend.title=element_text(size=15),
+	# legend.text=element_text(size=12)) +
+	) + 
