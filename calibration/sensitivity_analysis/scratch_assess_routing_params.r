@@ -1,35 +1,35 @@
 # to run a sensitivity analysis for basin parameters
-# arguments = commandArgs(trailingOnly = T)
-# txtinout = arguments[1]
-# dir_out = arguments[2]
-# temp_dir = arguments[3]
-# p = arguments[4]
-# ext = arguments[5]
-# mn = as.numeric(arguments[6])
-# mx = as.numeric(arguments[7])
-# method = arguments[8]
-# iter = as.integer(arguments[9])
+arguments = commandArgs(trailingOnly = T)
+txtinout = arguments[1]
+dir_out = arguments[2]
+temp_dir = arguments[3]
+p = arguments[4]
+ext = arguments[5]
+mn = as.numeric(arguments[6])
+mx = as.numeric(arguments[7])
+method = arguments[8]
+iter = as.integer(arguments[9])
 # operation = arguments[10]
 # collect_reach_data = as.logical(arguments[11])
 # run = as.integer(arguments[9])
 ##
 #
 txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
-dir_out = "H:/WRB_sensitivity"
+dir_out = "H:/WRB_sensitivity_sub"
 temp_dir = "H:/temp_directory"
 # txtinout = "C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut"
 # dir_out = "C:/Users/ruesca/Desktop/WRB_sensitivity"
 # temp_dir = "C:/Users/ruesca/Desktop/temp_directory"
-p = "ALPHA_BF"
-ext = "gw"
-mn = -0.9
-mx = 1
-method = "r"
-iter = 7
+p = "CH_N2"
+ext = "rte"
+mn = 0.025
+mx = 0.2
+method = "a"
+iter = 3
 
 # operation = "planting"#"tillage"#
-collect_reach_data = TRUE
-
+collect_reach_data = FALSE
+collect_reach_and_sub = TRUE
 # if (p == "CNOP"){p = paste(p, operation, sep="_")}
 # Potential argument, hard code for now
 horizon_number = c(1)#c(1,2,3,4,5)
@@ -267,11 +267,16 @@ dimT = dim.def.ncdf( "Time", "days since 2001-12-31", 1:4383)
 # Make varables of various dimensionality, for illustration purposes
 mv = 1.e30 # missing value to use
 
-if (collect_reach_data) {
-	q.var = var.def.ncdf( "streamflow", "cms", list(dimT,dimS,dimI), mv)
-	s.var = var.def.ncdf( "sediment", "metric tons", list(dimT,dimS,dimI), mv)
-	p.var = var.def.ncdf( "phosphorus", "kilograms", list(dimT,dimS,dimI), mv)
-	var_list = list(q.var, s.var, p.var)
+if (collect_reach_and_sub) {
+	rch.q.var = var.def.ncdf( "streamflow", "cms", list(dimT,dimS,dimI), mv)
+	rch.s.var = var.def.ncdf( "rch_sediment", "metric tons", list(dimT,dimS,dimI), mv)
+	rch.p.var = var.def.ncdf( "rch_phosphorus", "kilograms", list(dimT,dimS,dimI), mv)
+	sub.q.var = var.def.ncdf( "water_yield", "mm", list(dimT,dimS,dimI), mv)
+	sub.s.var = var.def.ncdf( "sediment", "metric tons", list(dimT,dimS,dimI), mv)
+	sub.orgp.var = var.def.ncdf( "org_phosphorus", "kilograms", list(dimT,dimS,dimI), mv)
+	sub.solp.var = var.def.ncdf( "sol_phosphorus", "kilograms", list(dimT,dimS,dimI), mv)
+	sub.minp.var = var.def.ncdf( "sed_phosphorus", "kilograms", list(dimT,dimS,dimI), mv)
+	var_list = list(rch.q.var, rch.s.var, rch.p.var, sub.q.var,sub.s.var, sub.orgp.var, sub.solp.var, sub.minp.var)
 	
 	output.file = "output.rch"
 	first_col = "REACH" 
@@ -333,73 +338,187 @@ for (i in 1:iter){
 	writeLines(paste("cd ", wd, "\nSWAT_64rel.exe", sep=""), bat) 
 	system(bat)
 	print("Processing SWAT output...")
-	dat = readLines(paste(wd, output.file, sep="/"))
-	dat = dat[10:length(dat)]
-	dat = gsub("\\s+", ",", dat)
-	dat = gsub(paste(first_col,",",sep=''), "", dat)
-	dat = strsplit(dat, ",")
-	nrows = length(dat)
-	ncols = length(dat[[1]])
-	dat = unlist(dat)
-	dat = matrix(dat, nrow=nrows, ncol=ncols, byrow=T)
-	dat = apply(dat, 2, as.numeric)
-	dat = subset(dat, select=col_nums)
-	colnames(dat) = col_names
-	
+	if (collect_reach_and_sub){
+		output.file = c("output.rch", "output.sub")
+		first_col = c("REACH", "BIGSUB")
+		col_nums = list(
+			c(1,5:7),
+			c(4:8))
+		col_names = list(
+			c("sub", "flow", "rch_sed", "totpkg"),
+			c("wat_yld", "sed_yld", "org_p", "sol_p", "min_p"))
+		dat = NULL
+		for (j in 1:2){
+			dat.part = readLines(paste(wd, output.file[j], sep="/"))
+			dat.part = dat.part[10:length(dat.part)]
+			dat.part = gsub("\\s+", ",", dat.part)
+			dat.part = gsub(paste(first_col[j],",",sep=''), "", dat.part)
+			dat.part = strsplit(dat.part, ",")
+			nrows = length(dat.part)
+			ncols = length(dat.part[[1]])
+			dat.part = unlist(dat.part)
+			dat.part = matrix(dat.part, nrow=nrows, ncol=ncols, byrow=T)
+			dat.part = apply(dat.part, 2, as.numeric)
+			dat.part = subset(dat.part, select=col_nums[[j]])
+			colnames(dat.part) = col_names[[j]]
+			dat = cbind(dat, dat.part)
+		}
+		
+	} else {
+		dat = readLines(paste(wd, output.file, sep="/"))
+		dat = dat[10:length(dat)]
+		dat = gsub("\\s+", ",", dat)
+		dat = gsub(paste(first_col,",",sep=''), "", dat)
+		dat = strsplit(dat, ",")
+		nrows = length(dat)
+		ncols = length(dat[[1]])
+		dat = unlist(dat)
+		dat = matrix(dat, nrow=nrows, ncol=ncols, byrow=T)
+		dat = apply(dat, 2, as.numeric)
+		dat = subset(dat, select=col_nums)
+		colnames(dat) = col_names
+	}
 	dat = dat[order(dat[,1]),]
 	
-	q = matrix(
-		dat[,2], 
-		nrow=4383, 
-		ncol=337)
-	sed = matrix(
-		dat[,3], 
-		nrow=4383, 
-		ncol=337)
-	if (collect_reach_data){
-		pho = matrix(
+	
+	if (collect_reach_and_sub){
+		q = matrix(
+			dat[,2], 
+			nrow=4383, 
+			ncol=337)
+		rch.sed = matrix(
+			dat[,3], 
+			nrow=4383, 
+			ncol=337)
+		rch.pho = matrix(
 			dat[,4],
 			nrow=4383,
 			ncol=337)
-		dim(q) = c(4383, 337, 1)
-		dim(sed) = c(4383, 337, 1)
-		dim(pho) = c(4383, 337, 1)
-		print("Writing output to netCDF...")
-		put.var.ncdf(nc, q.var, q, start=c(1,1,i), count=c(-1,-1,1))
-		put.var.ncdf(nc, s.var, sed, start=c(1,1,i), count=c(-1,-1,1))
-		put.var.ncdf(nc, p.var, pho, start=c(1,1,i), count=c(-1,-1,1))
-		
-	} else {
-		org.pho = matrix(
-			dat[,4], 
-			nrow=4383, 
-			ncol=337)
-		sol.pho = matrix(
+		wat.yld = matrix(
 			dat[,5], 
 			nrow=4383, 
 			ncol=337)
-		min.pho = matrix(
+		sed.yld = matrix(
 			dat[,6], 
 			nrow=4383, 
 			ncol=337)
-	
+		org.pho = matrix(
+			dat[,7], 
+			nrow=4383, 
+			ncol=337)
+		sol.pho = matrix(
+			dat[,8], 
+			nrow=4383, 
+			ncol=337)
+		min.pho = matrix(
+			dat[,9], 
+			nrow=4383, 
+			ncol=337)
 		dim(q) = c(4383, 337, 1)
-		dim(sed) = c(4383, 337, 1)
+		dim(rch.sed) = c(4383, 337, 1)
+		dim(rch.pho) = c(4383, 337, 1)
+		dim(wat.yld) = c(4383, 337, 1)
+		dim(sed.yld) = c(4383, 337, 1)
 		dim(org.pho) = c(4383, 337, 1)
 		dim(sol.pho) = c(4383, 337, 1)
 		dim(min.pho) = c(4383, 337, 1)
+
 		print("Writing output to netCDF...")
-		put.var.ncdf(nc, q.var, q, start=c(1,1,i), count=c(-1,-1,1))
-		put.var.ncdf(nc, s.var, sed, start=c(1,1,i), count=c(-1,-1,1))
-		put.var.ncdf(nc, org.p.var, org.pho, start=c(1,1,i), count=c(-1,-1,1))
-		put.var.ncdf(nc, sol.p.var, sol.pho, start=c(1,1,i), count=c(-1,-1,1))
-		put.var.ncdf(nc, min.p.var, min.pho, start=c(1,1,i), count=c(-1,-1,1))
+		put.var.ncdf(nc, rch.q.var, q, start=c(1,1,i), count=c(-1,-1,1))
+		put.var.ncdf(nc, rch.s.var, rch.sed, start=c(1,1,i), count=c(-1,-1,1))
+		put.var.ncdf(nc, rch.p.var, rch.pho, start=c(1,1,i), count=c(-1,-1,1))
+		put.var.ncdf(nc, sub.q.var, wat.yld, start=c(1,1,i), count=c(-1,-1,1))
+		put.var.ncdf(nc, sub.s.var, sed.yld, start=c(1,1,i), count=c(-1,-1,1))
+		put.var.ncdf(nc, sub.orgp.var, org.pho, start=c(1,1,i), count=c(-1,-1,1))
+		put.var.ncdf(nc, sub.solp.var, sol.pho, start=c(1,1,i), count=c(-1,-1,1))
+		put.var.ncdf(nc, sub.minp.var, min.pho, start=c(1,1,i), count=c(-1,-1,1))
 	}
+	# q = matrix(
+		# dat[,2], 
+		# nrow=4383, 
+		# ncol=337)
+	# sed = matrix(
+		# dat[,3], 
+		# nrow=4383, 
+		# ncol=337)
+	# if (collect_reach_data){
+		# pho = matrix(
+			# dat[,4],
+			# nrow=4383,
+			# ncol=337)
+		# dim(q) = c(4383, 337, 1)
+		# dim(sed) = c(4383, 337, 1)
+		# dim(pho) = c(4383, 337, 1)
+		# print("Writing output to netCDF...")
+		# put.var.ncdf(nc, q.var, q, start=c(1,1,i), count=c(-1,-1,1))
+		# put.var.ncdf(nc, s.var, sed, start=c(1,1,i), count=c(-1,-1,1))
+		# put.var.ncdf(nc, p.var, pho, start=c(1,1,i), count=c(-1,-1,1))
+		
+	# } else {
+		# org.pho = matrix(
+			# dat[,4], 
+			# nrow=4383, 
+			# ncol=337)
+		# sol.pho = matrix(
+			# dat[,5], 
+			# nrow=4383, 
+			# ncol=337)
+		# min.pho = matrix(
+			# dat[,6], 
+			# nrow=4383, 
+			# ncol=337)
+	
+		# dim(q) = c(4383, 337, 1)
+		# dim(sed) = c(4383, 337, 1)
+		# dim(org.pho) = c(4383, 337, 1)
+		# dim(sol.pho) = c(4383, 337, 1)
+		# dim(min.pho) = c(4383, 337, 1)
+		
+		# print("Writing output to netCDF...")
+		# put.var.ncdf(nc, q.var, q, start=c(1,1,i), count=c(-1,-1,1))
+		# put.var.ncdf(nc, s.var, sed, start=c(1,1,i), count=c(-1,-1,1))
+		# put.var.ncdf(nc, org.p.var, org.pho, start=c(1,1,i), count=c(-1,-1,1))
+		# put.var.ncdf(nc, sol.p.var, sol.pho, start=c(1,1,i), count=c(-1,-1,1))
+		# put.var.ncdf(nc, min.p.var, min.pho, start=c(1,1,i), count=c(-1,-1,1))
+	# }
 	write(
 		paste("Completed iteration", i, "at", Sys.time()),
 		logfile,
 		append=T)
+	rm(dat, dat.part)
 }
 close.ncdf(nc)
+
+vars = list(
+	c("water_yield", "Annual Average water yield (mm)"),
+	c("sediment", "Average daily sediment yield (metric tons/ha)"),
+	c("org_phosphorus", "Average daily organic P yield (kg/ha)"),
+	c("sol_phosphorus", "Average daily organic P yield (kg/ha)"),
+	c("sed_phosphorus", "Average daily organic P yield (kg/ha)"),
+	c("tot_phosphorus", "Average daily total P yield (kg/ha)"),
+	c("streamflow", "Annual Average streamflow (cms)"),
+	c("rch_sediment", "Average Daily Sediment Load (tons)"),
+	c("rch_phosphorus", "Average Daily P Load (kg)")
+)
+nc = open.ncdf("H:/WRB_sensitivity_sub/CH_N2_rte.nc")
+
+
+strmflw = get.var.ncdf(nc, varid="streamflow", start=c(1,1,1), count=c(-1,-1,-1))
+watyld = get.var.ncdf(nc, varid="water_yield", start=c(1,1,1), count=c(-1,-1,-1))
+
+### This is a really messy script but here's the meat:
+sum(abs(strmflw[,162,1] - strmflw[,162,3]))
+sum(abs(watyld[,162,1] - watyld[,162,3]))
+
+sb162 = cbind(strmflw[,162,1], watyld[,162,1])
+plot(sb162[1:365,1], type='l', col='red',lwd='4')
+par(new=T)
+plot(sb162[1:365,2], type='l', col='blue')
+
+
+
+
+
+
 
 
