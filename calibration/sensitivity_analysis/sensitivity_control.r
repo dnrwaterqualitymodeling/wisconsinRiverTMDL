@@ -4,26 +4,21 @@ options(stringsAsFactors=F)
 par_inf_tbl = read.csv("https://raw.githubusercontent.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/master/calibration/sensitivity_analysis/basin_sensitivity_parameters.csv")
 par_inf_tbl = subset(par_inf_tbl, run==1)
 # unchanging parameters
-txtinout = "D:/TxtInOut"
-dir_out = "D:/WRB_sensitivity"
-temp_dir = "Y:/temp_directory"
-script_sensitivity = "D:/wisconsinRiverTMDL/calibration/sensitivity_analysis/bsn_sub_hru_gw.r"
+
+txtinout = "/media/d/TxtInOut"
+dir_out = "/media/d/WRB_sensitivity_sub"
+temp_dir = "/media/d/temp_directory"
+
+script_sensitivity = "/media/d/wisconsinRiverTMDL/calibration/sensitivity_analysis/bsn_hru_gw_rte_sol_pnd.r"
+
 iter = 25
 
-bat_files = NULL
+pat = paste("\\s(", paste(par_inf_tbl$param, collapse="|"), ")\\s", sep="")
+# bat_files = NULL
 # loop on parameter name
 for (p.i in 1:nrow(par_inf_tbl)){
 	# Create an empty temporary batch file for every 32 parameters
-	if ((p.i %% 32) == 1){
-		tmp_bat = tempfile(fileext = ".bat")
-		bat_lines = NULL
-		bat_files = c(bat_files, tmp_bat)
-	}
-	
-	# test to see if the parameter should be included
-	#	in the run (if 1 in 'run' column then yes, else zero)
-	should.run = par_inf_tbl$run[p.i]
-	if (!should.run){next}
+	tmp_bat = tempfile(fileext = ".bat")
 
 	# Grabbing the parameters
 	p = par_inf_tbl$param[p.i]
@@ -39,21 +34,29 @@ for (p.i in 1:nrow(par_inf_tbl)){
 		'"',
 		'"C:\\Program Files\\R\\R-3.1.2\\bin\\x64\\Rscript.exe"',
 		script_sensitivity,
-		txtinout,
-		dir_out,
-		temp_dir,
-		p,
-		ext,
-		mn,
-		mx,
-		method,
-		iter,
+		txtinout,		# arg 1
+		dir_out,		# arg 2
+		temp_dir,		# arg 3
+		p,				# arg 4
+		ext,			# arg 5
+		mn,				# arg 6
+		mx,				# arg 7
+		method,			# arg 8
+		iter,			# arg 9
+		# operation,		# arg 10
+		# collect_reach_data = FALSE,	# arg 11
 		sep = " ")
-	bat_lines = rbind(bat_lines, cmd)
-	if ((p.i %% 32) == 0 | p.i == nrow(par_inf_tbl)) {
-		writeLines(bat_lines, tmp_bat)
+	writeLines(cmd, tmp_bat)
+
+	go.to.next = F
+	while (!go.to.next) {
+		ps = grep(pat, system('tasklist /v', intern=TRUE), value=TRUE)
+		if (length(ps) == 32) {
+			go.to.next = T
+		} else {
+			Sys.sleep(1)
+			go.to.next = F
+		}
 	}
-}
-for (bat_file in bat_files) {
-	system(bat_file)
+	system(tmp_bat)
 }

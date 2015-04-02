@@ -19,7 +19,7 @@ qry_bgning = paste("INSERT INTO SSURGO_Soils ",
 
 for (rw in 1:nrow(agg_soil_data)){
 	rw_vals = paste("('", 
-	paste(agg_soil_data[rw,], collapse="','"),
+		paste(agg_soil_data[rw,], collapse="','"),
 	"')",
 	sep='')
 	# print(paste(rw_vals))

@@ -2,28 +2,25 @@
 # SWAT project
 
 projectDir = "D:/WRB.Sufi2.SwatCup"
-simCount = 2001
-subbasinCount = 338
+simCount = 512
+subbasinCount = 337
 startYr = 2002
 endYr = 2013
-objFuncCode = 8
-# 1=mult,2=sum,3=r2,4=chi2,5=NS,6=br2,7=ssqr,8=PBIAS,9=RSR
-# Observations -- variable name, column index in output.rch, subbasin ID, observed data
-obsDir = "D:/usgs_raw"
+objFuncCode = 5
+monthly = F
+
+# Observations -- 
+#	variable name, column index in output.rch, subbasin ID, observed data
+obsDir = "D:/usgs_raw/calibration/entire_90_pct_exc"
+#obsDir =
+#	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration/spring_10_pct_exc"
+#gage_subbasin_lu =
+#	read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
+
 gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
     colClasses=c("character", "character", "integer", "integer", "character"))
-monthly = T
-# to use only winter and spring months
-use_only_winter_spring = T
-#   assumed to be December to June
-mnths = c(
-    "December", 
-    "January", 
-    "February", 
-    "March", 
-    "April", 
-    "May", 
-    "June") 
+setInternet2(TRUE)
+
 # parameterization = rbind(
     # c("r__ALPHA_BF.gw", -0.99, -0.5),
     # c("r__CN2.mgt", -0.6, 0.2),
@@ -48,19 +45,55 @@ mnths = c(
 	# c("v__BIOMIX.mgt",0,1),
 	# c("v__EPCO.hru",0,1)
 # )
+
+# parameterization = rbind(
+	# c("v__SFTMP.bsn",-5,5),
+	# c("v__SMTMP.bsn",-5,5),
+	# c("v__ESCO.hru", 0.9, 1),
+	# c("v__SURLAG.hru", 0.05, 24),
+	# c("r__ALPHA_BF.gw", -0.99, -0.5),
+	# c("v__GW_DELAY.gw", 0, 500),
+	# c("r__CNOP.mgt", -0.05, 0.05),
+	# c("v__CH_N2.sub", 0.023, 0.15),
+	# c("r__WET_MXVOL.pnd",0,2)
+# )
+
 parameterization = rbind(
-	c("v__SFTMP.bsn",-20,20),
-	c("v__SMTMP.bsn",-20,20),
-	c("v__SMFMX.bsn",0,20),
-	c("v__SMFMN.bsn",0,20),
-	c("v__TIMP.bsn",0,1),
-	c("a__WET_K.pnd",0,1),
-	c("r__WET_MXVOL.pnd",2,11)
+	c("r__CN2.mgt",-0.05,0.05),
+	c("v__ESCO.hru",0.3,0.9),
+	c("r__WET_MXVOL.pnd",0,2),
+	c("r__PND_EVOL.pnd",0,2)
 )
 
 # Don't change these
 source("https://raw.githubusercontent.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/master/calibration/functions_query_output.r")
 #source("C:/Users/evansdm/Documents/Code/calibration/functions_query_output.r")
+
+# Change absolute values for ponds and wetlands
+file_abs_vol = paste(projectDir, "Absolute_SWAT_Values.txt", sep="/")
+abs_vol = readLines(file_abs_vol)
+abs_vol[405] = 
+	"PND_PSA		        0	  100000	    	        Surface area of ponds when filled to principal spillway"
+abs_vol[406] = 
+	"PND_PVOL	        0	  10000000		    	Volume of water needed to fill ponds to the principal spillway."
+abs_vol[407] = 
+	"PND_ESA		        0	  100000		    	 Surface area of ponds when filled to emergency spillway."
+abs_vol[408] = 
+	"PND_EVOL	        0	  10000000		    	 Volume of water stored in ponds when filled to the emergency spillway."
+abs_vol[409] = 
+	"PND_VOL		        0	  10000000		      	Initial volume of water in ponds."
+
+abs_vol[429] = 
+	"WET_NSA		        0	  100000	    	        Surface area of wetlands at normal water level ."
+abs_vol[430] = 
+	"WET_NVOL	        0	  10000000		    	Volume of water stored in wetlands when filled to normal water level ."
+abs_vol[431] = 
+	"WET_MXSA	        0	  100000	    	        Surface area of wetlands at maximum water level ."
+abs_vol[432] = 
+	"WET_MXVOL	        0	  10000000		    	Volume of water stored in wetlands when filled to maximum water level ."
+abs_vol[433] = 
+	"PND_VOL		        0	  10000000		      	Initial volume of water in ponds."
+writeLines(abs_vol, file_abs_vol)
 
 gage_subbasin_lu = subset(gage_subbasin_lu, Keep == 1)
 gage_subbasin_lu = gage_subbasin_lu[c("USGS_ID", "WRB_SubbasinID")]
@@ -117,10 +150,7 @@ if (monthly) {
         1))
     time_series = cbind(data.frame(i = 1:nrow(time_series)), time_series)
 }
-if (use_only_winter_spring){
-    wntr_sprng_ind = months(time_series$DATE) %in% mnths 
-    time_series = time_series[wntr_sprng_ind,]
-}
+
 # Write file.cio
 file.cio.dat = readLines(file.cio)
 if (monthly) {

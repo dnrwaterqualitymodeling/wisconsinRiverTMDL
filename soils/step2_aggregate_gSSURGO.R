@@ -142,7 +142,7 @@ for (hsg in 1:4) {
 }
 ind = which(
 	!(soil_tbl$SNAM %in% excld) &
-	grepl("[A-D]$", soil_tbl$MUID)
+	grepl("(_drained)$", soil_tbl$MUID)
 )
 clus_d = agg_tbl[ind,]
 clus_d_scld = scale(clus_d)
@@ -230,8 +230,8 @@ for (grp in unique(soil_tbl$hru_grp)) {
 	print(paste(grp," contains ", length(grp_tbl), " profiles...")) 
 	max_depth = max_depths[max_depths$hru_grp == grp, "SOL_ZMX"]
 	# setting those horizons with percentages that sum to less than 80
-# 	txtSums = rowSums(grp_tbl@horizons[,c('sand','silt','clay')])
-# 	grp_tbl@horizons[which(txtSums < 80),c('sand','silt','clay')] = NA
+	# txtSums = rowSums(grp_tbl@horizons[,c('sand','silt','clay')])
+	# grp_tbl@horizons[which(txtSums < 80),c('sand','silt','clay')] = NA
 	
 	grp_slab = slab(grp_tbl,
 		fm = ~ hydgrp +
@@ -302,8 +302,12 @@ for (rw in 1:length(unique(soil_tbl$hru_grp))){
 	solZ = paste('SOL_Z', 1:nlayers,sep = '')
 	agg_soil_data[rw,solZ] = cumsum(dpths)
 	# creating texture class
-	txt= dcast(sbst, top + bottom ~ variable)[c('sand','silt','clay')]
+	txt = dcast(sbst, top + bottom ~ variable)[c('sand','silt','clay')]
+	# Scale texture percentages so they add to 100 (i.e., fix rounding errors)
+	txt = (txt / rowSums(txt, na.rm=T)) * 100
+	# cbind hrz id then insert into sbst
 	names(txt) = toupper(names(txt))
+	
 	for (h in 1:5) {
 		err = try({
 			txt$TxtClass[h] = TT.points.in.classes(tri.data = txt[h,1:3],
@@ -321,6 +325,21 @@ for (rw in 1:length(unique(soil_tbl$hru_grp))){
 		}
 	}
 	agg_soil_data[rw, 'TEXTURE'] = paste(txt$TxtClass[1:5], collapse= '-')
+	
+	# overwriting the UNscaled texture values
+	## in sbst with those from txt
+	txt = txt[,1:3]
+	txt = cbind(1:5, txt)
+	
+	names(txt) = c("hrz_num", tolower(names(txt)[2:4]))
+	txt = melt(txt, id.var = "hrz_num")
+	txt[["variable"]] = as.character(txt[["variable"]]) 
+	sbst[["variable"]] = as.character(sbst[["variable"]])
+	txt = txt[order(txt$variable,txt$hrz_num),]
+	sbst = sbst[order(sbst$variable,sbst$hrz_num),]
+	
+	sbst$value[which(sbst$variable %in% c("clay", "silt", "sand"))] = txt$value
+	
 	# for the horizon level variables
 	for (vrb in unique(sbst$variable)){
 		if (vrb == "hydgrp"){next}
@@ -346,7 +365,6 @@ update_num_cols = c('MUID',
 	"NLAYERS",
 	"SOL_K1")
 agg_soil_data[agg_soil_data$SNAM == "W", update_num_cols] = c(1, 100, 0.23, 0.5, 0.5, 25, 25, 1, 600)
-# givin' water a D
 agg_soil_data$HYDGRP[agg_soil_data$SNAM == "W"] = "D"
 
 agg_soil_data$OBJECTID = 1:nrow(agg_soil_data)
@@ -359,7 +377,7 @@ agg_soil_data$MUID = as.integer(agg_soil_data$MUID)
 x_hydgrps = subset(soil_tbl, hru_grp == "X")$HYDGRP
 
 # Average the HSGs together for MUID = X
-x_hydgrp = LETTERS[round(mean(unlist(lapply(x_hydgrps, function (x) {which(LETTERS == x)}))))]
+x_hydgrp = LETTERS[mean(x_hydgrps, na.rm=T)]
 agg_soil_data$HYDGRP[agg_soil_data$SNAM == "X"] = x_hydgrp
 
 soil_tbl = rbind(soil_tbl, water_mus)
@@ -375,22 +393,28 @@ agg_soil_data$SEQN = agg_soil_data$MUID
 write.table(agg_soil_data, agg_soil_unit_tbl, sep="\t", row.names = F)
 
 #----
-mupolygon = spTransform(mupolygon, CRS(wtm))
+# mupolygon = spTransform(mupolygon, CRS(wtm))
+
+# RECODE MUPOLYGON MUKEY FOR DRAINED
+mupolygon@data$MUKEY[mupolygon@data$DRAINED == 1] = paste(
+	mupolygon@data$MUKEY[mupolygon@data$DRAINED == 1],
+	"drained",
+	sep="_")
 
 mupolygon_remap_mukey = merge(mupolygon, 
 	soil_tbl[,c("MUID", "hru_grp","hru_code")],
 	by.x="MUKEY", 
 	by.y="MUID")
 
-# I (DE) don't believe its necessary to have a numeric id for mukey,
-#   in fact I think it makes it more difficult as it gets read as long type and cannot be
-#   joined to the shapefile
-
 mupolygon_remap_mukey@data$MUKEY = mupolygon_remap_mukey@data$hru_code
+for (col in c("MUKEY", "hru_code")) {
+	mupolygon_remap_mukey@data[[col]] = vapply(
+		mupolygon_remap_mukey@data[[col]],
+		as.integer, integer(1))
+}
+
 writeOGR(mupolygon_remap_mukey, gsub("/$", "", net_soil_dir),
 	"MUPOLYGON_remap_mukey", driver = "ESRI Shapefile")
-mupolygon_remap_mukey@data$hru_code = apply(
-	mupolygon_remap_mukey@data$hru_code)
 
 py_file = tempfile(pattern="rasterize_ssurgo_", fileext=".py")
 ln1 = "import arcpy"
@@ -398,20 +422,19 @@ ln2 = "from arcpy import env"
 ln3 = paste("env.extent = '", lc, "'", sep="")
 ln4 = paste("env.cellSize = '", lc, "'", sep="")
 ln5 = paste("env.snapRaster = '", lc, "'", sep="")
-ln6 = paste("env.cellSize = '", lc, "'", sep="")
-ln7 = paste("arcpy.CopyFeatures_management(r'",
+ln6 = paste("arcpy.CopyFeatures_management(r'",
 	paste(net_soil_dir, "MUPOLYGON_remap_mukey.shp", sep=""),
 	"', r'",
 	paste(tempdir(), "mupolygon_remap_mukey.shp", sep="\\"),
 	"')",
 	sep="")
-ln8 = paste("arcpy.PolygonToRaster_conversion(r'",
+ln7 = paste("arcpy.PolygonToRaster_conversion(r'",
 	paste(tempdir(), "mupolygon_remap_mukey.shp", sep="\\"),
 	"', 'hru_code', r'",
 	paste(tempdir(), "ssurgo_wtm.tif", sep="\\"),
 	"', 'MAXIMUM_COMBINED_AREA', '', 30)",
 	sep="")
-ln9 = paste("arcpy.CopyRaster_management(r'",
+ln8 = paste("arcpy.CopyRaster_management(r'",
 	paste(tempdir(), "ssurgo_wtm.tif", sep="\\"),
 	"', r'",
 	paste(net_soil_dir, "ssurgo_wtm.tif", sep=""),
@@ -420,7 +443,7 @@ ln9 = paste("arcpy.CopyRaster_management(r'",
 
 writeLines(
 	paste(
-		ln1,ln2,ln3,ln4,ln5,ln6,ln7,ln8,ln9,
+		ln1,ln2,ln3,ln4,ln5,ln6,ln7,ln8,
 		sep="\n"),
 	py_file)
 
@@ -434,8 +457,8 @@ update_soils_tbl = tempfile(fileext='.bat')
 
 writeLines(
 	paste(
-		"C:\\Users\\ruesca\\Documents\\R\\R-3.1.2\\bin\\i386\\Rscript.exe",
-		"C:\\Users\\ruesca\\Documents\\wisconsin_river_tmdl\\Code\\soils\\step2_5_updateSWAT_soils_table.R"),
+		"C:\\Users\\evansdm\\Documents\\R\\R-3.1.1\\bin\\i386\\Rscript.exe",
+		"C:\\Users\\evansdm\\Documents\\Code\\soils\\step2_5_updateSWAT_soils_table.R"),
 	update_soils_tbl)
 
 system(update_soils_tbl)

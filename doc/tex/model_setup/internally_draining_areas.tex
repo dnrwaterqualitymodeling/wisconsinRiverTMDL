@@ -1,6 +1,6 @@
 \subsection{Wetlands}\label{sec:wetlands}
 
-	SWAT considers wetlands in a manner very similar to how it considers ponds, the difference only being one additional parameter in ponds, NDTARG. There were several parameters that needed to be calculated for the basin's wetlands and these were the same as for ponds: the fraction of each subbasin composed of wetlands, the normal and maximum surface areas, and the normal and maximum volumes. 
+	SWAT considers wetlands in a manner very similar to how it considers ponds, the difference only being one additional parameter in ponds, NDTARG. There were several parameters that needed to be calculated for the basin's wetlands and these were the same as for ponds: the fraction of each subbasin that drains to wetlands, the normal and maximum surface areas, and the normal and maximum volumes. 
 	
 	These parameters were calculated for each subbasin using a terrain-based approach. A digital elevation model (DEM) was filled using the Fill function in ArcGIS, filling all of the sink areas and causing all simulated water to run off of the landscape. The original DEM was subtracted from the filled DEM to derive a surface of the depth of internally drained areas or sinks.  This sinks layer shows the internally drained areas for the basin.
 	

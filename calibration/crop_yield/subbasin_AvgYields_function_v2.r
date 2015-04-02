@@ -67,7 +67,7 @@ yldCalib = function(crop, scenario = 'Default', unit = 'metric', projectDir = 'H
         vals = sapply(vals, dtype)
         modData_allSubs[col_name] = data.frame(vals, stringsAsFactors=F)
     }
-    modData_allSubs = modData_allSubs[modData_allSubs$LULC == cropKeySWAT,]
+	modData_allSubs = subset(modData_allSubs, LULC == cropKeySWAT & MON > 13)
 
     # Grabbing and formating obs for specific county
     yldDat = read.csv(obsDataFile)
@@ -94,7 +94,7 @@ yldCalib = function(crop, scenario = 'Default', unit = 'metric', projectDir = 'H
             #NASS has 12.5% moisture for soy and 60#/bu
             yldDat$YLD = (yldDat$Value *60)*(2.471/2205)*(0.875)#(1/1.125) 
         }
-    }      
+    }
     
     counties = unique(yldDat$County)
     all_cnty_data = data.frame()
@@ -105,8 +105,7 @@ yldCalib = function(crop, scenario = 'Default', unit = 'metric', projectDir = 'H
         subIDs = subbasinIDs[toupper(subbasinIDs$CTY_NAME) == cnty, 11]
         cnty_SWAT_data = data.frame()
         # taking just the yearly harvest values, ASSUMING MONTHLY
-        modData = modData_allSubs[modData_allSubs$MON > 13,]
-        modData = modData[modData$SUB %in% subIDs,]
+        modData = modData_allSubs[modData_allSubs$SUB %in% subIDs,]
         if (nrow(modData) == 0) {next}
         area_wt_yld = merge(aggregate(YLD * AREA ~ MON, data=modData, sum),
             aggregate(AREA ~ MON, data=modData, sum))

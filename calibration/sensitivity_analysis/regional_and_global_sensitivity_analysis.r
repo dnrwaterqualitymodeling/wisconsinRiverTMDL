@@ -1,88 +1,132 @@
+## dir_nc = "D:/WRB_sensitivity_sub"
+dir_nc = "/media/d/WRB_sensitivity_sub"
+dir_out = dir_nc
+## file_subbasin_region_lu = "D:/Water_Budget/subbasin_region_lookup.txt"
+file_subbasin_region_lu = "/media/d/Water_Budget/subbasin_region_lookup.txt"
+
 library(ncdf)
 library(rgdal)
 library(raster)
+library(reshape2)
 
-options(stringsAsFactors = FALSE)
+options(stringsAsFactors=FALSE)
+ 
+setwd(dir_out)
 
-# subbasins = readOGR(
-	# dsn="T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro",
-	# layer="subbasins_minus_urban_boundaries")
-# regions = readOGR(
-	# dsn="T:/Projects/Wisconsin_River/GIS_Datasets/Water_Budget",
-	# layer="WRB_Budget_Divisions")
-
-file_subbasin_region_lu = "D:/Water_Budget/subbasin_region_lookup.txt"
-setwd("D:/WRB_sensitivity")
 vars = list(
-	c("streamflow", "Annual Average streamflow (cms)"),
-	c("sediment", "Average Daily Sediment Load (tons)"),
-	c("phosphorus", "Average Daily P Load (kg)")
+	c("water_yield", "Annual Average water yield (mm)"),
+	c("sediment", "Average daily sediment yield (metric tons/ha)"),
+	c("org_phosphorus", "Average daily organic P yield (kg/ha)"),
+	c("sol_phosphorus", "Average daily organic P yield (kg/ha)"),
+	c("sed_phosphorus", "Average daily organic P yield (kg/ha)"),
+	c("tot_phosphorus", "Average daily total P yield (kg/ha)")
+	# c("streamflow", "Annual Average streamflow (cms)"),
+	# c("sediment", "Average Daily Sediment Load (tons)"),
+	# c("phosphorus", "Average Daily P Load (kg)")
 )
 
 sb_region_lu = read.delim(file_subbasin_region_lu)
-nc_files = list.files(pattern="\\.nc$")
+
+dates = seq(as.Date("2002-01-01"), as.Date("2013-12-31"), "1 day")
+mos = format(dates, "%m")
+seasons = mos
+seasons = replace(seasons, as.integer(mos) %in% 3:5, "spring")
+seasons = replace(seasons, as.integer(mos) %in% 6:8, "summer")
+seasons = replace(seasons, as.integer(mos) %in% 9:11, "autumn")
+seasons = replace(seasons, as.integer(mos) %in% c(12,1,2), "winter")
+
+nc_files = list.files(dir_nc, pattern="\\.nc$", full.names=T)
+
+percent_change = function(x) {
+	n_days = dim(x)[1]
+	x = cbind(x, rep(0,n_days))
+	offset = x
+	offset[,2:26] = offset[,1:25]
+	offset[,1] = rep(0,n_days)
+	dq = abs(x - offset)
+	dq = dq[,2:25]
+	return(mean(dq))
+}
+
 regional_all = NULL
 for (nc_file in nc_files) {
 	nc = open.ncdf(nc_file)
 	p = strsplit(nc_file, "\\.")[[1]][1]
 	
-	# to be changed Moonday
-	subbasin_all = NULL
+	subbasins_all = NULL
 	for (v in vars) {
 		print(c(p, v[1]))
-		d = get.var.ncdf(nc, varid=v[1], start=c(1,1,1), count=c(-1,-1,-1))
-		p_change = apply(d, 2,
-			function(x) {
-				x = cbind(x, rep(0,4383))
-				offset = x
-				offset[,2:26] = offset[,1:25]
-				offset[,1] = rep(0,4383)
-				dq = abs(x - offset)
-				dq = dq[,2:25]
-				return(mean(dq))
-			}
-		)
-		
-		subbasin_all = cbind(subbasin_all, p_change)
-		
-		sb_region_lu = cbind(sb_region_lu, p_change)
-		names(sb_region_lu)[4] = "delta"
-		regional_means = aggregate(
-			delta ~ region, 
-			data=sb_region_lu, 
-			function (x) {
-				cbind(mean(x),sd(x))})
-		regional_means = data.frame(
-			Region=regional_means$region,
-			Parameter=p,
-			Variable=v[1],
-			delta_mean=regional_means$delta[,1],
-			delta_sd=regional_means$delta[,2])
-		regional_means = rbind(regional_means, data.frame(
-			Region="Global",
-			Parameter=p,
-			Variable=v[1],
-			delta_mean=mean(p_change),
-			delta_sd=sd(p_change)))
-		regional_all = rbind(regional_all, regional_means)
-		
+		if (v[1] != "tot_phosphorus") {
+			d = get.var.ncdf(nc, varid=v[1], start=c(1,1,1), count=c(-1,-1,-1))
+		} else {
+			i = 0
+			for (p_species in paste(c("org", "sol", "sed"), "phosphorus", sep="_")) {
+				i = i + 1
+				if (i == 1) {
+					d = get.var.ncdf(nc, varid=p_species, start=c(1,1,1), count=c(-1,-1,-1))
+				} else {
+					d = d + get.var.ncdf(nc, varid=p_species, start=c(1,1,1), count=c(-1,-1,-1))
+				}
+			}	
+		}
+		p_change = apply(d, 2, percent_change)
+		subbasins_var = cbind(1:dim(d)[2], p_change)
+		for (season in unique(seasons)) {
+			d_season = d[which(seasons == season),,]
+			p_change = apply(d_season, 2, percent_change)
+			subbasins_var = cbind(subbasins_var, p_change)
+		}
+		subbasins_var = data.frame(subbasins_var)
+		names(subbasins_var)[1] = "Subbasin"
+		names(subbasins_var)[2] = paste(v[1], "_annual", sep="")
+		names(subbasins_var)[3:6] = paste(v[1], "_", unique(seasons), sep="")
+		subbasins_var = melt(subbasins_var, id.var="Subbasin")
+		subbasins_all = rbind(subbasins_all, subbasins_var)
 	}
-	subbasin_all = cbind(1:338, subbasin_all)
-	subbasin_all = data.frame(subbasin_all)
-	names(subbasin_all) = c("subbasin", vars[[1]][1], vars[[2]][1], vars[[3]][1])
+	subbasins_all = merge(subbasins_all, sb_region_lu[,2:3], all.x=T, all.y=F)
+	regional_means = aggregate(
+			value ~ region + variable, 
+			data=subbasins_all, 
+			mean)
+	regional_sd = aggregate(
+			value ~ region + variable, 
+			data=subbasins_all, 
+			sd)
+	subbasins_all$region = "Global"
+	global_means = aggregate(
+			value ~ region + variable, 
+			data=subbasins_all, 
+			mean)
+	global_sd = aggregate(
+			value ~ region + variable, 
+			data=subbasins_all, 
+			sd)
 	
-	file_name = paste("subbasin_", p, "_sensitivity.txt", sep="")
+	regional_means$variable = paste(regional_means$variable, "_mean", sep="")
+	regional_sd$variable = paste(regional_sd$variable, "_sd", sep="")
+	global_means$variable = paste(global_means$variable, "_mean", sep="")
+	global_sd$variable = paste(global_sd$variable, "_sd", sep="")
+	
+	regional_stats = rbind(regional_means, regional_sd, global_means, global_sd)
+	regional_stats = cbind(data.frame(parameter=basename(p)), regional_stats)
+	regional_all = rbind(regional_all, regional_stats)
+	
+	subbasins_all = subbasins_all[c("Subbasin", "variable", "value")]
+	names(subbasins_all)[1] = "subbasin"
+	subbasins_all = subbasins_all[order(subbasins_all$subbasin),]
+	subbasins_all = dcast(subbasins_all, subbasin ~ variable)
+	file_name = paste("subbasin_", basename(p), "_sensitivity_tst.txt", sep="")
 	write.table(
-		subbasin_all,
-		file_name,
-		sep='\t',
-		row.names=F)
+			subbasins_all,
+			file_name,
+			sep='\t',
+			row.names=F)
 	close.ncdf(nc)
 }
 file_region = "regional_sensitivity.txt"
 write.table(
-	regional_all,
-	file_region,
-	sep='\t',
-	row.names=F)
-	
+		regional_all,
+		file_region,
+		sep='\t',
+		row.names=F)
+

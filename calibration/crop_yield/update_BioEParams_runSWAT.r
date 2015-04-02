@@ -1,6 +1,6 @@
 # this function replaces default values of bio_e for corn, alfalfa and soybeans
 # then runs swat
-source("C:/Users/evansdm/Documents/Code/validation/crop_yield/subbasin_AvgYields_function_v2.r")
+source("C:/Users/evansdm/Documents/Code/calibration/crop_yield/subbasin_AvgYields_function_v2.r")
 wd = 'H:\\WRB\\Scenarios\\Default\\TxtInOut'
 setwd(wd)
 

@@ -58,7 +58,8 @@ variables = c(
 	"SOL_EC",
 	"SOL_CAL",
 	"SOL_PH")
-comp_cols = c("mukey",
+comp_cols = c(
+	"mukey",
 	"cokey",
 	"compname",
 	"comppct_r",
@@ -97,7 +98,7 @@ drained = which(comp$DRAINED == 1)
 not_drained = which(comp$DRAINED == 0)
 comp$hydgrp[drained] = with(comp[drained,], substr(hydgrp, 1, 1))
 comp$hydgrp[not_drained] = with(comp[not_drained,], substr(hydgrp, nchar(hydgrp), nchar(hydgrp)))
-comp$MUKEY[drained] = with(comp[drained,], paste(MUKEY, hydgrp, sep=""))
+comp$MUKEY[drained] = with(comp[drained,], paste(MUKEY, "drained", sep="_"))
 
 comp$hydgrp[comp$hydgrp == "A"] = 1
 comp$hydgrp[comp$hydgrp == "B"] = 2
@@ -111,6 +112,29 @@ comp$cbn = comp$om_r * 0.50 # Brady and Weil,
 comp$comppct_r = comp$comppct_r / 100
 ##############
 
+# A number of horizons have texture classes percentages that sum to zero
+# The likely case is that these are mostly organic horizons
+# A number of horizons have only one texture class percentages equal to zero
+# This seems to be a flaw in SSURGO
+tex_prop = cbind(comp$sandtotal_r, comp$silttotal_r, comp$claytotal_r)
+
+na_bool = apply(
+	tex_prop,
+	MARGIN=1,
+	FUN=function(x){
+		if (all(is.na(x))){
+			return(FALSE)
+		} else if (sum(x, na.rm=T) == 0){
+			return(TRUE)
+		} else {
+			return(FALSE)
+		}
+	}
+)
+
+comp[na_bool, c("sandtotal_r", "silttotal_r", "claytotal_r")] = NA
+
+
 # Functions for aggregating soil horizons using slab function in aqp
 scale_to_1 = function(pcts) {
 	scaled = pcts / (sum(pcts, na.rm=T))
@@ -123,9 +147,13 @@ sum.that.works = function(values, hrz.height, comppct) {
 	pcts = t(apply(pct_bool, 1, function(X) {X * comppct}))
 	scaled_pcts = t(apply(pcts, 1, scale_to_1))
 	ss = rowSums(d * scaled_pcts, na.rm=T)
+	# get rid of values from 1-cm horizons that are all NA
+	# Otherwise, rowSums returns 1 if all NA, which biases output
+	ss = ss[rowSums(is.na(d)) != ncol(d)]
 	s = mean(ss, na.rm=T)
 	return(c(s=s))
 }
+
 
 check.on.these = NULL
 rw = 0
@@ -147,7 +175,11 @@ for (m in unique(comp$MUKEY)){
 			"hzdept_r", 
 			"hzdepb_r",
 			dat_cols)]
-		max_depth = max(mc$hzdepb_r, is.na=T)
+		if (all(is.na(mc$hzdepb_r))) {
+			max_depth = NA
+		} else {
+			max_depth = max(mc$hzdepb_r, na.rm=T)
+		}
 		# need to calculate a component-weighted mean of all data columns
 		if (length(unique(mc$cokey)) > 1) { # If there is more than one component
 			w.aves = colSums(mc$comppct_r * mc[dat_cols], na.rm=T)
@@ -163,7 +195,7 @@ for (m in unique(comp$MUKEY)){
 		names(mky_data)[1:2] = c("top", "bottom")
 		mky_data = subset(mky_data, !(variable %in% c("MUKEY", "chkey")))
 		mky_data$value = as.numeric(mky_data$value)
-		# check query says for any single-component map unit, compenent percentages add to less than half,
+		# check query says for any single-component map unit, component percentages add to less than half,
 		# or there are no horizons,
 		# all hydrologic soil groups are NA (probably water, and some pits, and other trash basket items).
 		check_query = any(mc$comppct_r < 0.5) | any(is.na(mc$chkey)) | all(is.na(mc$hydgrp))
@@ -173,12 +205,15 @@ for (m in unique(comp$MUKEY)){
 	} else {
 		print("Slabber...")
 		max_depths = aggregate(cbind(hzdepb_r, comppct_r) ~ cokey, mc, max, na.rm=T)
-		max_depth = with(max_depths, weighted.mean(hzdepb_r, w = comppct_r))
+		max_depth = with(max_depths, weighted.mean(hzdepb_r, w = comppct_r, na.rm=T))
 		depths(mc) = cokey ~ hzdept_r + hzdepb_r
-		# slab to the MU level		   
+		# slab to the MU level
 		slab.structure = seq(0,round(max_depth),length.out=6)
 		hrz.height = floor(slab.structure[2])
 		comppct = with(mc@horizons, unique(cbind(cokey, comppct_r)))[,2]
+		# Set texture classes to NA if all values are 0
+		tex_na_bool = rowSums(mc@horizons[c("claytotal_r", "silttotal_r", "sandtotal_r")], na.rm=T) == 0
+		mc@horizons[tex_na_bool, c("claytotal_r", "silttotal_r", "sandtotal_r")] = NA
 		mky_data = slab(mc, fm = 
 			~ hydgrp +
 			sandtotal_r +
