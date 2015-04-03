@@ -59,8 +59,8 @@ wb_vol$Volume..acre.ft.[area_depth_ind] = exp(predict(area_depth_model, wb_vol[a
 
 wb@data = wb_vol
 
-wb_ll = wb_vol[which(wb_vol$LANDLOCK_C == 1),]
-watersheds_ll = subset(watersheds, CATCHID %in% wb_ll$HYDROID)
+wb_ll = subset(wb, LANDLOCK_C == 1)
+watersheds_ll = subset(watersheds, CATCHID %in% wb_ll@data$HYDROID)
 
 catchids_ll = watersheds_ll@data$CATCHID
 end = F
@@ -92,10 +92,10 @@ for (s in subbasins@data$Subbasin) {
     # If there are no land-locked WATERBODIES in the landlocked watersheds, move onto the next iteration
     if (any(gContains(dissolve_watersheds, wb, byid=T)[,1]) == F) {next}
     contained_ponds = subset(
-		wb,
+		wb_ll,
 		gContains(
 			dissolve_watersheds,
-			wb,
+			wb_ll,
 			byid=T)[,1])
     e = alignExtent(dissolve_watersheds, dem)
     mask_dem = mask(crop(dem, e), dissolve_watersheds)
@@ -111,21 +111,22 @@ for (s in subbasins@data$Subbasin) {
         mask_clumps = mask(crop(clumps, e_w), w)
         if (all(is.na(getValues(mask_clumps)))) { next }
         clumps_poly = rasterToPolygons(mask_clumps, dissolve=T)
-        maxArea = max(gArea(clumps_poly, byid=T))
-        totalArea = totalArea + maxArea # square meters
-        maxSizeId = clumps_poly@data$clumps[which(gArea(clumps_poly, byid=T) == maxArea)]
+        sumArea = sum(gArea(clumps_poly, byid=T))
+        totalArea = totalArea + sumArea # square meters
+#        maxSizeId = clumps_poly@data$clumps[which(gArea(clumps_poly, byid=T) == maxArea)]
         mask_fill_height = mask(crop(fill_height, e_w), w)
-        heights = mask_fill_height[mask_clumps == maxSizeId]
+#        heights = mask_fill_height[mask_clumps == maxSizeId]
+		heights = mask_fill_height[mask_clumps > 0]
         d_vol = sum(heights * 100, na.rm=T)
         totalVolumeChange = totalVolumeChange + d_vol # cubic meters
     }
     row = data.frame(
         subbasin = subbasin@data$Subbasin,
         PND_FR = gArea(contained_watersheds) / gArea(subbasin),
-        PND_PSA = gArea(contained_ponds) / 1e4,
-        PND_PVOL = sum(contained_ponds$Volume..acre.ft., na.rm=T) * 8.107132,
+        PND_PSA = sum(contained_ponds@data$Area..acres. * 0.404686, na.rm=T),
+        PND_PVOL = sum(contained_ponds$Volume..acre.ft., na.rm=T) * 0.123348184,
         PND_ESA = totalArea / 1e4,
-        PND_EVOL = (sum(contained_ponds$Volume..acre.ft., na.rm=T) * 8.107132) + 
+        PND_EVOL = (sum(contained_ponds$Volume..acre.ft., na.rm=T) * 0.123348184) + 
             (totalVolumeChange / 1e4)
     )
     geometry_table = rbind(geometry_table, row)
