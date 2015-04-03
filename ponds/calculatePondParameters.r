@@ -90,7 +90,7 @@ for (s in subbasins@data$Subbasin) {
 			byid=T)[,1])
     dissolve_watersheds = gUnionCascaded(contained_watersheds)
     # If there are no land-locked WATERBODIES in the landlocked watersheds, move onto the next iteration
-    if (any(gContains(dissolve_watersheds, wb, byid=T)[,1]) == F) {next}
+    if (any(gContains(dissolve_watersheds, wb_ll, byid=T)[,1]) == F) {next}
     contained_ponds = subset(
 		wb_ll,
 		gContains(
@@ -113,9 +113,7 @@ for (s in subbasins@data$Subbasin) {
         clumps_poly = rasterToPolygons(mask_clumps, dissolve=T)
         sumArea = sum(gArea(clumps_poly, byid=T))
         totalArea = totalArea + sumArea # square meters
-#        maxSizeId = clumps_poly@data$clumps[which(gArea(clumps_poly, byid=T) == maxArea)]
         mask_fill_height = mask(crop(fill_height, e_w), w)
-#        heights = mask_fill_height[mask_clumps == maxSizeId]
 		heights = mask_fill_height[mask_clumps > 0]
         d_vol = sum(heights * 100, na.rm=T)
         totalVolumeChange = totalVolumeChange + d_vol # cubic meters
