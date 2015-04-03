@@ -1,37 +1,36 @@
 # to run a sensitivity analysis for basin parameters
-# arguments = commandArgs(trailingOnly = T)
-# txtinout = arguments[1]
-# dir_out = arguments[2]
-# temp_dir = arguments[3]
-# p = arguments[4]
-# ext = arguments[5]
-# mn = as.numeric(arguments[6])
-# mx = as.numeric(arguments[7])
-# method = arguments[8]
-# iter = as.integer(arguments[9])
+arguments = commandArgs(trailingOnly = T)
+txtinout = arguments[1]
+dir_out = arguments[2]
+temp_dir = arguments[3]
+p = arguments[4]
+ext = arguments[5]
+mn = as.numeric(arguments[6])
+mx = as.numeric(arguments[7])
+method = arguments[8]
+iter = as.integer(arguments[9])
 # operation = arguments[10]
 # collect_reach_data = as.logical(arguments[11])
 # run = as.integer(arguments[9])
 ##
 #
 txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
-dir_out = "H:/WRB_sensitivity"
-
+dir_out = "H:/wrb_calibration_7iters"
 temp_dir = "H:/temp_directory"
 # txtinout = "C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut"
 # dir_out = "C:/Users/ruesca/Desktop/WRB_sensitivity"
 # temp_dir = "C:/Users/ruesca/Desktop/temp_directory"
-p = "ALPHA_BF"
-ext = "gw"
-mn = -0.9
-mx = 1
+p = "WET_MXVOL"
+ext = "pnd"
+mn = -0.5
+mx = 3
 method = "r"
 iter = 7
-file_output = paste(dir_out, paste(p,"_param_values.txt"), sep="/")
+
+just_calibration = FALSE
+file_output = paste(dir_out, paste(p,"_param_values.txt",sep=''), sep="/")
 
 horizon_number = c(1)#c(1,2,3,4,5)
-
-library(ncdf)
 options(stringsAsFactors=F)
 
 # these are all the codes in SWAT_lookup.csv that are above 9, assuming 9 = cranberries
@@ -87,26 +86,29 @@ place_vals = data.frame(
 	endings = c(16,16,16,14,16,16))
 
 wd = txtinout
-
 setwd(wd)
 # format parameter file(s)
 # List files with extension associated with parameter (e.g., bsn, gw)
 
 ext.re = paste("\\.", ext, "$",sep='')
 p.files = list.files(pattern = ext.re)
-calib_basins = c(127,162,159,268,157,155,152,326,151,150,149,78,142,141,140,199,195,138,184,137)
-# calib_search = paste("00",calib_basins,sep='')
-
-pfs = NULL
-for (sb in calib_basins){
-	if (nchar(sb) == 2){
-		srch = paste("^000", sb,sep='')
-	} else {
-		srch = paste("^00", sb,sep='')
+if (just_calibration & ext != "bsn"){
+	calib_basins = c(127,162,159,268,157,155,152,326,151,150,149,78,142,141,140,199,195,138,184,137)
+	# calib_search = paste("00",calib_basins,sep='')
+	
+	pfs = NULL
+	for (sb in calib_basins){
+		if (nchar(sb) == 3){
+			srch = paste("^00", sb,sep='')
+		} else if (nchar(sb) == 2){
+			srch = paste("^000", sb,sep='')
+		} else if (nchar(sb) == 1){
+			srch = paste("^0000", sb,sep='')
+		} 
+		pfs = c(pfs, p.files[grepl(srch, p.files)])
 	}
-	pfs = c(pfs, p.files[grepl(srch, p.files)])
+	p.files = pfs
 }
-p.files = pfs
 # Grab original parameter value for each file, hold in memory
 p.file.list = list()
 for (p.file in p.files){
@@ -230,20 +232,30 @@ if (substr(p,1,4) != "CNOP"){
 	p.mat = t(p.mat)
 }
 
-hdr = paste("Subbasin\t", paste(seq(1, iter, 1), collapse="\t"),sep='')
+hdr = c("Subbasin", paste("iter", seq(1, iter, 1), sep=""))
+hdr = paste(hdr, collapse="\t")
 write(hdr, file_output)
 prev_fl = "00000"
-for (fl in dimnames(p.mat)[[1]]){
-	if (substr(fl, 1, 5) == substr(prev_fl, 1, 5)){
+if (ext == "bsn"){
+	write(paste(c(0, paste(p.mat,collapse="\t")),collapse='\t'),file_output,append=T)
+} else if (method == "a"){
+	write(paste(c(0, paste(p.mat[1,],collapse="\t")),collapse='\t'),file_output,append=T)
+} else {
+	for (fl in dimnames(p.mat)[[1]]){
+		if (substr(fl, 1, 5) == substr(prev_fl, 1, 5)){
+			prev_fl = fl
+			next
+		}
+		vals = p.mat[which(dimnames(p.mat)[[1]]==fl),]
+		info = substr(fl, 1, 5)
+		info = paste(
+			info, 
+			paste(vals, collapse="\t"),
+			sep="\t")
+		write(info, file_output, append=T)
 		prev_fl = fl
-		next
 	}
-	vals = p.mat[which(dimnames(p.mat)[[1]]==fl),]
-	info = substr(fl, 1, 5)
-	info = paste(
-		info, 
-		paste(vals, collapse="\t"),
-		sep="\t")
-	write(info, file_output, append=T)
-	prev_fl = fl
 }
+
+
+Sys.sleep(5)

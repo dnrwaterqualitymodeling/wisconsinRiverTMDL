@@ -1,35 +1,38 @@
 # to run a sensitivity analysis for basin parameters
-# arguments = commandArgs(trailingOnly = T)
-# txtinout = arguments[1]
-# dir_out = arguments[2]
-# temp_dir = arguments[3]
-# p = arguments[4]
-# ext = arguments[5]
-# mn = as.numeric(arguments[6])
-# mx = as.numeric(arguments[7])
-# method = arguments[8]
-# iter = as.integer(arguments[9])
+arguments = commandArgs(trailingOnly = T)
+txtinout = arguments[1]
+dir_out = arguments[2]
+temp_dir = arguments[3]
+p = arguments[4]
+ext = arguments[5]
+mn = as.numeric(arguments[6])
+mx = as.numeric(arguments[7])
+method = arguments[8]
+iter = as.integer(arguments[9])
 # operation = arguments[10]
 # collect_reach_data = as.logical(arguments[11])
 # run = as.integer(arguments[9])
 ##
 #
-txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
-dir_out = "H:/WRB_sensitivity"
-temp_dir = "H:/temp_directory"
+# txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
+# dir_out = "H:/WRB_sensitivity"
+# temp_dir = "H:/temp_directory"
 # txtinout = "C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut"
 # dir_out = "C:/Users/ruesca/Desktop/WRB_sensitivity"
 # temp_dir = "C:/Users/ruesca/Desktop/temp_directory"
-p = "ALPHA_BF"
-ext = "gw"
-mn = -0.9
-mx = 1
-method = "r"
-iter = 7
+# p = "ALPHA_BF"
+# ext = "gw"
+# mn = -0.9
+# mx = 1
+# method = "r"
+# iter = 7
 
 # operation = "planting"#"tillage"#
-collect_reach_data = TRUE
-
+if (ext == "rte"){
+	collect_reach_data = TRUE
+} else {
+	collect_reach_data = TRUE
+}
 # if (p == "CNOP"){p = paste(p, operation, sep="_")}
 # Potential argument, hard code for now
 horizon_number = c(1)#c(1,2,3,4,5)
