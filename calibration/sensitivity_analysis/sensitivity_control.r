@@ -1,17 +1,22 @@
 setInternet2(TRUE)
 options(stringsAsFactors=F)
 # Read parameter table with parameter name, file extension, min, max, method
-par_inf_tbl = read.csv("https://raw.githubusercontent.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/master/calibration/sensitivity_analysis/basin_sensitivity_parameters.csv")
+# par_inf_tbl = read.csv("https://raw.githubusercontent.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/master/calibration/sensitivity_analysis/basin_sensitivity_parameters.csv")
+par_inf_tbl = read.csv("~/Code/calibration/sensitivity_analysis/basin_sensitivity_parameters.csv")
 par_inf_tbl = subset(par_inf_tbl, run==1)
 # unchanging parameters
 
-txtinout = "D:/TxtInOut"
-dir_out = "D:/WRB_sensitivity_sub"
-temp_dir = "Y:/temp_directory"
+# txtinout = "D:/TxtInOut"
+# dir_out = "D:/WRB_sensitivity_sub"
+# temp_dir = "Y:/temp_directory"
 
-script_sensitivity = "D:/wisconsinRiverTMDL/calibration/sensitivity_analysis/bsn_hru_gw_rte_sol_pnd.r"
+txtinout = "H:WRB/Scenarios/Default/TxtInOut"
+dir_out = "H:/wrb_calibration_7iters"
+temp_dir = "H:/temp_directory"
 
-iter = 25
+# script_sensitivity = "C:/Users/evansdm/Documents/Code/calibration/sensitivity_analysis/bsn_hru_gw_rte_sol_pnd.r"
+script_sensitivity = "C:/Users/evansdm/Documents/Code/calibration/sensitivity_analysis/back_calculating_param_values.r"
+iter = 7
 
 pat = paste("\\s(", paste(par_inf_tbl$param, collapse="|"), ")\\s", sep="")
 # bat_files = NULL
@@ -32,7 +37,8 @@ for (p.i in 1:nrow(par_inf_tbl)){
 		'"',
 		p,
 		'"',
-		'"C:\\Program Files\\R\\R-3.1.2\\bin\\x64\\Rscript.exe"',
+		# '"C:\\Program Files\\R\\R-3.1.2\\bin\\x64\\Rscript.exe"',
+		'"C:\\Users\\evansdm\\Documents\\R\\R-3.1.1\\bin\\x64\\Rscript.exe"',
 		script_sensitivity,
 		txtinout,		# arg 1
 		dir_out,		# arg 2
@@ -51,7 +57,8 @@ for (p.i in 1:nrow(par_inf_tbl)){
 	go.to.next = F
 	while (!go.to.next) {
 		ps = grep(pat, system('tasklist /v', intern=TRUE), value=TRUE)
-		if (length(ps) == 32) {
+		# if (length(ps) == 32) {
+		if (length(ps) <=1) {
 			go.to.next = T
 		} else {
 			Sys.sleep(1)

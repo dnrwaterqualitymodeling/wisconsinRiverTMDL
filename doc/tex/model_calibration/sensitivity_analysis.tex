@@ -1,0 +1,11 @@
+\subsection{Calibration Setup}
+	\subsubsection{Calibration software}
+	The primary software used for calibrating flows (discharge) and in-stream pollutants was SWAT-CUP 2012, SWAT Calibration and Uncertainty Programs (see ``SWAT-CUP'' folder in ``SWAT-General'' folder in the e\textunderscore Library). This software offers the capability to run several different analysis routines; SUFI-2 is the routine that will be used in this project. 
+	
+	\textbf{Potential issue:} after having set SWAT-CUP to run for 100 simulations, I (DE) noticed that the parameter values that were showing up after each SWAT run (the text in green) were outside their proper changes. The two parameters I'm concerned about are ALPHA\_ BF and CN2, both of which appeared to be negative, (CN2: ``Value: (-0.004000)'' and ALPHA\_BF: ``Value: (-0.820950)'' for simulation 2); neither of which should be negative. The question is is this actually the value being input into the model or is it just some factor by which its being adjusted? Currently going to let it ride and see what happens. SWAT-CUP should adjust them both to be as close as they can be to their proper values, right?
+	
+	\subsubsection{SUFI-2}
+	SUFI-2 (sequential uncertainty fitting, version 2) 
+	  
+	\subsubsection{Hardware Considerations}
+\pagebreak

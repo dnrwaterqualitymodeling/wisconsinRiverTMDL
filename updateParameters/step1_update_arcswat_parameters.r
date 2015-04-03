@@ -10,8 +10,8 @@ library(foreign)
 options(stringsAsFactors=F)
 options(warn=1)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
-projectDir = "C:/Users/ruesca/Desktop/WRB"
-# projectDir = "H:/WRB"
+ projectDir = "C:/Users/ruesca/Desktop/WRB"
+#projectDir = "H:/WRB"
 mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
 wetland_geometry_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/wetlands/wetland_parameters.csv"
 pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
@@ -175,6 +175,7 @@ for (row in 1:nrow(wetland_geometry)) {
 		"WET_NSA = ", wetland_geometry$WET_NSA[row], ",",
 		"WET_NVOL = ", wetland_geometry$WET_NVOL[row], ",",
 		"WET_VOL = ", wetland_geometry$WET_VOL[row], ",",
+		"WET_MXVOL = ", wetland_geometry$WET_MXVOL[row], ",",
 		"WET_MXSA = ", wetland_geometry$WET_MXSA[row],
 		" WHERE SUBBASIN = ", wetland_geometry$subbasin[row], ";",
 		sep = ""
