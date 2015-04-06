@@ -106,17 +106,12 @@ for (s in strt:stp){#length(subbasins@data$Subbasin)) {
     
     # subbasin sinks and sink binary
     sinks_sb <- filled_sb - dem_sb
+	# sinks_sb = maske(sinks_sb, ponds_sb, inverse=T)
 	# sinks_sb <- mask(crop(sinks, e_buffer), subbasin_buffer)
-	# err = try(sinks_sb <- mask(sinks_sb, ponds_sb, inverse = T),
-		# silent=T)
-	
-	# if (attr(err,"class") == "try-error"){
-		
-	# }
-	
+
     sinks_sb_crp <- mask(sinks_sb, subbasin)
     sinkBin_sb <- sinks_sb
-	
+
     sinkBin_sb[sinkBin_sb > 0] <- 1
     sinkBin_sb[sinkBin_sb == 0] <- NA
     sinkBin_sb_crp <- mask(sinkBin_sb, subbasin)
@@ -169,8 +164,7 @@ for (s in strt:stp){#length(subbasins@data$Subbasin)) {
 		"topleft",
 		legend=c("Ponds", "Max Wetland SA"),
 		fill = c("#0000ff50", "#ff000050")
-		)
-	
+	)
 	dev.off()
 	
 	print("Exporting files...")
@@ -187,7 +181,6 @@ for (s in strt:stp){#length(subbasins@data$Subbasin)) {
 		overwrite=TRUE)
 
 	print("###################")
-
 }
 names(geometry_table) <- c('subbasin','WET_FR','WET_NSA','WET_NVOL','WET_VOL','WET_MXSA','WET_MXVOL')
 write.csv(

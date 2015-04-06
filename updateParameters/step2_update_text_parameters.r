@@ -2,14 +2,15 @@ library(stringr)
 
 options(stringsAsFactors=F)
 
-projectDir = "C:/Users/ruesca/Desktop/WRB"
-# projectDir = "H:/WRB"
-
+# projectDir = "C:/Users/ruesca/Desktop/WRB"
+projectDir = "H:/WRB"
+txtinout = paste(projectDir, "Scenarios", "Default", "TxtInOut", sep="/")
 ###########################################
 # NOTE: This script should be run AFTER   #
 # re-write SWAT Input Files, which is run #
 # in ArcSWAT or SWATEditor                #
 ###########################################
+file_wetland_geometry = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/wetlands/wetland_parameters.csv"
 
 ## UPDATE POINT SOURCE TEXT FILES AND FIG.FIG
 ps_files = list.files(
@@ -18,7 +19,6 @@ ps_files = list.files(
 	full.names=T
 )
 
-txtinout = paste(projectDir, "Scenarios", "Default", "TxtInOut", sep="/")
 fig.fig = readLines(paste(txtinout, "fig.fig", sep="/"))
 
 for (ps_file in ps_files) {
@@ -84,5 +84,24 @@ for (ps_file in ps_files) {
 	writeLines(ps_data_str, out_file)
 }
 
+## UPDATE WETLAND PARAMETERS
 
+wetland_geometry = read.csv(file_wetland_geometry)
+pond_geometry = read.csv(file_pond_geometry)
+files_pnds = list.files(txtinout, "*.pnd")
 
+for (fl in files_pnds){
+	lnes = readLines(paste(txtinout, fl, sep="/"))
+	sb = as.numeric(substr(fl, 1, 5))
+	indx = which(wetland_geometry$subbasin == sb)
+	
+	print(paste("Working on Subabsin", sb))
+
+	substr(lnes[29], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"WET_FR"])
+	substr(lnes[30], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"WET_NSA"])
+	substr(lnes[31], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"WET_NVOL"])
+	substr(lnes[32], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"WET_MXSA"])
+	substr(lnes[33], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"WET_MXVOL"])
+	substr(lnes[34], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"WET_VOL"])
+	writeLines(lnes, paste(txtinout, fl, sep="/"))
+}

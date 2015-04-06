@@ -126,7 +126,7 @@ file.cio.dat = readLines("file.cio")
 file.cio.dat[59] = "               1    | IPRINT: print code (month, day, year)"
 
 ##### Reach output variables
-file.cio.dat[65] = "   2   6  44   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
+file.cio.dat[65] = "   1    2   6  44   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
 ##### Subbasin output variables
 file.cio.dat[67] = "   9  10  12  14  15   0   0   0   0   0   0   0   0   0   0"
 ##### HRU output variables
@@ -274,12 +274,13 @@ if (collect_reach_data) {
 	q.var = var.def.ncdf( "streamflow", "cms", list(dimT,dimS,dimI), mv)
 	s.var = var.def.ncdf( "sediment", "metric tons", list(dimT,dimS,dimI), mv)
 	p.var = var.def.ncdf( "phosphorus", "kilograms", list(dimT,dimS,dimI), mv)
-	var_list = list(q.var, s.var, p.var)
+	deltaQ.var = var.def.ncdf( "deltaQ.var", "cms", list(dimT,dimS,dimI), mv)
+	var_list = list(q.var, s.var, p.var, deltaQ.var)
 	
 	output.file = "output.rch"
 	first_col = "REACH" 
-	col_nums = c(1,5:7)
-	col_names = c("sub", "flow", "sed", "totpkg")
+	col_nums = c(1,5:8)
+	col_names = c("sub", "flow_in", "flow_out", "sed", "totpkg")
 	
 } else {#collect subbasin data
 	q.var = var.def.ncdf( "water_yield", "mm", list(dimT,dimS,dimI), mv)
@@ -351,17 +352,21 @@ for (i in 1:iter){
 	
 	dat = dat[order(dat[,1]),]
 	
-	q = matrix(
-		dat[,2], 
-		nrow=4383, 
-		ncol=337)
-	sed = matrix(
-		dat[,3], 
-		nrow=4383, 
-		ncol=337)
 	if (collect_reach_data){
+		q = matrix(
+			dat[,"flow_out"], 
+			nrow=4383, 
+			ncol=337)
+		sed = matrix(
+			dat[,"sed"], 
+			nrow=4383, 
+			ncol=337)
 		pho = matrix(
-			dat[,4],
+			dat[,"totpkg"],
+			nrow=4383,
+			ncol=337)
+		deltaQ = matrix(
+			(dat[,"flow_out"] - dat[,"flow_in"]),
 			nrow=4383,
 			ncol=337)
 		dim(q) = c(4383, 337, 1)
@@ -371,8 +376,17 @@ for (i in 1:iter){
 		put.var.ncdf(nc, q.var, q, start=c(1,1,i), count=c(-1,-1,1))
 		put.var.ncdf(nc, s.var, sed, start=c(1,1,i), count=c(-1,-1,1))
 		put.var.ncdf(nc, p.var, pho, start=c(1,1,i), count=c(-1,-1,1))
+		put.var.ncdf(nc, deltaQ.var, deltaQ, start=c(1,1,i), count=c(-1,-1,1))
 		
 	} else {
+		q = matrix(
+			dat[,2], 
+			nrow=4383, 
+			ncol=337)
+		sed = matrix(
+			dat[,3], 
+			nrow=4383, 
+			ncol=337)
 		org.pho = matrix(
 			dat[,4], 
 			nrow=4383, 

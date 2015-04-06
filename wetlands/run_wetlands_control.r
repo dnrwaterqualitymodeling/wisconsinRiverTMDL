@@ -1,10 +1,12 @@
-library(rgdal)
-library(rgeos)
-library(raster)
+# library(rgdal)
+# library(rgeos)
+# library(raster)
 
 wd <- "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands"
 # file_wetland_parm = paste("wetland_parameters_",strt,"to",stp,".csv",sep='')
 # 
+# processes to start
+itr = 2
 gd_dir <- "T:/Projects/Wisconsin_River/GIS_Datasets"
 # orginal dem
 # dem <- raster(paste(gd_dir, 'DEM','wrb_dem.tif',sep ='/'))
@@ -18,24 +20,34 @@ dir_out_maps = "wetland_maps"
 dir_out_files = "wetland_files"
 
 gdal_path = "C:/Program Files/GDAL"
+C:/Users/evansdm
+rscript = "C:/Users/evansdm/Documents/R/R-3.1.1/bin/x64/Rscript.exe"
+wtlndsscrpt = "C:/Users/evansdm/Documents/Code/wetlands/calculate_wetland_parameters.r"
+wtlnds_cleanup = "C:/Users/evansdm/Documents/Code/wetlands/run_wetlands_cleanup.r"
+strt_stps = round(seq(1,337+337/itr,by=337/itr))
+cmd = NULL
+for (i in 1:(length(strt_stps)-1)){
+	strt = strt_stps[i]
+	stp = strt_stps[i+1]-1
+	ln = paste(paste("start", rscript, wtlndsscrpt, strt, stp))
+	cmd = c(cmd, ln)
+	print(ln)
+}
 
-rscript = "~/Documents/R/R-3.1.1/bin/x64/Rscript.exe"
-wtlndsscrpt = "~/Documents/Code/wetlands/calculate_wetland_parameters.r"
-
-ln1 = paste("start", rscript, wtlndsscrpt, 1, 84)
-ln2 = paste("start", rscript, wtlndsscrpt, 85, 168)
-ln3 = paste("start", rscript, wtlndsscrpt, 169, 252)
-ln4 = paste("start ", rscript, wtlndsscrpt, 253, 337)
+# ln1 = paste("start", rscript, wtlndsscrpt, 1, 84)
+# ln2 = paste("start", rscript, wtlndsscrpt, 85, 168)
+# ln3 = paste("start", rscript, wtlndsscrpt, 169, 252)
+# ln4 = paste("start ", rscript, wtlndsscrpt, 253, 337)
 
 tmpf = tempfile(fileext=".bat")
 writeLines(
-	paste(ln1, ln2, ln3, ln4, sep="\n"),
-	# paste(ln4),
+	paste(cmd, collapse="\n"),
 	tmpf
 )
 
 system(tmpf, wait=T)
-
+cmd_clean = paste(rscript,wtlnds_cleanup)
+system(cmd_clean)
 ## Creating layers of max and normal surface area
 # if (file.exists(gdal_path)){
 	# gdalbuildvrt = "gdalbuildvrt"

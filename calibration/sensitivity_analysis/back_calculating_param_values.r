@@ -14,20 +14,20 @@ iter = as.integer(arguments[9])
 # run = as.integer(arguments[9])
 ##
 #
-txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
-dir_out = "H:/wrb_calibration_7iters"
-temp_dir = "H:/temp_directory"
+# txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
+# dir_out = "H:/wrb_calibration_7iters"
+# temp_dir = "H:/temp_directory"
 # txtinout = "C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut"
 # dir_out = "C:/Users/ruesca/Desktop/WRB_sensitivity"
 # temp_dir = "C:/Users/ruesca/Desktop/temp_directory"
-p = "WET_MXVOL"
-ext = "pnd"
-mn = -0.5
-mx = 3
-method = "r"
-iter = 7
+# p = "WET_MXVOL"
+# ext = "pnd"
+# mn = -0.5
+# mx = 3
+# method = "r"
+# iter = 7
 
-just_calibration = FALSE
+just_calibration = TRUE
 file_output = paste(dir_out, paste(p,"_param_values.txt",sep=''), sep="/")
 
 horizon_number = c(1)#c(1,2,3,4,5)
