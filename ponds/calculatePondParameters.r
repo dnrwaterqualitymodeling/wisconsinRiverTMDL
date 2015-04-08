@@ -81,22 +81,41 @@ for (s in subbasins@data$Subbasin) {
     print(paste("Subbasin number", s))
     subbasin = subset(subbasins, Subbasin == s)
     # If there are no land-locked watersheds in the subbasin, move onto the next iteration
-    if (any(gContains(subbasin, watersheds_ll, byid=T)[,1]) == F) {next}
-    contained_watersheds = subset(
+    # if (any(gContains(subbasin, watersheds_ll, byid=T)[,1]) == F) {next}
+    # contained_watersheds = subset(
+		# watersheds_ll,
+		# gContains(
+			# subbasin,
+			# watersheds_ll,
+			# byid=T)[,1])
+	# contained_watersheds_df = watersheds_ll@data[gIntersects(subbasin, watersheds_ll, byid=T),]
+	contained_watersheds = gIntersection(
+		subbasin,
 		watersheds_ll,
-		gContains(
-			subbasin,
-			watersheds_ll,
-			byid=T)[,1])
+		byid=T,
+		drop_lower_td=T,
+		id=as.character(watersheds_ll@data$CATCHID))
+	
+	if (length(contained_watersheds) == 0) {next}
     dissolve_watersheds = gUnionCascaded(contained_watersheds)
     # If there are no land-locked WATERBODIES in the landlocked watersheds, move onto the next iteration
-    if (any(gContains(dissolve_watersheds, wb_ll, byid=T)[,1]) == F) {next}
-    contained_ponds = subset(
+    # if (any(gContains(dissolve_watersheds, wb_ll, byid=T)[,1]) == F) {next}
+    # contained_ponds = subset(
+		# wb_ll,
+		# gContains(
+			# dissolve_watersheds,
+			# wb_ll,
+			# byid=T)[,1])
+	contained_ponds = gIntersection(
+		dissolve_watersheds,
 		wb_ll,
-		gContains(
-			dissolve_watersheds,
-			wb_ll,
-			byid=T)[,1])
+		byid=T,
+		drop_lower_td=T,
+		id=as.character(wb_ll@data$HYDROID))
+	
+	contained_ponds_df = merge(data.frame(HYDROID=row.names(contained_ponds)), wb_ll)
+	
+	if (length(contained_ponds) == 0) {next}
     e = alignExtent(dissolve_watersheds, dem)
     mask_dem = mask(crop(dem, e), dissolve_watersheds)
     mask_dem_fill = mask(crop(demFill, e), dissolve_watersheds)
@@ -104,9 +123,10 @@ for (s in subbasins@data$Subbasin) {
     clumps = clump(fill_height > 0, directions=8)
     totalArea = 0
     totalVolumeChange = 0
-    for (catchid in contained_watersheds@data$CATCHID) {
-        print(paste("assessing emergency geometry within subbasin", catchid))
-        w = subset(contained_watersheds, CATCHID==catchid)
+    for (catchid in row.names(contained_watersheds)) {
+        print(paste("Assessing emergency geometry within subbasin", catchid))
+        # w = subset(contained_watersheds, row.names(contained_watersheds)==catchid)
+		w = contained_watersheds[row.names(contained_watersheds)==catchid]
         e_w = alignExtent(w, dem)
         mask_clumps = mask(crop(clumps, e_w), w)
         if (all(is.na(getValues(mask_clumps)))) { next }
@@ -121,10 +141,10 @@ for (s in subbasins@data$Subbasin) {
     row = data.frame(
         subbasin = subbasin@data$Subbasin,
         PND_FR = gArea(contained_watersheds) / gArea(subbasin),
-        PND_PSA = sum(contained_ponds@data$Area..acres. * 0.404686, na.rm=T),
-        PND_PVOL = sum(contained_ponds$Volume..acre.ft., na.rm=T) * 0.123348184,
+        PND_PSA = sum(contained_ponds_df$Area..acres. * 0.404686, na.rm=T),
+        PND_PVOL = sum(contained_ponds_df$Volume..acre.ft., na.rm=T) * 0.123348184,
         PND_ESA = totalArea / 1e4,
-        PND_EVOL = (sum(contained_ponds$Volume..acre.ft., na.rm=T) * 0.123348184) + 
+        PND_EVOL = (sum(contained_ponds_df$Volume..acre.ft., na.rm=T) * 0.123348184) + 
             (totalVolumeChange / 1e4)
     )
     geometry_table = rbind(geometry_table, row)

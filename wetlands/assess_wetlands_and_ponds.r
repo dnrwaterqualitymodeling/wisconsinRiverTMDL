@@ -48,8 +48,7 @@ names(dat) = c("Subbasin",
 # looks good...
 plot(PND_FR ~ WET_FR, data=dat)
 
-##### Some of the ponds come out incredibly deep...
-#### hmmm, maybe counting some reservoirs in here?
+#####
 hist(dat$PND_PVOL/dat$PND_PSA)
 dat[which((dat$PND_PVOL/dat$PND_PSA)>100),]
 
@@ -59,13 +58,18 @@ dat[which((dat$PND_EVOL/dat$PND_ESA)>100),]
 hist(dat$WET_NVOL/dat$WET_NSA)
 dat[which((dat$WET_NVOL/dat$WET_NSA)>10),]
 
-hist(dat$WET_EVOL/dat$WET_ESA)
+### There are some anomalus, very high values of max volume.
+### 	Got it: ponds were not masking sinks in wet script.
+hist(dat$WET_MXVOL/dat$WET_MXSA)
 dat[which((dat$WET_MXVOL/dat$WET_MXSA)>10),]
 
 ### how many have a larger normal than max? a few
-dat[which(dat$PND_PVOL > dat$PND_EVOL),]
-dat[which(dat$WET_NVOL > dat$WET_MXVOL),]
-dat[which(dat$WET_NSA > dat$WET_MXSA),]
+dat[which(dat$PND_PVOL > dat$PND_EVOL),c('Subbasin', 'PND_PVOL', 'PND_EVOL')]
+
+#### Issue here: why do a couple of these subs have greater emergency than principle surface areas?
+dat[which(dat$PND_PSA > dat$PND_ESA),c('Subbasin', 'PND_PSA', 'PND_ESA')]
+dat[which(dat$WET_NVOL > dat$WET_MXVOL),c('Subbasin', 'WET_NSA', 'WET_MXSA')]
+dat[which(dat$WET_NSA > dat$WET_MXSA),c('Subbasin', 'WET_NVOL', 'WET_MXVOL')]
 
 ### How many have a calc'd volume even though fraction = 0
 dat[which(dat$PND_PVOL > 0 & dat$PND_FR == 0),]

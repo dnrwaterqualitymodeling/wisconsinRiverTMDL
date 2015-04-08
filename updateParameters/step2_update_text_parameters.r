@@ -38,7 +38,10 @@ file.copy(paste(txtinout, "fig.fig", sep="/"),
 	paste(txtinout, "fig.fig_bkp", sep="/"))
 writeLines(fig.fig, paste(txtinout, "fig.fig", sep="/"))
 
-dates = seq(as.Date("1990-01-01"), as.Date("2013-12-31"), "1 day")
+dates = seq(
+	as.Date("1990-01-01"),
+	as.Date("2013-12-31"),
+	"1 day")
 days = formatC(
 	gsub(
 		"^[0]+", "",
@@ -87,7 +90,6 @@ for (ps_file in ps_files) {
 ## UPDATE WETLAND PARAMETERS
 
 wetland_geometry = read.csv(file_wetland_geometry)
-pond_geometry = read.csv(file_pond_geometry)
 files_pnds = list.files(txtinout, "*.pnd")
 
 for (fl in files_pnds){

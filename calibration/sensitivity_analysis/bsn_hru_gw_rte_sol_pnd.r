@@ -14,18 +14,18 @@ iter = as.integer(arguments[9])
 # run = as.integer(arguments[9])
 ##
 #
-# txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
-# dir_out = "H:/WRB_sensitivity"
-# temp_dir = "H:/temp_directory"
+txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
+dir_out = "H:/wrb_calibration_7iters"
+temp_dir = "H:/temp_directory"
 # txtinout = "C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut"
 # dir_out = "C:/Users/ruesca/Desktop/WRB_sensitivity"
 # temp_dir = "C:/Users/ruesca/Desktop/temp_directory"
-# p = "ALPHA_BF"
-# ext = "gw"
-# mn = -0.9
-# mx = 1
-# method = "r"
-# iter = 7
+p = "ALPHA_BF"
+ext = "gw"
+mn = -0.9
+mx = 1
+method = "r"
+iter = 7
 
 # operation = "planting"#"tillage"#
 if (ext == "rte"){
@@ -271,10 +271,10 @@ dimT = dim.def.ncdf( "Time", "days since 2001-12-31", 1:4383)
 mv = 1.e30 # missing value to use
 
 if (collect_reach_data) {
-	q.var = var.def.ncdf( "streamflow", "cms", list(dimT,dimS,dimI), mv)
-	s.var = var.def.ncdf( "sediment", "metric tons", list(dimT,dimS,dimI), mv)
-	p.var = var.def.ncdf( "phosphorus", "kilograms", list(dimT,dimS,dimI), mv)
-	deltaQ.var = var.def.ncdf( "deltaQ.var", "cms", list(dimT,dimS,dimI), mv)
+	q.var = var.def.ncdf("streamflow", "cms", list(dimT,dimS,dimI), mv)
+	s.var = var.def.ncdf("sediment", "metric tons", list(dimT,dimS,dimI), mv)
+	p.var = var.def.ncdf("phosphorus", "kilograms", list(dimT,dimS,dimI), mv)
+	deltaQ.var = var.def.ncdf("deltaQ", "cms", list(dimT,dimS,dimI), mv)
 	var_list = list(q.var, s.var, p.var, deltaQ.var)
 	
 	output.file = "output.rch"

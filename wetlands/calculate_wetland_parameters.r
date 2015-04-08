@@ -116,7 +116,7 @@ for (s in strt:stp){#length(subbasins@data$Subbasin)) {
     sinkBin_sb[sinkBin_sb == 0] <- NA
     sinkBin_sb_crp <- mask(sinkBin_sb, subbasin)
 	sinkBin_sb_crp <- mask(sinkBin_sb_crp, ponds_sb, inverse = T)
-
+	sinks_sb_crp <- mask(sinks_sb_crp, ponds_sb, inverse = T)
     ### finding SA and V normal
     wet_n <- lc_sb * sinkBin_sb
     wet_n_crp <- mask(wet_n, subbasin)

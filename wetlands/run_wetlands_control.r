@@ -6,7 +6,7 @@ wd <- "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands"
 # file_wetland_parm = paste("wetland_parameters_",strt,"to",stp,".csv",sep='')
 # 
 # processes to start
-itr = 2
+procs = 4
 gd_dir <- "T:/Projects/Wisconsin_River/GIS_Datasets"
 # orginal dem
 # dem <- raster(paste(gd_dir, 'DEM','wrb_dem.tif',sep ='/'))
@@ -24,7 +24,7 @@ C:/Users/evansdm
 rscript = "C:/Users/evansdm/Documents/R/R-3.1.1/bin/x64/Rscript.exe"
 wtlndsscrpt = "C:/Users/evansdm/Documents/Code/wetlands/calculate_wetland_parameters.r"
 wtlnds_cleanup = "C:/Users/evansdm/Documents/Code/wetlands/run_wetlands_cleanup.r"
-strt_stps = round(seq(1,337+337/itr,by=337/itr))
+strt_stps = round(seq(1,337+337/procs,by=337/procs))
 cmd = NULL
 for (i in 1:(length(strt_stps)-1)){
 	strt = strt_stps[i]
