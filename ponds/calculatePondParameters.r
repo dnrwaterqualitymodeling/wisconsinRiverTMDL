@@ -20,14 +20,15 @@ subbasins = readOGR(
 wb = readOGR(
 	dirname(file_wb),
 	strsplit(basename(file_wb), "\\.")[[1]][1])
+
 watersheds = readOGR(
 	dirname(file_watersheds),
 	strsplit(basename(file_watersheds), "\\.")[[1]][1])
 dem = raster(file_dem)
 demFill = raster(file_demFill)
-
-proj4string(watersheds) = proj4string(wb)
-proj4string(subbasins) = proj4string(wb)
+projection(wb) = projection(dem)
+projection(subbasins) = projection(dem)
+projection(watersheds) = projection(dem)
 
 # lake_volume_data = read.xlsx("ponds/WRT_07_19_13.xlsx", sheetName="data")
 lake_volume_data$Volume..acre.ft.[lake_volume_data$Volume..acre.ft. == 0] = NA
@@ -131,6 +132,7 @@ for (s in subbasins@data$Subbasin) {
         mask_clumps = mask(crop(clumps, e_w), w)
         if (all(is.na(getValues(mask_clumps)))) { next }
         clumps_poly = rasterToPolygons(mask_clumps, dissolve=T)
+		clumps_poly = gSymdifference(clumps_poly, contained_ponds, byid=T)
         sumArea = sum(gArea(clumps_poly, byid=T))
         totalArea = totalArea + sumArea # square meters
         mask_fill_height = mask(crop(fill_height, e_w), w)
@@ -143,7 +145,7 @@ for (s in subbasins@data$Subbasin) {
         PND_FR = gArea(contained_watersheds) / gArea(subbasin),
         PND_PSA = sum(contained_ponds_df$Area..acres. * 0.404686, na.rm=T),
         PND_PVOL = sum(contained_ponds_df$Volume..acre.ft., na.rm=T) * 0.123348184,
-        PND_ESA = totalArea / 1e4,
+        PND_ESA = sum(contained_ponds_df$Area..acres. * 0.404686, na.rm=T) + (totalArea / 1e4),
         PND_EVOL = (sum(contained_ponds_df$Volume..acre.ft., na.rm=T) * 0.123348184) + 
             (totalVolumeChange / 1e4)
     )

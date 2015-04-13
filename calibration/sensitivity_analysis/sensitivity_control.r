@@ -11,11 +11,11 @@ par_inf_tbl = subset(par_inf_tbl, run==1)
 # temp_dir = "Y:/temp_directory"
 
 txtinout = "H:WRB/Scenarios/Default/TxtInOut"
-dir_out = "H:/WRB_sensitivity_rte"
+dir_out = "H:/WRB_sensitivity_new"
 temp_dir = "H:/temp_directory"
 
-# script_sensitivity = "C:/Users/evansdm/Documents/Code/calibration/sensitivity_analysis/bsn_hru_gw_rte_sol_pnd.r"
-script_sensitivity = "C:/Users/evansdm/Documents/Code/calibration/sensitivity_analysis/back_calculating_param_values.r"
+script_sensitivity = "C:/Users/evansdm/Documents/Code/calibration/sensitivity_analysis/bsn_hru_gw_rte_sol_pnd.r"
+# script_sensitivity = "C:/Users/evansdm/Documents/Code/calibration/sensitivity_analysis/back_calculating_param_values.r"
 iter = 7
 
 pat = paste("\\s(", paste(par_inf_tbl$param, collapse="|"), ")\\s", sep="")
