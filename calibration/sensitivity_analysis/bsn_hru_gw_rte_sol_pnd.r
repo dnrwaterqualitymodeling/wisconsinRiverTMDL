@@ -14,18 +14,18 @@ iter = as.integer(arguments[9])
 # run = as.integer(arguments[9])
 ##
 #
-txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
-dir_out = "H:/wrb_calibration_7iters"
-temp_dir = "H:/temp_directory"
+# txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
+# dir_out = "H:/wrb_calibration_7iters"
+# temp_dir = "H:/temp_directory"
 # txtinout = "C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut"
 # dir_out = "C:/Users/ruesca/Desktop/WRB_sensitivity"
 # temp_dir = "C:/Users/ruesca/Desktop/temp_directory"
-p = "ALPHA_BF"
-ext = "gw"
-mn = -0.9
-mx = 1
-method = "r"
-iter = 7
+# p = "CNOP_tillage"
+# ext = "mgt"
+# mn = -0.05
+# mx = 0.05
+# method = "r"
+# iter = 7
 
 # operation = "planting"#"tillage"#
 if (ext == "rte"){

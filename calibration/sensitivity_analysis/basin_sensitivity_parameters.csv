@@ -1,59 +1,59 @@
 param,ext,minVal,maxVal,method,note,run
-ADJ_PKR,bsn,0.5,2,a,,0
-EPCO,bsn,0.01,1,a,no response,0
-ESCO,bsn,0.01,1,a,no response,0
-EVLAI,bsn,0,10,a,no response,0
-FFCB,bsn,0,1,a,little to no response,0
-PRF_BSN,bsn,0,2,a,no response,0
-SFTMP,bsn,-2,2,a,some response,0
-SMFMN,bsn,-2,2,a,some response,0
-SMFMX,bsn,-2,2,a,some response,0
-SMTMP,bsn,-2,2,a,some response,0
-SPCON,bsn,0.0001,0.01,a,no response,0
-SPEXP,bsn,1,1.5,a,no response,0
-SURLAG,bsn,0,24,a,no response,0
-TIMP,bsn,0.01,1,a,,0
-PPERCO,bsn,10,17.5,a,,0
-EVRCH,bsn,0,1,a,,0
-PHOSKD,bsn,100,200,a,,0
-PSP,bsn,0.01,0.7,a,no response,0
-RSDCO,bsn,0.02,0.1,a,no response,0
-ALPHA_BF,gw,-0.9,1,a,,0
-GW_DELAY,gw,0,500,a,,0
-GW_REVAP,gw,0.02,0.2,a,,0
-GWQMN,gw,0,5000,a,,0
-RCHRG_DP,gw,0,1,a,,0
-REVAPMN,gw,0,500,a,no response,0
-CANMX,hru,0,10,a,,0
-EPCO,hru,0.01,1,a,,0
-ESCO,hru,0.01,1,a,,0
-OV_N,hru,0.01,0.41,a,,0
-SLSUBBSN,hru,-0.5,0.5,r,,0
-SURLAG,hru,0,24,a,,0
-HRU_SLP,hru,-0.5,0.5,r,,0
-ERORGP,hru,0,1,a,,0
-SLSOIL,hru,0,150,a,,0
-CNOP_tillage,mgt,-0.05,0.05,r,,0
-CN2,mgt,-0.05,0.05,r,,0
-CNOP_planting,mgt,-0.05,0.05,r,,0
-USLE_P,mgt,-0.5,0.5,r,,0
-BIOMIX,mgt,0,1,a,,0
-FILTERW,mgt,0,50,a,,0
-USLE_C,plant.dat,-0.5,0.5,r,,0
-WET_MXVOL,pnd,-0.5,3,r,,0
-PND_EVOL,pnd,-0.5,3,r,,0
-CH_K2,rte,0,127,a,,1
+ADJ_PKR,bsn,0.5,2,a,,1
+ALPHA_BF,gw,-0.9,0.5,r,,1
+ALPHA_BNK,rte,0,0.6,a,,1
+BIOMIX,mgt,0,1,a,,1
+CANMX,hru,0,50,a,,1
+CH_COV1,rte,0.01,0.6,a,,1
+CH_COV2,rte,0.01,1,a,,1
+CH_ERODMO,rte,0,1,a,does not work with bsn_hru_gw_rte_sol.r,0
+CH_K2,rte,0,50,a,,1
 CH_N2,rte,0.025,0.1,a,,1
 CH_S2,rte,-0.5,0.5,r,,1
 CHD,rte,-0.5,0.5,r,,1
 CHW2,rte,-0.5,0.5,r,,1
-CH_COV1,rte,1,20,a,,1
-CH_COV2,rte,1,20,a,,1
-CH_ERODMO,rte,0,1,a,does not work with bsn_hru_gw_rte_sol.r,0
-ALPHA_BNK,rte,0,1,a,,1
-SOL_AWC,sol,-0.5,0.5,r,,0
-SOL_ALB,sol,-0.5,0.5,r,,0
-SOL_K,sol,-0.5,0.5,r,,0
-SOL_Z,sol,-0.5,0.5,r,,0
-SOL_BD,sol,-0.5,0.5,r,,0
-USLE_K,sol,-0.5,0.5,r,,0
+CN2,mgt,-0.1,0.1,r,,1
+CNOP_planting,mgt,-0.075,0.075,r,,1
+CNOP_tillage,mgt,-0.075,0.075,r,,1
+EPCO,bsn,0.01,1,a,no response,0
+EPCO,hru,0.01,1,a,,1
+ERORGP,hru,0,5,a,,1
+ESCO,bsn,0.01,1,a,no response,0
+ESCO,hru,0.01,1,a,,1
+EVLAI,bsn,0,10,a,no response,0
+EVRCH,bsn,0,1,a,,1
+FFCB,bsn,0,1,a,little to no response,0
+FILTERW,mgt,0,15,a,,1
+GW_DELAY,gw,0,50,a,,1
+GW_REVAP,gw,0.02,0.2,a,,1
+GWQMN,gw,0,5000,a,,1
+HRU_SLP,hru,-0.5,0.5,r,,0
+OV_N,hru,0.01,0.41,a,,1
+PHOSKD,bsn,100,200,a,,1
+PND_EVOL,pnd,-0.5,0.5,r,,1
+PPERCO,bsn,10,17.5,a,,1
+PRF_BSN,bsn,0,2,a,no response,0
+PSP,bsn,0.01,0.7,a,no response,0
+RCHRG_DP,gw,0,1,a,,1
+REVAPMN,gw,0,500,a,no response,1
+RSDCO,bsn,0.02,0.1,a,no response,0
+SFTMP,bsn,-2,2,a,some response,1
+SLSOIL,hru,-0.25,0.25,r,,1
+SLSUBBSN,hru,-0.5,0.5,r,,0
+SMFMN,bsn,-2,2,a,some response,1
+SMFMX,bsn,-2,2,a,some response,1
+SMTMP,bsn,-2,2,a,some response,1
+SOL_ALB,sol,-0.8,0.8,r,,1
+SOL_AWC,sol,-0.5,0.5,r,,1
+SOL_BD,sol,-0.5,0.5,r,,1
+SOL_K,sol,-0.5,0.5,r,,1
+SOL_Z,sol,-0.5,0.5,r,,1
+SPCON,bsn,0.0001,0.01,a,no response,0
+SPEXP,bsn,1,1.5,a,no response,0
+SURLAG,bsn,0,24,a,no response,0
+SURLAG,hru,0,24,a,,1
+TIMP,bsn,0.01,1,a,,1
+USLE_C,plant.dat,-0.5,0.5,r,,0
+USLE_K,sol,-0.5,0.5,r,,1
+USLE_P,mgt,-0.5,0.5,r,,1
+WET_MXVOL,pnd,-0.5,0.5,r,,1

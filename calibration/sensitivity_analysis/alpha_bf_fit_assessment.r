@@ -92,18 +92,35 @@ for (nc_file in nc_files){
 		}
 		
 	}
-	xmn = min(param_dat$value)
-	xmx = max(param_dat$value)
-	ymn = min(param_dat$nash_sutcliffe)
-	ymx = max(param_dat$nash_sutcliffe)
-	for (sb in 1:length(unique(param_dat$Subbasin))){
-		sbst = subset(param_dat, Subbasin==unique(param_dat$Subbasin)[sb])
-		if (sb == 1){
-			plot(nash_sutcliffe ~ value,
-				data=sbst,type='l',
-				ylim=c(ymn, ymx),
-				xlim=c(xmn, xmx))
-				}
+
+	colrs = topo.colors(20, alpha=0.5)
+	for (met in c('pbias', 'nash_sutcliffe')){
+		xmn = min(param_dat$value, na.rm=T)
+		xmx = max(param_dat$value, na.rm=T)
+		ymn = min(param_dat[met], na.rm=T)
+		ymx = max(param_dat[met], na.rm=T)
+		for (sb in 1:length(unique(param_dat$Subbasin))){
+			sbst = subset(param_dat, Subbasin==sort(unique(param_dat$Subbasin))[sb])
+			if (sb == 1){
+				plot(sbst[,met] ~ sbst$value,
+					# data=sbst,
+					type='l',
+					ylim=c(ymn, ymx),
+					xlim=c(xmn, xmx),
+					col=colrs[sb],
+					main=p,
+					xlab="Parameter Value",
+					ylab=met)
+			} else {
+				lines(sbst[,met] ~ value,data=sbst,col=colrs[sb])
+			}
+			
+		}
+		legend(
+			"bottomright",
+			legend=sort(unique(param_dat$Subbasin)),
+			fill=colrs)
+	}
 	# gplt = ggplot(param_dat, aes(x=value, y=nash_sutcliffe, color=factor(Subbasin)))
 	# gplt = gplt + geom_line() + facet_grid(.~Subbasin) + ggtitle(p)
 	# plot(gplt)

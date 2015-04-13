@@ -53,7 +53,7 @@ hist(dat$PND_PVOL/dat$PND_PSA)
 dat[which((dat$PND_PVOL/dat$PND_PSA)>100),]
 
 hist(dat$PND_EVOL/dat$PND_ESA)
-dat[which((dat$PND_EVOL/dat$PND_ESA)>100),]
+dat[which((dat$PND_EVOL/dat$PND_ESA)>75),]
 
 hist(dat$WET_NVOL/dat$WET_NSA)
 dat[which((dat$WET_NVOL/dat$WET_NSA)>10),]
