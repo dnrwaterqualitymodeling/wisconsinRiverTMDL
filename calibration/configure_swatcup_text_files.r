@@ -11,9 +11,9 @@ monthly = F
 
 # Observations -- 
 #	variable name, column index in output.rch, subbasin ID, observed data
-obsDir = "D:/usgs_raw/calibration/entire_90_pct_exc"
-#obsDir =
-#	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration/spring_10_pct_exc"
+#obsDir = "D:/usgs_raw/calibration/entire_90_pct_exc"
+obsDir =
+	"D:/usgs_raw/calibration/spring_10_pct_exc"
 #gage_subbasin_lu =
 #	read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
 
@@ -58,11 +58,33 @@ setInternet2(TRUE)
 	# c("r__WET_MXVOL.pnd",0,2)
 # )
 
+#parameterization = rbind(
+#	c("r__CN2.mgt",-0.05,0.05),
+#	c("v__ESCO.hru",0.3,0.9),
+#	c("r__WET_MXVOL.pnd",0,2),
+#	c("r__PND_EVOL.pnd",0,2)
+#)
+
+#parameterization = rbind(
+#	c("v__SFTMP.bsn",-2,2),
+#	c("v__SMTMP.bsn",-2,2),
+#	c("v__TIMP.bsn",0.01,1),
+#	c("r__CN2.mgt",-0.05,0.05),
+#	c("v__SURLAG.hru",1,8),
+#	c("r__PND_EVOL.gw",0,3),
+#	c("r__WET_MXVOL.gw",0,3),
+#	c("v__OV_N.hru",0.1,0.3),
+#	c("r__CH_N2.rte",-0.1,0.1)
+#)
+
+
 parameterization = rbind(
-	c("r__CN2.mgt",-0.05,0.05),
-	c("v__ESCO.hru",0.3,0.9),
-	c("r__WET_MXVOL.pnd",0,2),
-	c("r__PND_EVOL.pnd",0,2)
+	c("r__ALPHA_BF.gw",-0.99,-0.5),
+	c("v__GW_DELAY.gw",0,200),
+	c("v__RCHRG_DP.gw",0,1),
+	c("v__GWQMN.gw",500,3000),
+	c("v__GW_REVAP.gw",0.02,0.2),
+	c("v__REVAPMN.gw",0,500)
 )
 
 # Don't change these
@@ -75,22 +97,22 @@ abs_vol = readLines(file_abs_vol)
 abs_vol[405] = 
 	"PND_PSA		        0	  100000	    	        Surface area of ponds when filled to principal spillway"
 abs_vol[406] = 
-	"PND_PVOL	        0	  10000000		    	Volume of water needed to fill ponds to the principal spillway."
+	"PND_PVOL	        0	  50000		    	Volume of water needed to fill ponds to the principal spillway."
 abs_vol[407] = 
 	"PND_ESA		        0	  100000		    	 Surface area of ponds when filled to emergency spillway."
 abs_vol[408] = 
-	"PND_EVOL	        0	  10000000		    	 Volume of water stored in ponds when filled to the emergency spillway."
+	"PND_EVOL	        0	  50000		    	 Volume of water stored in ponds when filled to the emergency spillway."
 abs_vol[409] = 
 	"PND_VOL		        0	  10000000		      	Initial volume of water in ponds."
 
 abs_vol[429] = 
 	"WET_NSA		        0	  100000	    	        Surface area of wetlands at normal water level ."
 abs_vol[430] = 
-	"WET_NVOL	        0	  10000000		    	Volume of water stored in wetlands when filled to normal water level ."
+	"WET_NVOL	        0	  50000		    	Volume of water stored in wetlands when filled to normal water level ."
 abs_vol[431] = 
 	"WET_MXSA	        0	  100000	    	        Surface area of wetlands at maximum water level ."
 abs_vol[432] = 
-	"WET_MXVOL	        0	  10000000		    	Volume of water stored in wetlands when filled to maximum water level ."
+	"WET_MXVOL	        0	  50000		    	Volume of water stored in wetlands when filled to maximum water level ."
 abs_vol[433] = 
 	"PND_VOL		        0	  10000000		      	Initial volume of water in ponds."
 writeLines(abs_vol, file_abs_vol)
