@@ -14,7 +14,7 @@ options(warn=1)
 projectDir = "H:/WRB"
 mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
 
-pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
+#pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
 reservoir_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/hydrology/dams_parameters.csv"
 gw_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/alphaBflowSubbasin_lookup.csv"
 op_db_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/OpSchedules.mdb"

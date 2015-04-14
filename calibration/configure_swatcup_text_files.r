@@ -162,6 +162,8 @@ file.cio.dat[65] = "   2   0   0   0   0   0   0   0   0   0   0   0   0   0   0
 file.cio.dat[67] = "   4   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
 file.cio.dat[69] = "   6   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
 file.cio.dat[71] = "   1   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
+# SEDOUT = 10
+# TP = 49
 writeLines(file.cio.dat, file.cio)
 
 # Write par_inf file
