@@ -96,17 +96,20 @@ files_pnds = list.files(txtinout, "*.pnd")
 for (fl in files_pnds){
 	lnes = readLines(paste(txtinout, fl, sep="/"))
 	sb = as.numeric(substr(fl, 1, 5))
-	indx = which(wetland_geometry$subbasin == sb)
+	
 	
 	print(paste("Working on Subbasin", sb))
-
-	substr(lnes[3], 9, 16) = sprintf("%8.3f", pond_geometry[indx,"PND_FR"])
-	substr(lnes[4], 9, 16) = sprintf("%8.3f", pond_geometry[indx,"PND_PSA"])
-	substr(lnes[5], 9, 16) = sprintf("%8.3f", pond_geometry[indx,"PND_PVOL"])
-	substr(lnes[6], 9, 16) = sprintf("%8.3f", pond_geometry[indx,"PND_ESA"])
-	substr(lnes[7], 9, 16) = sprintf("%8.3f", pond_geometry[indx,"PND_EVOL"])
-	# substr(lnes[34], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"PND_VOL"])
 	
+	if (sb %in% pond_geometry$subbasin){
+		indx = which(pond_geometry$subbasin == sb)
+		substr(lnes[3], 9, 16) = sprintf("%8.3f", pond_geometry[indx,"PND_FR"])
+		substr(lnes[4], 9, 16) = sprintf("%8.3f", pond_geometry[indx,"PND_PSA"])
+		substr(lnes[5], 9, 16) = sprintf("%8.3f", pond_geometry[indx,"PND_PVOL"])
+		substr(lnes[6], 9, 16) = sprintf("%8.3f", pond_geometry[indx,"PND_ESA"])
+		substr(lnes[7], 9, 16) = sprintf("%8.3f", pond_geometry[indx,"PND_EVOL"])
+		# substr(lnes[34], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"PND_VOL"])
+	}
+	indx = which(wetland_geometry$subbasin == sb)
 	substr(lnes[29], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"WET_FR"])
 	substr(lnes[30], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"WET_NSA"])
 	substr(lnes[31], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"WET_NVOL"])
