@@ -39,19 +39,21 @@ if (!exists(paste(wd, dir_out_files, sep = '/'))){
 
 gdal_path = "C:/Program Files/GDAL"
 
-#ponds
-# watersheds_ll = readOGR("ponds", "landlocked_watersheds")
+#### ponds
+# subbasins = readOGR("T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro", "subbasins_minus_urban_boundaries_honoring_hucs")
+# watersheds_ll = readOGR(paste(gd_dir, "ponds",sep="/"), "landlocked_watersheds")
 # watersheds_ll_df = watersheds_ll@data
 # subbasins_dissolve = gUnionCascaded(subbasins)
 # watersheds_ll = gIntersection(watersheds_ll, subbasins_dissolve, drop_not_poly=T, byid=T)
 # watersheds_ll = SpatialPolygonsDataFrame(watersheds_ll,
-#     data=data.frame(watersheds_ll_df, row.names=row.names(watersheds_ll)))
-# #rasterizing ponds
+	# data=data.frame(watersheds_ll_df, row.names=row.names(watersheds_ll)))
+#### rasterizing ponds
 # ponds <- rasterize(watersheds_ll, dem, field = watersheds_ll$Subbasin)
 # ponds <- reclassify(pondsRas,     
-#         rbind(c(-Inf,Inf,1)))
-# 
+        # rbind(c(-Inf,Inf,1)))
+
 # writeRaster(ponds, 'ponds.tif')
+
 ponds <- raster(paste(wd, 'ponds.tif', sep ='/'))
 # land cover
 # lc_lm <- raster("T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/landcoverlandmanagement.img")
