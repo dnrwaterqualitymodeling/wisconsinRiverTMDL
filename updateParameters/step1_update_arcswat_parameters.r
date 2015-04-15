@@ -10,11 +10,11 @@ library(foreign)
 options(stringsAsFactors=F)
 options(warn=1)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
- # projectDir = "C:/Users/ruesca/Desktop/WRB"
-projectDir = "H:/WRB"
+  projectDir = "C:/Users/ruesca/Desktop/WRB"
+#projectDir = "H:/WRB"
 mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
 
-pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
+#pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
 reservoir_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/hydrology/dams_parameters.csv"
 gw_parameter_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/alphaBflowSubbasin_lookup.csv"
 op_db_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/OpSchedules.mdb"
@@ -137,44 +137,44 @@ for (rw in background_p$ID){
 close(con)
 
 #UPDATE SWAT POND PARAMETERS
-
-pond_geometry = read.csv(pond_geometry_file)
-
-inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
-con = odbcConnectAccess(inDb)
-# Setting default values for subbasins with no ponds
-for (row in 1:337) {
-	if (!row %in% pond_geometry$subbasin){
-		print(paste("No pond data for subbasin", row))
-		query = paste(
-			"UPDATE pnd ",
-			"SET PND_FR = ", 0, ",",
-			"PND_PSA = ", 5, ",",
-			"PND_PVOL = ", 25, ",",
-			"PND_ESA = ", 8, ",",
-			"PND_EVOL = ", 40, ",",
-			"NDTARG = 15, IFLOD1 = 4, IFLOD2 = 6 ",
-			"WHERE SUBBASIN = ", row, ";",
-			sep = ""
-		)
-	} else {
-		print(paste("Inputting pond data for subbasin", row))
-		indx = which(pond_geometry$subbasin == row)
-		query = paste(
-			"UPDATE pnd ",
-			"SET PND_FR = ", pond_geometry$PND_FR[indx], ",",
-			"PND_PSA = ", pond_geometry$PND_PSA[indx], ",",
-			"PND_PVOL = ", pond_geometry$PND_PVOL[indx], ",",
-			"PND_ESA = ", pond_geometry$PND_ESA[indx], ",",
-			"PND_EVOL = ", pond_geometry$PND_EVOL[indx], ",",
-			"NDTARG = 15, IFLOD1 = 4, IFLOD2 = 6 ",
-			"WHERE SUBBASIN = ", pond_geometry$subbasin[indx], ";",
-			sep = ""
-		)
-	}
-	stdout = sqlQuery(con, query)
-}
-close(con)
+#
+#pond_geometry = read.csv(pond_geometry_file)
+#
+#inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
+#con = odbcConnectAccess(inDb)
+## Setting default values for subbasins with no ponds
+#for (row in 1:337) {
+#	if (!row %in% pond_geometry$subbasin){
+#		print(paste("No pond data for subbasin", row))
+#		query = paste(
+#			"UPDATE pnd ",
+#			"SET PND_FR = ", 0, ",",
+#			"PND_PSA = ", 5, ",",
+#			"PND_PVOL = ", 25, ",",
+#			"PND_ESA = ", 8, ",",
+#			"PND_EVOL = ", 40, ",",
+#			"NDTARG = 15, IFLOD1 = 4, IFLOD2 = 6 ",
+#			"WHERE SUBBASIN = ", row, ";",
+#			sep = ""
+#		)
+#	} else {
+#		print(paste("Inputting pond data for subbasin", row))
+#		indx = which(pond_geometry$subbasin == row)
+#		query = paste(
+#			"UPDATE pnd ",
+#			"SET PND_FR = ", pond_geometry$PND_FR[indx], ",",
+#			"PND_PSA = ", pond_geometry$PND_PSA[indx], ",",
+#			"PND_PVOL = ", pond_geometry$PND_PVOL[indx], ",",
+#			"PND_ESA = ", pond_geometry$PND_ESA[indx], ",",
+#			"PND_EVOL = ", pond_geometry$PND_EVOL[indx], ",",
+#			"NDTARG = 15, IFLOD1 = 4, IFLOD2 = 6 ",
+#			"WHERE SUBBASIN = ", pond_geometry$subbasin[indx], ";",
+#			sep = ""
+#		)
+#	}
+#	stdout = sqlQuery(con, query)
+#}
+#close(con)
 
 #UPDATE SWAT WETLAND PARAMETERS
 ### This is now being run in Step 2

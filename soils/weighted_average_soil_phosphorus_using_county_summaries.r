@@ -1,14 +1,16 @@
+library(reshape2)
+
 options(stringsAsFactors=F)
 setwd("T:/Projects/Wisconsin_River/GIS_Datasets/Soil_Phosphorus")
 
-area_lu = read.csv("subbasin_county_union_area.txt")[,c(2,3,5)]
+area_lu = read.table("subbasin_county_union_area.txt", header=T)[,c(2,3,4)]
 soil_tbl = read.csv("WRB_Counties_soil_P_org_C_1995.csv")
 soil_tbl = soil_tbl[c("Variable", "County", "Mean")]
 soil_tbl = dcast(soil_tbl, County ~ Variable, value.var="Mean")
 soil_tbl = subset(soil_tbl, County != "all")
 names(soil_tbl)[2:3] = c("OM", "P")
 
-soil_area = merge(area_lu, soil_tbl, by.x="CTY_NAME", by.y="County")
+soil_area = merge(area_lu, soil_tbl, by.x="COUNTY_NAM", by.y="County")
 
 sub_area = aggregate(Area ~ Subbasin, soil_area, sum)
 OM = aggregate(Area * OM ~ Subbasin, soil_area, sum)[,2] / sub_area[,2]

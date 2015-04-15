@@ -67,9 +67,11 @@ catchids_ll = watersheds_ll@data$CATCHID
 end = F
 while (!end) {
     count = length(catchids_ll)
-    upstream_catchids = watersheds_ll@data$TOCATCHID %in% catchids_ll
-    catchids_ll = unique(c(catchids_ll, upstream_catchids))
-    if (length(catchids_ll == count)) {
+    upstream_catchids = with(watersheds@data,
+		CATCHID[TOCATCHID %in% catchids_ll])
+	catchids_ll = c(catchids_ll, upstream_catchids)
+	catchids_ll = unique(catchids_ll)
+    if (length(catchids_ll) == count) {
         end = T
     }
 }
@@ -113,8 +115,8 @@ for (s in subbasins@data$Subbasin) {
 		byid=T,
 		drop_lower_td=T,
 		id=as.character(wb_ll@data$HYDROID))
-	
 	contained_ponds_df = merge(data.frame(HYDROID=row.names(contained_ponds)), wb_ll)
+	contained_ponds = gUnionCascaded(contained_ponds)
 	
 	if (length(contained_ponds) == 0) {next}
     e = alignExtent(dissolve_watersheds, dem)
@@ -132,7 +134,7 @@ for (s in subbasins@data$Subbasin) {
         mask_clumps = mask(crop(clumps, e_w), w)
         if (all(is.na(getValues(mask_clumps)))) { next }
         clumps_poly = rasterToPolygons(mask_clumps, dissolve=T)
-		clumps_poly = gSymdifference(clumps_poly, contained_ponds, byid=T)
+		clumps_poly = gDifference(clumps_poly, contained_ponds)
         sumArea = sum(gArea(clumps_poly, byid=T))
         totalArea = totalArea + sumArea # square meters
         mask_fill_height = mask(crop(fill_height, e_w), w)
