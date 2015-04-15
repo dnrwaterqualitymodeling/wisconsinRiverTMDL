@@ -8,7 +8,7 @@ setwd(wd)
 lake_volume_data = read.csv("ponds/WRT_07_19_13.csv")
 file_wb = paste(wd, "ponds/processing_files/ponds_clipped_to_basin.shp", sep="/")
 file_watersheds = paste(wd, "ponds/processing_files/huc_16s.shp", sep="/")
-file_subbasins = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/subbasins_honoring_hucs.shp"
+file_subbasins = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/subbasins.shp"
 file_dem = paste(wd, "DEM/raw_prj_10_m.img", sep="/")
 file_demFill = paste(wd, "DEM/filled_dem_hydro_burned.img", sep="/")
 
