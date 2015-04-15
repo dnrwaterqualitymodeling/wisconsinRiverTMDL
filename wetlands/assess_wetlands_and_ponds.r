@@ -50,7 +50,7 @@ plot(PND_FR ~ WET_FR, data=dat)
 
 #####
 hist(dat$PND_PVOL/dat$PND_PSA)
-dat[which((dat$PND_PVOL/dat$PND_PSA)>100),]
+dat[which((dat$PND_PVOL/dat$PND_PSA)>50),]
 
 hist(dat$PND_EVOL/dat$PND_ESA)
 dat[which((dat$PND_EVOL/dat$PND_ESA)>75),]
