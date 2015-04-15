@@ -39,19 +39,21 @@ if (!exists(paste(wd, dir_out_files, sep = '/'))){
 
 gdal_path = "C:/Program Files/GDAL"
 
-#ponds
-# watersheds_ll = readOGR("ponds", "landlocked_watersheds")
+#### ponds
+# subbasins = readOGR("T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro", "subbasins_minus_urban_boundaries_honoring_hucs")
+# watersheds_ll = readOGR(paste(gd_dir, "ponds",sep="/"), "landlocked_watersheds")
 # watersheds_ll_df = watersheds_ll@data
 # subbasins_dissolve = gUnionCascaded(subbasins)
 # watersheds_ll = gIntersection(watersheds_ll, subbasins_dissolve, drop_not_poly=T, byid=T)
 # watersheds_ll = SpatialPolygonsDataFrame(watersheds_ll,
-#     data=data.frame(watersheds_ll_df, row.names=row.names(watersheds_ll)))
-# #rasterizing ponds
+	# data=data.frame(watersheds_ll_df, row.names=row.names(watersheds_ll)))
+#### rasterizing ponds
 # ponds <- rasterize(watersheds_ll, dem, field = watersheds_ll$Subbasin)
 # ponds <- reclassify(pondsRas,     
-#         rbind(c(-Inf,Inf,1)))
-# 
+        # rbind(c(-Inf,Inf,1)))
+
 # writeRaster(ponds, 'ponds.tif')
+
 ponds <- raster(paste(wd, 'ponds.tif', sep ='/'))
 # land cover
 # lc_lm <- raster("T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/landcoverlandmanagement.img")
@@ -106,22 +108,17 @@ for (s in strt:stp){#length(subbasins@data$Subbasin)) {
     
     # subbasin sinks and sink binary
     sinks_sb <- filled_sb - dem_sb
+	# sinks_sb = maske(sinks_sb, ponds_sb, inverse=T)
 	# sinks_sb <- mask(crop(sinks, e_buffer), subbasin_buffer)
-	# err = try(sinks_sb <- mask(sinks_sb, ponds_sb, inverse = T),
-		# silent=T)
-	
-	# if (attr(err,"class") == "try-error"){
-		
-	# }
-	
+
     sinks_sb_crp <- mask(sinks_sb, subbasin)
     sinkBin_sb <- sinks_sb
-	
+
     sinkBin_sb[sinkBin_sb > 0] <- 1
     sinkBin_sb[sinkBin_sb == 0] <- NA
     sinkBin_sb_crp <- mask(sinkBin_sb, subbasin)
 	sinkBin_sb_crp <- mask(sinkBin_sb_crp, ponds_sb, inverse = T)
-
+	sinks_sb_crp <- mask(sinks_sb_crp, ponds_sb, inverse = T)
     ### finding SA and V normal
     wet_n <- lc_sb * sinkBin_sb
     wet_n_crp <- mask(wet_n, subbasin)
@@ -169,8 +166,7 @@ for (s in strt:stp){#length(subbasins@data$Subbasin)) {
 		"topleft",
 		legend=c("Ponds", "Max Wetland SA"),
 		fill = c("#0000ff50", "#ff000050")
-		)
-	
+	)
 	dev.off()
 	
 	print("Exporting files...")
@@ -187,7 +183,6 @@ for (s in strt:stp){#length(subbasins@data$Subbasin)) {
 		overwrite=TRUE)
 
 	print("###################")
-
 }
 names(geometry_table) <- c('subbasin','WET_FR','WET_NSA','WET_NVOL','WET_VOL','WET_MXSA','WET_MXVOL')
 write.csv(

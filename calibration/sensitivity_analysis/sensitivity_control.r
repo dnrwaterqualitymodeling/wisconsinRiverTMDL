@@ -11,11 +11,11 @@ par_inf_tbl = subset(par_inf_tbl, run==1)
 # temp_dir = "Y:/temp_directory"
 
 txtinout = "H:WRB/Scenarios/Default/TxtInOut"
-dir_out = "H:/wrb_calibration_7iters"
+dir_out = "H:/WRB_sensitivity_new"
 temp_dir = "H:/temp_directory"
 
-# script_sensitivity = "C:/Users/evansdm/Documents/Code/calibration/sensitivity_analysis/bsn_hru_gw_rte_sol_pnd.r"
-script_sensitivity = "C:/Users/evansdm/Documents/Code/calibration/sensitivity_analysis/back_calculating_param_values.r"
+script_sensitivity = "C:/Users/evansdm/Documents/Code/calibration/sensitivity_analysis/bsn_hru_gw_rte_sol_pnd.r"
+# script_sensitivity = "C:/Users/evansdm/Documents/Code/calibration/sensitivity_analysis/back_calculating_param_values.r"
 iter = 7
 
 pat = paste("\\s(", paste(par_inf_tbl$param, collapse="|"), ")\\s", sep="")
@@ -57,8 +57,8 @@ for (p.i in 1:nrow(par_inf_tbl)){
 	go.to.next = F
 	while (!go.to.next) {
 		ps = grep(pat, system('tasklist /v', intern=TRUE), value=TRUE)
-		# if (length(ps) == 32) {
-		if (length(ps) <=1) {
+		if (length(ps) <= 32) {
+		# if (length(ps) <=1) {
 			go.to.next = T
 		} else {
 			Sys.sleep(1)

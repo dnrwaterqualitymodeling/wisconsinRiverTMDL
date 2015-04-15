@@ -3,17 +3,9 @@ library(rgeos)
 library(raster)
 
 wd <- "T:/Projects/Wisconsin_River/GIS_Datasets/wetlands"
-# file_wetland_parm = paste("wetland_parameters_",strt,"to",stp,".csv",sep='')
-# 
+
 dir_modinputs <- "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/wetlands"
 file_out = "wetland_parameters.csv"
-# orginal dem
-# dem <- raster(paste(gd_dir, 'DEM','wrb_dem.tif',sep ='/'))
-# filled dem
-# dem_fl <- raster(paste(gd_dir, 'DEM','wrb_filled.tif',sep ='/'))
-
-# sinks
-# sinks = raster(paste(gd_dir, "DEM", "sinks_10m.tif",sep="/"))
 
 dir_out_maps = "wetland_maps"
 dir_out_files = "wetland_files"
