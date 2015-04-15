@@ -9,4 +9,4 @@ parms[which(parms$Method == 'a'),"Method"] = "Absolute"
 parms[which(parms$Method == 'r'),"Method"] = "Relative"
 
 xparms = xtable(parms)
-print.xtable(xparms, type='latex',file="~/Code/doc/tab/param_table.tex")
+print.xtable(xparms, type='latex',file="~/Code/doc/tab/param_table.tex",include.rownames=F)

@@ -12,7 +12,7 @@ library(RColorBrewer)
 #   It takes as input the data table containing the model predictions (exported from the analysis
 #   and modeling script)as well as the lookup table linking the huc16 to each subbasin
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-wd = "C:/evans/bflow/wi_dailyValues/"
+wd = "~/bflow/wi_dailyValues/"
 setwd(wd)
 #   subbasin layer for plotting
 # subbasins <- readOGR('T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro','subbasins')
@@ -32,7 +32,7 @@ huc16data[which(is.nan(huc16data$mod_2_Pred)),13] <- NA
 huc16data[which(is.infinite(huc16data$mod_3_Pred)),15] <- NA
 huc16data[which(is.nan(huc16data$mod_3_Pred)),15] <- NA
 # Lookup table with all the huc16s within the WR basin, and the subbasin IDs
-lookup <- read.csv("data_files/subbasin_catchid_lookup.txt")
+lookup <- read.csv("T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/huc16_subbasin_crosswalk.txt")
 ## merges the subbasin ID to the huc16, removes all nonWi River hucs
 WR_huc16data <- merge(huc16data, lookup, by = 'CATCHID')
 
