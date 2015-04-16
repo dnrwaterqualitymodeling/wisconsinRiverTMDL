@@ -1,3 +1,6 @@
+arguments = commandArgs(trailingOnly = T)
+strt = arguments[1]
+stp = arguments[2]
 # library(xlsx)
 library(rgdal)
 library(rgeos)
@@ -11,8 +14,15 @@ file_watersheds = paste(wd, "Watersheds/HUC_Subwatersheds/WRB_HUC16_WTM_no_buffe
 file_subbasins = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/subbasins.shp"
 file_dem = paste(wd, "DEM/raw_prj_10_m.img", sep="/")
 file_demFill = paste(wd, "DEM/filled_dem_hydro_burned.img", sep="/")
-file_out = "ponds/pond_geometry_8.csv"
-subbasin_range = 296:337
+file_out = paste(
+	"ponds/pond_geometry",
+	strt,
+	"to",
+	stp,
+	".csv",
+	sep="")
+
+subbasin_range = strt:stp
 
 td = tempdir()
 
