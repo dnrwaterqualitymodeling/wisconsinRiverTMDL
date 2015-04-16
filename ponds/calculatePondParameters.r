@@ -11,6 +11,8 @@ file_watersheds = paste(wd, "Watersheds/HUC_Subwatersheds/WRB_HUC16_WTM_no_buffe
 file_subbasins = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/subbasins.shp"
 file_dem = paste(wd, "DEM/raw_prj_10_m.img", sep="/")
 file_demFill = paste(wd, "DEM/filled_dem_hydro_burned.img", sep="/")
+file_out = "ponds/pond_geometry_8.csv"
+subbasin_range = 296:337
 
 td = tempdir()
 
@@ -34,7 +36,7 @@ projection(watersheds) = projection(dem)
 
 # lake_volume_data = read.xlsx("ponds/WRT_07_19_13.xlsx", sheetName="data")
 lake_volume_data$Volume..acre.ft.[lake_volume_data$Volume..acre.ft. == 0] = NA
-lake_volume_data$Max.Depth..ft.[lake_volume_data$Max.Depth..ft.] = NA
+lake_volume_data$Max.Depth..ft.[lake_volume_data$Max.Depth..ft. == 0] = NA
 
 wb_vol = merge(wb,
     lake_volume_data,
@@ -84,10 +86,12 @@ while (!end) {
     }
 }
 watersheds_ll = subset(watersheds, CATCHID %in% catchids_ll)
-writeOGR(watersheds_ll,
-	"ponds",
-	"landlocked_watersheds",
-	driver = "ESRI Shapefile")
+if (!file.exists("ponds/landlocked_watersheds.shp")) {
+	writeOGR(watersheds_ll,
+		"ponds",
+		"landlocked_watersheds",
+		driver = "ESRI Shapefile")
+}
 file_local_watershed = tempfile(pattern="watersheds_ll_", fileext=".shp")
 writeOGR(watersheds_ll,
 	td,
@@ -96,7 +100,8 @@ writeOGR(watersheds_ll,
 
 
 geometry_table = data.frame()
-for (s in subbasins@data$Subbasin) {
+#for (s in subbasins@data$Subbasin) {
+for (s in subbasin_range) {
 #    if (s == 3) {break}
     print(paste("Subbasin number", s))
 	
@@ -176,6 +181,9 @@ for (s in subbasins@data$Subbasin) {
 #	if (length(contained_ponds) == 0) {next}
 	
 	contained_ponds_df = contained_ponds@data
+	contained_ponds_df = merge(
+		contained_ponds_df,
+		wb_vol)
 	
     e = alignExtent(dissolve_watersheds, dem)
     mask_dem = mask(crop(dem, e), dissolve_watersheds)
@@ -189,23 +197,45 @@ for (s in subbasins@data$Subbasin) {
 	sink_vals[sink_vals == 0] = NA
 	sink_extent = mask_sinks
 	sink_extent = setValues(sink_extent, sink_vals)
-	sink_extent = rasterToPolygons(sink_extent, dissolve=T)
+	
+	file_sink_extent = tempfile(
+		pattern="sink_extent_",
+		fileext=".img")
+	file_sink_poly = tempfile(
+		pattern="sink_poly_",
+		fileext=".shp")
+	writeRaster(sink_extent, file_sink_extent, "HFA", datatype="INT2S")
+	ln1 = "import arcpy"
+	ln2 = paste(
+		"arcpy.RasterToPolygon_conversion(r'",
+		file_sink_extent,
+		"',r'",
+		file_sink_poly,
+		"', 'NO_SIMPLIFY')",
+		sep="")
+	code = paste(ln1,ln2,sep="\n")
+	writeLines(code,file_py)
+	cmd = paste("C:\\Python27\\ArcGIS10.1\\python.exe", file_py)
+	system(cmd)
+	
+	sink_extent = readOGR(
+		td,
+		strsplit(basename(file_sink_poly), "\\.")[[1]][1])
 	
 	contained_ponds = gUnionCascaded(contained_ponds)
 	sink_extent = gDifference(sink_extent, contained_ponds, drop_lower_td = T)
-	
 
     row = data.frame(
         subbasin = subbasin@data$Subbasin,
         PND_FR = gArea(dissolve_watersheds) / gArea(subbasin),
-        PND_PSA = sum(contained_ponds_df$Ar__cr_ * 0.404686, na.rm=T),
-        PND_PVOL = sum(contained_ponds_df$Vlm____, na.rm=T) * 0.123348184,
-        PND_ESA = sum(contained_ponds_df$Ar__cr_ * 0.404686, na.rm=T) +
+        PND_PSA = sum(contained_ponds_df$Area..acres. * 0.404686, na.rm=T),
+        PND_PVOL = sum(contained_ponds_df$Volume..acre.ft., na.rm=T) * 0.123348184,
+        PND_ESA = sum(contained_ponds_df$Area..acres. * 0.404686, na.rm=T) +
 			(gArea(sink_extent) / 1e4),
-        PND_EVOL = (sum(contained_ponds_df$Vlm____, na.rm=T) * 0.123348184) + 
+        PND_EVOL = (sum(contained_ponds_df$Volume..acre.ft., na.rm=T) * 0.123348184) + 
             (sink_vol / 1e4)
     )
     geometry_table = rbind(geometry_table, row)
 }
 
-write.csv(geometry_table, file="ponds/pond_geometry.csv", row.names=F)
+write.csv(geometry_table, file=file_out, row.names=F)
