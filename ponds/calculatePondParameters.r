@@ -11,6 +11,8 @@ file_watersheds = paste(wd, "Watersheds/HUC_Subwatersheds/WRB_HUC16_WTM_no_buffe
 file_subbasins = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/subbasins.shp"
 file_dem = paste(wd, "DEM/raw_prj_10_m.img", sep="/")
 file_demFill = paste(wd, "DEM/filled_dem_hydro_burned.img", sep="/")
+file_out = "ponds/pond_geometry_3.csv"
+subbasin_range = 98:145
 
 td = tempdir()
 
@@ -84,10 +86,12 @@ while (!end) {
     }
 }
 watersheds_ll = subset(watersheds, CATCHID %in% catchids_ll)
-writeOGR(watersheds_ll,
-	"ponds",
-	"landlocked_watersheds",
-	driver = "ESRI Shapefile")
+if (!file.exists("ponds/landlocked_watersheds.shp")) {
+	writeOGR(watersheds_ll,
+		"ponds",
+		"landlocked_watersheds",
+		driver = "ESRI Shapefile")
+}
 file_local_watershed = tempfile(pattern="watersheds_ll_", fileext=".shp")
 writeOGR(watersheds_ll,
 	td,
@@ -96,7 +100,8 @@ writeOGR(watersheds_ll,
 
 
 geometry_table = data.frame()
-for (s in subbasins@data$Subbasin) {
+#for (s in subbasins@data$Subbasin) {
+for (s in subbasin_range) {
 #    if (s == 3) {break}
     print(paste("Subbasin number", s))
 	
@@ -233,4 +238,4 @@ for (s in subbasins@data$Subbasin) {
     geometry_table = rbind(geometry_table, row)
 }
 
-write.csv(geometry_table, file="ponds/pond_geometry.csv", row.names=F)
+write.csv(geometry_table, file=file_out, row.names=F)
