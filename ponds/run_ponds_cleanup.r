@@ -1,13 +1,9 @@
-library(rgdal)
-library(rgeos)
-library(raster)
-
 wd <- "T:/Projects/Wisconsin_River/GIS_Datasets/ponds"
 
 # dir_modinputs <- "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/ponds"
 file_out = "pond_geometry.csv"
 
-out_pnds = list.files(wd, pattern="pond_geometry*")
+out_pnds = list.files(wd, pattern="pond_geometry*",full.names=T)
 
 pnds_params = data.frame()
 for (fl in out_pnds){
