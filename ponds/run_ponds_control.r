@@ -1,13 +1,13 @@
 
 user_path = path.expand("~")
-rscript = paste(user_path, "R\\R-3.1.1\\bin\\x64\\Rscript.exe",sep="\\")
-pndsscrpt = paste(user_path, "Code\\ponds\\calculatePondParameters.r",sep="\\")
-pnds_cleanup = paste(user_path, "Code\\ponds\\run_ponds_cleanup.r",sep="\\")
+rscript = paste(user_path, "R\\R-3.1.2\\bin\\Rscript.exe",sep="\\")
+pndsscrpt = paste(user_path, "wisconsinRiverTMDL\\ponds\\calculatePondParameters.r",sep="\\")
+pnds_cleanup = paste(user_path, "wisconsinRiverTMDL\\ponds\\run_ponds_cleanup.r",sep="\\")
 
 wd <- "T:/Projects/Wisconsin_River/GIS_Datasets/ponds"
 gd_dir <- "T:/Projects/Wisconsin_River/GIS_Datasets"
 #### Number of processes to start
-procs = 4
+procs = 8
 
 strt_stps = round(seq(1,337+337/procs,by=337/procs))
 cmd = NULL
