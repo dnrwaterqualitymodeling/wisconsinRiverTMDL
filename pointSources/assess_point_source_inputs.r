@@ -18,6 +18,7 @@ sample_pts=unique(of_data$SAMPLE_ID)
 
 dates = seq(as.Date("1990-01-01"), as.Date("2013-12-31"), by="1 day")
 dates = data.frame(
+	DATE = dates,
 	YEAR = as.integer(format(dates, "%Y")),
 	MON = as.integer(format(dates, "%m")),
 	DAY = as.integer(format(dates, "%j"))
@@ -71,9 +72,10 @@ for (sb_id in 1:337) {
 		aggregated_of$p_org_load = aggregated_of$p_load * 0.58
 		aggregated_of$p_min_load = aggregated_of$p_load * 0.42
 		aggregated_of = aggregated_of[,-6]
+		aggregated_of = aggregated_of[order(aggregated_of$DATE),]
 		if (sum(aggregated_of[,4:7], na.rm=T) == 0) {
 			ofs_issues = paste(ofs, collapse=",")
-			writeLines(paste(ofs_issues, "SAMPLE_PTs have all zero data"), log_file)
+			write(paste(ofs_issues, "SAMPLE_PTs have all zero data"), log_file, append=T)
 		}
 	} else {
 		of_bool = F
@@ -90,6 +92,7 @@ for (sb_id in 1:337) {
 			na.rm=T
 		)
 		muni_sub_agg = data.frame(
+			DATE = muni_sub_agg$date,
 			YEAR = as.integer(format(as.Date(muni_sub_agg$date), "%Y")),
 			DAY = as.integer(format(as.Date(muni_sub_agg$date), "%j")),
 			mean_flow = muni_sub_agg$flow_m3,
@@ -103,9 +106,11 @@ for (sb_id in 1:337) {
 			all.x=T,
 			all.y=F
 		)
+		muni_sub_agg = muni_sub_agg[order(muni_sub_agg$date),]
 	} else {
 		muni_bool = F
 	}
+	
 	if (!muni_bool & !of_bool) {
 		next
 	} else if (muni_bool & !of_bool) {
@@ -153,45 +158,3 @@ dates = seq(as.Date("1990-01-01"), as.Date("2013-12-31"), by="1 day")
 out_tbl$DATE = format(dates, "%m/%d/%Y")
 out_tbl$DATE = gsub("^0", "", out_tbl$DATE)
 out_tbl$DATE = gsub("(/0)", "/", out_tbl$DATE)
-
-# update with point source specific data
-
-setwd(out_dir)
-for (sb in unique(output_holder$sb_id)) {
-
-	file_name = paste("recday_", sb, ".txt", sep='')
-	print(file_name)
-	sb_dat = subset(output_holder, sb_id == sb)
-
-	out_sb_tbl = out_tbl
-	out_sb_tbl[c("Floday", "Sedday", "Minpday", "Orgpday")] =
-		sb_dat[c("mean_flow", "sed_load", "p_min_load", "p_org_load")]
-
-	out_sb_tbl[is.na(out_sb_tbl)] = 0
-	dts = out_sb_tbl$DATE
-	
-	out_sb_tbl = out_sb_tbl[,2:length(out_sb_tbl)]
-	print("formatting output...")
-	out_sb_tbl = apply(
-		out_sb_tbl,
-		MARGIN=2,
-		FUN=function(x){
-			chrs = format(x, nsmall=3, digits=3)
-		}
-	)
-	out_sb_tbl = cbind(dts, out_sb_tbl)
-	hdr = paste('"', 
-		paste(arcswat_hdr, collapse='","'),
-		'"',
-		sep="")
-	print('writing data...')
-
-	writeLines(hdr, file_name)
-	write.table(out_sb_tbl,
-		file=file_name,
-		row.names=F,
-		col.names=F,
-		quote=F,
-		sep=",",
-		append=T)
-}

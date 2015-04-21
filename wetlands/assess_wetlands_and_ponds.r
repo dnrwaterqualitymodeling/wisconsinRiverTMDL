@@ -68,8 +68,8 @@ dat[which(dat$PND_PVOL > dat$PND_EVOL),c('Subbasin', 'PND_PVOL', 'PND_EVOL')]
 
 #### Issue here: why do a couple of these subs have greater emergency than principle surface areas?
 dat[which(dat$PND_PSA > dat$PND_ESA),c('Subbasin', 'PND_PSA', 'PND_ESA')]
-dat[which(dat$WET_NVOL > dat$WET_MXVOL),c('subbasin', 'WET_NSA', 'WET_MXSA')]
-dat[which(dat$WET_NSA > dat$WET_MXSA),c('subbasin', 'WET_NVOL', 'WET_MXVOL')]
+dat[which(dat$WET_NVOL > dat$WET_MXVOL),c('Subbasin', 'WET_NSA', 'WET_MXSA')]
+dat[which(dat$WET_NSA > dat$WET_MXSA),c('Subbasin', 'WET_NVOL', 'WET_MXVOL')]
 
 ### How many have a calc'd volume even though fraction = 0
 dat[which(dat$PND_PVOL > 0 & dat$PND_FR == 0),]
