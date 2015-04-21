@@ -23,7 +23,8 @@ dates = data.frame(
 )
 
 output_holder = data.frame()
-for (sb_id in unique(lu_table$SUBBASIN)) {
+# for (sb_id in unique(lu_table$SUBBASIN)) {
+for (sb_id in 1:337) {
 	# sample_pt in sample_pts) {
 	print(sb_id)
 	ofs = subset(lu_table, SUBBASIN == sb_id)$SAMPLE_PT
