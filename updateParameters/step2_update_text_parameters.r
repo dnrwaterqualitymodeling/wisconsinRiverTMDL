@@ -1,3 +1,8 @@
+###########################################
+# NOTE: This script should be run AFTER   #
+# re-write SWAT Input Files, which is run #
+# in ArcSWAT or SWATEditor                #
+###########################################
 library(stringr)
 
 options(stringsAsFactors=F)
@@ -5,11 +10,7 @@ options(stringsAsFactors=F)
  # projectDir = "C:/Users/ruesca/Desktop/WRB"
 projectDir = "H:/WRB"
 txtinout = paste(projectDir, "Scenarios", "Default", "TxtInOut", sep="/")
-###########################################
-# NOTE: This script should be run AFTER   #
-# re-write SWAT Input Files, which is run #
-# in ArcSWAT or SWATEditor                #
-###########################################
+
 file_wetland_geometry = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/wetlands/wetland_parameters.csv"
 file_pond_geometry = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
 ## UPDATE POINT SOURCE TEXT FILES AND FIG.FIG
@@ -87,7 +88,7 @@ for (ps_file in ps_files) {
 	writeLines(ps_data_str, out_file)
 }
 
-## UPDATE WETLAND PARAMETERS
+## UPDATE POND AND WETLAND PARAMETERS
 
 wetland_geometry = read.csv(file_wetland_geometry)
 pond_geometry = read.csv(file_pond_geometry)
@@ -107,7 +108,6 @@ for (fl in files_pnds){
 		substr(lnes[5], 9, 16) = sprintf("%8.3f", pond_geometry[indx,"PND_PVOL"])
 		substr(lnes[6], 9, 16) = sprintf("%8.3f", pond_geometry[indx,"PND_ESA"])
 		substr(lnes[7], 9, 16) = sprintf("%8.3f", pond_geometry[indx,"PND_EVOL"])
-		# substr(lnes[34], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"PND_VOL"])
 	}
 	indx = which(wetland_geometry$subbasin == sb)
 	substr(lnes[29], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"WET_FR"])
