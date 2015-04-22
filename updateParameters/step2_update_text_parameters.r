@@ -34,9 +34,10 @@ for (ps_file in ps_files) {
 		lne)
 	fig.fig[indx] = lne
 }
-
-file.copy(paste(txtinout, "fig.fig", sep="/"),
-	paste(txtinout, "fig.fig_bkp", sep="/"))
+if (!file.exists(paste(txtinout, "fig.fig_bkp", sep="/"))){
+	file.copy(paste(txtinout, "fig.fig", sep="/"),
+		paste(txtinout, "fig.fig_bkp", sep="/"))
+}
 writeLines(fig.fig, paste(txtinout, "fig.fig", sep="/"))
 
 dates = seq(
