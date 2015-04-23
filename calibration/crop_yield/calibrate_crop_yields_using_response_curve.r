@@ -71,6 +71,7 @@ for (row in 1:length(select_cols$cols)) {
 	vals = sapply(vals, dtype)
 	modData[col_name] = data.frame(vals, stringsAsFactors=F)
 }
+# taking only crop of interest and yearly averages
 modData = subset(modData, LULC == crop & MON > 13)
 
 area_wt_yld = merge(aggregate(YLD * AREA ~ MON, data=modData, sum),
