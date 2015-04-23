@@ -11,18 +11,58 @@ Observed data for discharge were obtained from USGS in late September.
     \item Calibrating peak flows
     \begin{itemize}
         \item We calibrated peak flows by adjusting only parameters that control
-        runoff and fitting to observed high streamflow data. During this phase of
-        calibrations, we adjusted the following parameters:
+        runoff and fitting to observed high streamflow data (spring months,
+        10\% exceedence).
+        During this phase of calibrations, we adjusted the following parameters:
         \begin{itemize}
-            \item CN2
             \item SURLAG
+            \item TIMP
             \item SMTMP
             \item SFTMP
-            \item WET_MXVOL
-            \item WET_PVOL
-            \item PND_EVOL
-            \item PND_PVOL
+            \item WET\_MXVOL
+            \item PND\_EVOL
+            \item OV\_N
+            \item CH\_N2
+% Parameter Name    	t-Stat       	P-Value    
+% 8:R__CH_N2.rte    	0.138434890  	0.890009519
+% 3:V__TIMP.bsn     	0.293074108  	0.769711578
+% 7:V__OV_N.hru     	0.663769054  	0.507457214
+% 6:R__WET_MXVOL.pnd	1.186541967  	0.236548353
+% 4:V__SURLAG.hru   	-6.730148096 	0.000000000
+% 1:V__SFTMP.bsn    	-9.615948651 	0.000000000
+% 2:V__SMTMP.bsn    	-11.695267252	0.000000000
+% 5:R__PND_EVOL.pnd 	16.020519753 	0.000000000
+
         \end{itemize}
     \end{itemize}
+    \begin{itemize}
+        \item We calibrated baseflow by adjusting only parameters that control
+        baseflow and fitting to observed low streamflow data (annual 90\%
+        exceedence).
+        During this phase of calibrations, we adjusted the following parameters:
+        \begin{itemize}
+            \item WET\_MXVOL
+            \item PND\_EVOL
+            \item REVAPMN
+            \item ALPHA\_BF
+            \item GWQMN
+            \item GW\_DELAY
+            \item GW\_REVAP
+            \item RCHRG\_DP
+% Parameter Name    	t-Stat       	P-Value    
+% 6:R__WET_MXVOL.pnd	0.259973724  	0.795100617
+% 5:R__PND_EVOL.pnd 	-1.135580140 	0.257233001
+% 8:V__REVAPMN.gw   	1.165684213  	0.244866550
+% 1:R__ALPHA_BF.gw  	-1.782857472 	0.075837571
+% 4:V__GWQMN.gw     	2.528489334  	0.012079373
+% 2:V__GW_DELAY.gw  	4.341652727  	0.000020646
+% 7:V__GW_REVAP.gw  	5.657497705  	0.000000042
+% 3:V__RCHRG_DP.gw  	-10.791636578	0.000000000
+        \end{itemize}
+    \end{itemize}
+    \item We then reassigned parameter values for those parameters in the both
+    the spring runoff and baseflow calibrations that met a significance level of
+    p < 0.01. With this reassignment, we calibrated curve number for summer
+    months for flows above the 25\% exceedence flow.
 \end{itemize}
 \pagebreak

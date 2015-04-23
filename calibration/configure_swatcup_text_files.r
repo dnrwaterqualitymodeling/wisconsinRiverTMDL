@@ -1,8 +1,8 @@
 # CHANGE THESE ###########
 # SWAT project
 
-projectDir = "D:/WRB2.Sufi2.SwatCup"
-simCount = 256
+projectDir = "D:/WRB1.Sufi2.SwatCup"
+simCount = 64
 subbasinCount = 337
 startYr = 2002
 endYr = 2013
@@ -11,7 +11,7 @@ monthly = F
 
 # Observations -- 
 #	variable name, column index in output.rch, subbasin ID, observed data
-obsDir = "D:/usgs_raw/calibration/entire_90_pct_exc"
+obsDir = "D:/usgs_raw/calibration/JAJS_25_pct_exc"
 #obsDir =
 #	"D:/usgs_raw/calibration/spring_10_pct_exc"
 #gage_subbasin_lu =
@@ -76,15 +76,19 @@ setInternet2(TRUE)
 #	c("r__CH_N2.rte",-0.1,0.1)
 #)
 
+#parameterization = rbind(
+#	c("r__ALPHA_BF.gw",-0.99,-0.5),
+#	c("v__GW_DELAY.gw",0,200),
+#	c("v__RCHRG_DP.gw",0,1),
+#	c("v__GWQMN.gw",500,3000),
+#	c("r__PND_EVOL.pnd",0,3),
+#	c("r__WET_MXVOL.pnd",0,3),
+#	c("v__GW_REVAP.gw",0.02,0.2),
+#	c("v__REVAPMN.gw",0,500)
+#)
+
 parameterization = rbind(
-	c("r__ALPHA_BF.gw",-0.99,-0.5),
-	c("v__GW_DELAY.gw",0,200),
-	c("v__RCHRG_DP.gw",0,1),
-	c("v__GWQMN.gw",500,3000),
-	c("r__PND_EVOL.pnd",0,3),
-	c("r__WET_MXVOL.pnd",0,3),
-	c("v__GW_REVAP.gw",0.02,0.2),
-	c("v__REVAPMN.gw",0,500)
+	c("r__CN2.mgt",-0.05,-0.05)
 )
 
 # Don't change these

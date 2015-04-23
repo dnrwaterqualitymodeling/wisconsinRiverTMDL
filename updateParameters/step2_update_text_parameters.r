@@ -7,8 +7,8 @@ library(stringr)
 
 options(stringsAsFactors=F)
 
- # projectDir = "C:/Users/ruesca/Desktop/WRB"
-projectDir = "H:/WRB"
+  projectDir = "C:/Users/ruesca/Desktop/WRB"
+#projectDir = "H:/WRB"
 txtinout = paste(projectDir, "Scenarios", "Default", "TxtInOut", sep="/")
 
 file_wetland_geometry = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/wetlands/wetland_parameters.csv"
