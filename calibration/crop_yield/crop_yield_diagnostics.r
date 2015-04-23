@@ -85,14 +85,6 @@ dev.off()
 
 
 
-
-
-
-
-
-
-
-
 diagn_bySubID <- ddply(diagn_df, 'SubBasin', summarise, 
                        avgSubBas_diagn = mean(diagn, na.rm = T))
 diagn_byCnty <- ddply(diagn_df, 'County', summarise, 
