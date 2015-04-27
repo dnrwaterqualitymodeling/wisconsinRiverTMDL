@@ -1,12 +1,19 @@
-# This script produces simulated vs observed plots for crop yields at the county and basinwide level
-# CHANGE THESE ###########
-
-yldCalib = function(crop, scenario = 'Default', unit = 'metric', projectDir = 'H:/WRB', basinWide = F){
-    
+yldCalib = function(crop, scenario='Default', projectDir='H:/WRB', basinWide=T, monthly=F){
+#######################################    
+# This script produces simulated vs observed plots 
+# for crop yields at the county and basinwide level.
+# It requires MONTHLY swat output to work correctly
+#
+# Appropriate inputs are 'corn_grain', 'haylage', 
+#	 'soybeans', and 'corn_silage'
+# 
+#######################################    
     options(stringsAsFactors=F)
+	require(Hmisc)
     # Subbasin IDs in each County
-    dir_crop_valid = "T:/Projects/Wisconsin_River/GIS_Datasets/validation/crop_yield"
-    subbasinIDs = read.csv(paste(dir_crop_valid, 
+    dir_poli_bounds = "T:/Projects/Wisconsin_River/GIS_Datasets/Political_Boundaries"
+    subbasinIDs = read.csv(paste(
+		dir_poli_bounds, 
         "subbasins_byWRB_County.txt", 
         sep='/'))
     
@@ -16,13 +23,14 @@ yldCalib = function(crop, scenario = 'Default', unit = 'metric', projectDir = 'H
     #   crop Lookup      
     cropTab = data.frame(
         CropName = c('corn_grain', 'corn_silage', 'haylage', 'hay', 'soybeans', 'wheat'), 
-        CropKeySWAT = c('CORN', 'CSIL', 'ALFA',NA,'SOYB',NA),
-        CropKeyNASS = c('CORN, GRAIN - YIELD, MEASURED IN BU / ACRE',
-                      'CORN, SILAGE - YIELD, MEASURED IN TONS / ACRE',
-                      'HAY & HAYLAGE, ALFALFA - YIELD, MEASURED IN TONS / ACRE, DRY BASIS',
-                      'HAY, ALFALFA - YIELD, MEASURED IN TONS / ACRE',
-                      'SOYBEANS - YIELD, MEASURED IN BU / ACRE',
-                      'WHEAT - YIELD, MEASURED IN BU / ACRE')
+        CropKeySWAT = c('CORN', 'CSIL', 'ALFA', NA,'SOYB', NA),
+        CropKeyNASS = c(
+			'CORN, GRAIN - YIELD, MEASURED IN BU / ACRE',
+			'CORN, SILAGE - YIELD, MEASURED IN TONS / ACRE',
+			'HAY & HAYLAGE, ALFALFA - YIELD, MEASURED IN TONS / ACRE, DRY BASIS',
+			'HAY, ALFALFA - YIELD, MEASURED IN TONS / ACRE',
+			'SOYBEANS - YIELD, MEASURED IN BU / ACRE',
+			'WHEAT - YIELD, MEASURED IN BU / ACRE')
     )
     cropKeySWAT = cropTab[which(cropTab$CropName == crop),'CropKeySWAT']  
     cropKeyNASS = cropTab[which(cropTab$CropName == crop),'CropKeyNASS'] 
@@ -79,32 +87,32 @@ yldCalib = function(crop, scenario = 'Default', unit = 'metric', projectDir = 'H
     yldDat = yldDat[which(yldDat$Data.Item == cropKeyNASS),]
     
     # Converting to metric units
-    if (unit =='metric'){
-        if (cropKeySWAT == 'CSIL'){
-            # to reduce observed to dry weight, assuming NASS
-            yldDat$YLD = (yldDat$Value * 2.24 * 0.35) 
-        } else if (cropKeySWAT == 'ALFA'){
-            # to reduce to dry weight, assuming NASS of 13%
-            yldDat$YLD = (yldDat$Value * 2.24 * 0.87) 
-        } else if (cropKeySWAT == 'CORN'){
-            #NASS has 15% and 56#/bu
-            #(paste('Converting corn from bu/acre to tons per Ha'))
-            yldDat$YLD = (yldDat$Value *56)*(2.471/2205)*(0.845)#(1/1.155)     
-        } else if (cropKeySWAT == 'SOYB'){
-            #NASS has 12.5% moisture for soy and 60#/bu
-            yldDat$YLD = (yldDat$Value *60)*(2.471/2205)*(0.875)#(1/1.125) 
-        }
-    }
+    
+	if (cropKeySWAT == 'CSIL'){
+		# to reduce observed to dry weight, assuming NASS
+		yldDat$YLD = (yldDat$Value * 2.24 * 0.35) 
+	} else if (cropKeySWAT == 'ALFA'){
+		# to reduce to dry weight, assuming NASS of 13%
+		yldDat$YLD = (yldDat$Value * 2.24 * 0.87) 
+	} else if (cropKeySWAT == 'CORN'){
+		#NASS has 15% and 56#/bu
+		#(paste('Converting corn from bu/acre to tons per Ha'))
+		yldDat$YLD = (yldDat$Value *56)*(2.471/2205)*(0.845)#(1/1.155)     
+	} else if (cropKeySWAT == 'SOYB'){
+		#NASS has 12.5% moisture for soy and 60#/bu
+		yldDat$YLD = (yldDat$Value *60)*(2.471/2205)*(0.875)#(1/1.125) 
+	}
+
     
     counties = unique(yldDat$County)
     all_cnty_data = data.frame()
 
     for (cnty in counties){
-#         cnty = 'ADAMS'
+
         print(paste("Starting", cnty, "County"))
         subIDs = subbasinIDs[toupper(subbasinIDs$CTY_NAME) == cnty, 11]
         cnty_SWAT_data = data.frame()
-        # taking just the yearly harvest values, ASSUMING MONTHLY
+        # taking just the yearly harvest values, must be monthly outputs
         modData = modData_allSubs[modData_allSubs$SUB %in% subIDs,]
         if (nrow(modData) == 0) {next}
         area_wt_yld = merge(aggregate(YLD * AREA ~ MON, data=modData, sum),
@@ -117,62 +125,86 @@ yldCalib = function(crop, scenario = 'Default', unit = 'metric', projectDir = 'H
         )
         all_cnty_data = rbind(all_cnty_data, cnty_data)   
     }
-    obsData = aggregate(YLD ~ County + DATE, data=yldDat, mean)
-    print('Plotting county by county...')
-    ylm = range(c(obsData$YLD, all_cnty_data$YLD))
-    pdf(paste(crop,scenario,'_Obs_v_Sim_byCounty.pdf',sep = ''))
-    for (cnty in counties){
-        plot(YLD ~ DATE,
-         data=obsData[which(obsData$County == cnty),],
-         pch = 20,
-         col="aquamarine",
-         type="b",
-         ylim=ylm,
-         ylab= paste(crop, "Mg/ha"),
-         xlab="Date",
-         cex = 1.5,
-         main=paste(cnty,'County'))
+	ylm = range(c(yldDat$YLD, all_cnty_data$YLD))
+	if (monthly){
+		obsData = aggregate(YLD ~ County + DATE, data=yldDat, mean)
+		print('Plotting county by county...')
+		
+		pdf(paste(crop,scenario,'_Obs_v_Sim_byCounty.pdf',sep = ''))
+		for (cnty in counties){
+			plot(YLD ~ DATE,
+			 data=obsData[which(obsData$County == cnty),],
+			 pch = 20,
+			 col="aquamarine",
+			 type="b",
+			 ylim=ylm,
+			 ylab= paste(crop, "Mg/ha"),
+			 xlab="Date",
+			 cex = 1.5,
+			 main=paste(cnty,'County'))
 
-        points(YLD ~ DATE, data=all_cnty_data[which(all_cnty_data$CNTY == cnty),],
-           type = 'b', pch=20, col="coral1", cex = 1.5)
-    
-        legend('topright', legend = c('Observed','Simulated'),
-            fill = c('aquamarine', 'coral1'))
+			points(YLD ~ DATE, data=all_cnty_data[which(all_cnty_data$CNTY == cnty),],
+			   type = 'b', pch=20, col="coral1", cex = 1.5)
+		
+			legend('topright', legend = c('Observed','Simulated'),
+				fill = c('aquamarine', 'coral1'))
+		}
+		dev.off()
     }
-    dev.off()
-    
     # for basin wide
     if (basinWide){
+		cx = 1
+		pchar = 15
+		ltyp = 'dashed'
+		crop_unit_string = paste(paste(capitalize(unlist(strsplit(crop, "_"))),collapse=" "), "(Mg/ha)")
         print('Plotting basin-wide...')
-        obsData_basin = aggregate(YLD ~ DATE, data=yldDat, mean)
         
+		obsData_basin = aggregate(YLD ~ DATE, data=yldDat, mean)
         simData_basin = aggregate(YLD ~ DATE, data=all_cnty_data, mean)
 
-        pdf(paste(crop, scenario,'_Obs_v_Sim_basinWide.pdf',sep = ''))
+        pdf(
+			paste(crop, scenario,'_Obs_v_Sim_basinWide.pdf',sep = ''),
+			height=4.5,
+			width=4.5)
         plot(YLD ~ DATE,
              data=obsData_basin,
              pch = 20,
              col="aquamarine",
              type="b",
              ylim=ylm,
-             ylab= paste(crop, "Mg/ha"),
+             ylab= crop_unit_string,
              xlab="Date",
-             cex = 1.5,
-             main=paste('Basin wide Annual Averages'))
+             # main=paste('Basinwide Annual Averages'),
+			 cex.axis=cx,
+			 cex.lab=cx,
+			 cex=1
+             )
     
-        points(YLD ~ DATE, data=simData_basin,
-            type = 'b', pch=20, col="coral1", cex = 1.5)
+        points(YLD ~ DATE,
+			data=simData_basin,
+            type = 'b',
+			pch=pchar,
+			lty=ltyp,
+			col="coral1",
+			cex=1.2)
         
-        legend('topright', legend = c('Observed','Simulated'),
-            fill = c('aquamarine', 'coral1'))
+        legend('topright',
+			legend=c('Observed','Simulated'),
+			lty=c('solid', ltyp),
+			pch=c(20,pchar),
+			col=c('aquamarine', 'coral1'),
+			bg='white',
+			cex=0.75
+            # fill = c('aquamarine', 'coral1')
+			)
         dev.off()
     }
-    print('Complete.')
+    print("Dunzo.")
     
 }
 
 
-# yldCalib('corn_grain', basinWide = T)
-# yldCalib('haylage', basinWide = T)
-# yldCalib('corn_silage', basinWide = T)
-# yldCalib('soybeans', basinWide = T)
+yldCalib('corn_grain')
+yldCalib('haylage')
+yldCalib('corn_silage')
+yldCalib('soybeans')
