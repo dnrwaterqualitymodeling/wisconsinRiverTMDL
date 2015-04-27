@@ -1,8 +1,8 @@
 setInternet2(TRUE)
 options(stringsAsFactors=F)
 # Read parameter table with parameter name, file extension, min, max, method
-# par_inf_tbl = read.csv("https://raw.githubusercontent.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/master/calibration/sensitivity_analysis/basin_sensitivity_parameters.csv")
-par_inf_tbl = read.csv("~/Code/calibration/sensitivity_analysis/basin_sensitivity_parameters.csv")
+par_inf_tbl = read.csv("https://raw.githubusercontent.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/master/calibration/sensitivity_analysis/basin_sensitivity_parameters.csv")
+# par_inf_tbl = read.csv("~/Code/calibration/sensitivity_analysis/basin_sensitivity_parameters.csv")
 par_inf_tbl = subset(par_inf_tbl, run==1)
 # unchanging parameters
 
