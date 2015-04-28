@@ -36,3 +36,22 @@ query_output.rch = function(x, col_name, widths=rch_widths, col_names=rch_col_na
     print(paste(start, end))
     return(substr(x, start, end))
 }
+
+### for output.wtr
+wtr_col_names=c("LULC","HRU","GIS","SUB","MGT","MON","AREA","PND_PCP","PND_IN","PNDSED_IN",
+	"PND_EVAP","PND_SEEP","PND_OUT","PNDSED_OUT","PND_VOL","PND_ORGN","PND_NO3","PND_ORGP","PND_MINP","PND_CHLA",
+	"PND_SECI","WET_PCP","WET_SEDIN","WET_EVAP","WET_SEEP","SET_OUT","WET_SEDOUT","WET_VOL","WET_ORGN","WET_NO3",
+	"WET_ORGP","WET_MINP","WET_CHLA","WET_SECI","POT_PCP","OSED_I","POTEVP","POTSEP","POT_OUT","OSED_O",
+	"POTVOL","POT_SA","HRU_SURQ","PLANT_ET","SOIL_ET")
+
+wtr_widths = c(4,5,10,5,5,5,rep(10,39))
+
+query_output.wtr = function(x, col_name, widths=wtr_widths, col_names=wtr_col_names) {
+    cum_col = c(0, cumsum(widths))
+    col_index = which(col_names == col_name)
+    start = cum_col[col_index] + 1
+    end = start + widths[col_index] - 1
+	print(col_name)
+    # print(paste(start, end))
+    return(substr(x, start, end))
+}

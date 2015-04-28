@@ -115,7 +115,7 @@ for (fl in files_pnds){
 		pnd_esa =  pond_geometry[indx,"PND_ESA"]
 		pnd_evol =  pond_geometry[indx,"PND_EVOL"]
 	}
-	
+
 	indx = which(wetland_geometry$subbasin == sb)
 	pnd_fr = pnd_fr + wetland_geometry[indx,"WET_FR"]
 	pnd_psa = pnd_psa + wetland_geometry[indx,"WET_NSA"]

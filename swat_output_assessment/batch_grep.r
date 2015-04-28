@@ -5,6 +5,7 @@ extr_subs_fun <- function(
 	dst_folder,
 	hru=T,
 	rch=T,
+	wtr=F,
 	git_bin="C:\\Users\\evansdm\\AppData\\Local\\Programs\\Git\\bin"){
 
 	### Function to extract specific subbassins from output.hru and output.rch
@@ -33,6 +34,11 @@ extr_subs_fun <- function(
 			tmplt[21] = paste("#", tmplt[21])
 			tmplt[22] = paste("#", tmplt[22])
 		}
+		if (!wtr){
+			tmplt[23] = paste("#", tmplt[23])
+			tmplt[24] = paste("#", tmplt[24])
+			tmplt[25] = paste("#", tmplt[25])
+		}
 
 		tmpf = tempfile(fileext=".sh")
 		writeLines(tmplt, tmpf)
@@ -43,7 +49,7 @@ extr_subs_fun <- function(
 	setwd(git_bin)
 	lnes = paste("cd", git_bin) 
 	for (fl in 1:length(tmpfiles)){
-		ln = paste("START", '"',fl,'"', "sh.exe", tmpfiles[fl])
+		ln = paste("START", '"Batch GREP',fl,'"', "sh.exe", tmpfiles[fl])
 		lnes = c(lnes, ln)
 	}
 

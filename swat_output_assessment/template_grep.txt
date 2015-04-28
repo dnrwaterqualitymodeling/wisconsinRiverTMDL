@@ -20,4 +20,7 @@ do
 	echo "	extracting from output.rch"
 	mkdir $SCEN/output_rch
 	egrep REACH[[:space:]]{$SPCNUM}$SB H:/WRB/Scenarios/Default/TxtInOut/output.rch > $SCEN/output_rch/$SB.txt
+	echo "	extracting from output.wtr"
+	mkdir $SCEN/output_wtr
+	egrep $ZROES$SB[0-9]{4} H:/WRB/Scenarios/Default/TxtInOut/output.wtr > $SCEN/output_wtr/$SB.txt
 done
