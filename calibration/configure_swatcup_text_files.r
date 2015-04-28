@@ -2,7 +2,7 @@
 # SWAT project
 
 projectDir = "D:/WRB1.Sufi2.SwatCup"
-simCount = 64
+simCount = 128
 subbasinCount = 337
 startYr = 2002
 endYr = 2013
@@ -11,7 +11,7 @@ monthly = F
 
 # Observations -- 
 #	variable name, column index in output.rch, subbasin ID, observed data
-obsDir = "D:/usgs_raw/calibration/JAJS_25_pct_exc"
+obsDir = "D:/usgs_raw/calibration"
 #obsDir =
 #	"D:/usgs_raw/calibration/spring_10_pct_exc"
 #gage_subbasin_lu =
@@ -87,9 +87,18 @@ setInternet2(TRUE)
 #	c("v__REVAPMN.gw",0,500)
 #)
 
+#parameterization = rbind(
+#	c("r__CN2.mgt",-0.05,0.05)
+#)
+
 parameterization = rbind(
-	c("r__CN2.mgt",-0.05,-0.05)
+	c("v__ESCO.hru",0.01,1),
+	c("r__SOL_AWC().sol",-0.1,0.1),
+	c("r__SOL_BD().sol",-0.1,0.1),
+	c("r__SOL_K().sol",-0.1,0.1)
 )
+
+
 
 # Don't change these
 source("https://raw.githubusercontent.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/master/calibration/functions_query_output.r")
