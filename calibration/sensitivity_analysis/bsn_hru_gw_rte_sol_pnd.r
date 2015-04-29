@@ -14,24 +14,24 @@ iter = as.integer(arguments[9])
 # run = as.integer(arguments[9])
 ##
 #
-# txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
-# dir_out = "H:/wrb_calibration_7iters"
-# temp_dir = "H:/temp_directory"
+txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
+dir_out = "H:/wrb_sensitivity_test"
+temp_dir = "H:/temp_directory"
 # txtinout = "C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut"
 # dir_out = "C:/Users/ruesca/Desktop/WRB_sensitivity"
 # temp_dir = "C:/Users/ruesca/Desktop/temp_directory"
-# p = "CNOP_tillage"
-# ext = "mgt"
-# mn = -0.05
-# mx = 0.05
-# method = "r"
-# iter = 7
+p = "EPCO"
+ext = "hru"
+mn = -0.01
+mx = 1
+method = "a"
+iter = 3
 
 # operation = "planting"#"tillage"#
 if (ext == "rte"){
 	collect_reach_data = TRUE
 } else {
-	collect_reach_data = TRUE
+	collect_reach_data = FALSE
 }
 # if (p == "CNOP"){p = paste(p, operation, sep="_")}
 # Potential argument, hard code for now
@@ -399,7 +399,7 @@ for (i in 1:iter){
 			dat[,6], 
 			nrow=4383, 
 			ncol=337)
-	
+
 		dim(q) = c(4383, 337, 1)
 		dim(sed) = c(4383, 337, 1)
 		dim(org.pho) = c(4383, 337, 1)

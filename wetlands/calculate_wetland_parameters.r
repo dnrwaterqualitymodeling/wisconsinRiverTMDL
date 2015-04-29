@@ -72,7 +72,7 @@ lc_lm <- raster(paste(wd, "wetland_landcover.tif",sep='/'))
     # 8 is herbaceous wetlands
     # 9 is cranberries
 subbasins = readOGR("T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro",
-                    "subbasins_minus_urban_boundaries")
+                    "subbasins")
 
 geometry_table = data.frame()
 # failed after 148 subbasins, due to lack of memory, 

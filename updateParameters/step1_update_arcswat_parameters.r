@@ -1,16 +1,17 @@
-# Before running this script ensure that:
-#	Reservoirs are added and associated with a daily time series
-#	Point sources are added and associated with a daily time series
-#	Wetlands and ponds are summarized by the correct subbasin boundaries
-#	Mean slope per LULC/subbasin are summarized by the correct subbasin boundaries.
-
+### Before running this script ensure that:
+###	Reservoirs are added and associated with a daily time series
+###	Point sources are added and associated with a daily time series
+###	Wetlands and ponds are summarized by the correct subbasin boundaries
+###	Mean slope per LULC/subbasin are summarized by the correct subbasin boundaries.
+###
+### NOTE: this script is meant to be run BEFORE re-write swat input files
 library(RODBC)
 library(stringr)
 library(foreign)
 options(stringsAsFactors=F)
 options(warn=1)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
-  projectDir = "C:/Users/ruesca/Desktop/WRB"
+projectDir = "C:/Users/ruesca/Desktop/WRB"
 #projectDir = "H:/WRB"
 mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
 
@@ -137,7 +138,7 @@ for (rw in background_p$ID){
 close(con)
 
 #UPDATE SWAT POND PARAMETERS
-#
+# moved to step 2 because ArcSWAT was truncating values
 #pond_geometry = read.csv(pond_geometry_file)
 #
 #inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
@@ -177,6 +178,7 @@ close(con)
 #close(con)
 
 #UPDATE SWAT WETLAND PARAMETERS
+# moved to step 2 because ArcSWAT was truncating values
 ### This is now being run in Step 2
 # wetland_geometry = read.csv(wetland_geometry_file)
 
@@ -333,7 +335,7 @@ for (row in 1:nrow(mgt1)) {
 		)
 		sqlQuery(con_mgt2, insertQuery)
 	}
-	if (!(opCode %in% c('BARR','FRSD', 'WATR', 'URML', 'RNGB','RNGE','WETF', 'WETN','HAY'))){ 
+	if (!(opCode %in% c('BARR','FRSD', 'WATR', 'URML', 'RNGB','RNGE','PAST','WETF', 'WETN','HAY'))){ 
 		husc_query = paste("UPDATE mgt1 SET HUSC = 1, NROT = 6, ISCROP = 1 WHERE SUBBASIN = ",
 			as.character(row_data$SUBBASIN),
 			" AND HRU = ",
@@ -506,6 +508,31 @@ for (crop in c("CORN", "CSIL", "SOYB", "ALFA")) {
 # fixing forest ALAI_MIN parameter PB's suggestion
 
 # stdout = sqlQuery(con_swat2012, "UPDATE crop SET ALAI_MIN = 0 WHERE CPNM = 'FRST';")
+
+# Set RNGE values to TIMO values *not used in favor of PAST (bermudagrass, set elsewhere in script)
+
+# del_query = "DELETE FROM crop WHERE CPNM='RNGE'"
+# sqlQuery(con_swat2012, del_query)
+
+# cpy_query = "SELECT * FROM crop WHERE CPNM='PAST'"
+# timo_dat = sqlQuery(con_swat2012, cpy_query)
+
+# timo_dat$ICNUM = 15
+# timo_dat$CROPNAME = "'Range-Grasses'"
+# timo_dat$CPNM = "'RNGE'"
+# timo_dat$OpSchedule = "'PAST'"
+
+# colNames = paste(names(timo_dat[2:length(timo_dat)]), collapse=",")
+# vals = paste(timo_dat[,2:length(timo_dat)], collapse=",")
+# pst_query = paste(
+			# "INSERT INTO crop (",
+			# colNames,
+			# ") VALUES (",
+			# vals,
+			# ");",
+			# sep=""
+		# )
+# sqlQuery(con_swat2012, pst_query)
 
 odbcCloseAll()
 

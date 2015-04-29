@@ -1,14 +1,27 @@
 library(stringr)
-options(stringsAsFactors=T)
+options(stringsAsFactors=F)
 
-dir_exc = "entire_90_pct_exc"
+dir_exc = "JAJS_25_pct_exc"
+exc_val = 0.1
+mos = 6:9
 annual_basis = TRUE
-exc_val = 0.10
-
 cal_dir = 
 	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration"
+# This function needs to be edited
+# depending on how the flow data should be sliced 
+subset_cal_data = function(data_raw, mos, exc_val) {
+	pct_exc = quantile(data_raw[,4], 1 - exc_val)
+	mo_bool = as.integer(format(data_raw[,3], "%m")) %in% mos
+	exc_bool = data_raw[,4] >= pct_exc
+	bool = mo_bool & exc_bool
+	return(bool)
+}
+
 out_dir = paste(cal_dir, dir_exc, sep="/")
-pdf(paste(out_dir, "/",dir_exc,".pdf",sep=''), width=11, height=8)
+if (!file.exists(out_dir)) {
+	dir.create(out_dir)
+}
+pdf(paste(out_dir, "/", dir_exc, ".pdf",sep=''), width=11, height=8)
 # subset_dir = paste(cal_dir, "/10_pct_exceedance_mam", sep="")
 gauge_basin_lu_file =
 	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv"
@@ -24,34 +37,35 @@ obs_files = obs_files[gauge_ids %in% gauge_basin_lu$USGS_ID]
 model_period = seq(as.Date("2002-01-01"), as.Date("2013-12-31"), "1 day")
 
 for (obs_file in obs_files) {
-	obsData_raw = read.table(obs_file, skip=2, sep="\t", header=T)
+	obsData_raw = read.table(
+		obs_file,
+		skip=2,
+		sep="\t",
+		header=T
+	)
 	obsData_raw = obsData_raw[-1,]
-	obsData_raw[obsData_raw[,4] == "Ice", 4] = NA
-    obsData = obsData_raw[obsData_raw[,5] == "A",]
-    obsData = data.frame(DATE = as.Date(as.character(obsData[,3])),
-        FLOW=as.numeric(as.character(obsData[,4])))
-	# construct boolean for subsetting
-	mam_days = model_period[
-			as.integer(format(model_period, "%m")) %in% 1:12 #currently for june, july, aug, or 3:5 for mar, april, may
-	]
-	pct_exc = quantile(obsData$FLOW, exc_val)
+	obsData_raw[,3] = as.Date(obsData_raw[,3])
+	obsData_raw = obsData_raw[obsData_raw[,4] != "Ice",]
+	obsData_raw[,4] = as.numeric(obsData_raw[,4])
+    obsData_raw = obsData_raw[obsData_raw[,5] == "A",]
+
 	if (annual_basis){
 		sub_data = data.frame()
-		model_years = unique(format(model_period, "%Y"))
-		for (yr in model_years){
-			bool = format(as.Date(obsData_raw$datetime),"%Y") == yr 
-			annual_sub_data = subset(obsData_raw, bool)
-			annual_pct_exc = quantile(obsData[which(format(obsData$DATE, "%Y") == yr),"FLOW"], exc_val)
-			exc_bool = as.numeric(as.character(annual_sub_data[,4])) <= annual_pct_exc
-			annual_sub_data = subset(annual_sub_data, exc_bool)
+		obs_years = unique(format(obsData_raw[,3], "%Y"))
+		for (yr in obs_years){
+			yr_bool = format(obsData_raw[,3], "%Y") == yr 
+			annual_sub_data = subset(obsData_raw, yr_bool)
+			annual_sub_data = subset(
+				annual_sub_data,
+				subset_cal_data(annual_sub_data, mos, exc_val)
+			)
 			sub_data = rbind(sub_data, annual_sub_data)
 		}
 	} else {
-		bool = as.Date(obsData_raw$datetime) %in% mam_days &
-			as.numeric(as.character(obsData_raw[,4])) >= pct_exc
-		sub_data = subset(obsData_raw, bool)
+		sub_data = subset(
+			obsData_raw,
+			subset_cal_data(obsData_raw, mos, exc_val))
 	}
-	
 	out_file = paste(out_dir, basename(obs_file), sep="/")
 	raw_txt = readLines(obs_file)
 	header_lines = grep("#", raw_txt)
@@ -65,24 +79,19 @@ for (obs_file in obs_files) {
 		row.names=F,
 		col.names=F,
 		quote=F)
+#	# Below used for plotting only
 	gage =  gsub(".txt", "", basename(obs_file))
-	
-	obsData_raw[,4] = as.numeric(as.character(obsData_raw[,4]))
-	obsData_raw["datetime"] = as.Date(obsData_raw[,"datetime"])
-	sub_data[,4] = as.numeric(as.character(sub_data[,4]))
-	sub_data["datetime"] = as.Date(sub_data[,"datetime"])
 	total_data = nrow(sub_data)
 	obsData_raw = merge(obsData_raw, 
 		data.frame(datetime=seq(
-			as.Date(obsData_raw[1,3]), as.Date(obsData_raw[nrow(obsData_raw),3]),by='1 day')),
-		all.x=T, all.y=T
-	)
+			obsData_raw[1,3], obsData_raw[nrow(obsData_raw),3], by='1 day')),
+		all.x=T, all.y=T)
 	sub_data = merge(sub_data, 
 		data.frame(datetime=seq(
-			as.Date(sub_data$datetime[1]), as.Date(sub_data$datetime[nrow(sub_data)]),by='1 day')),
-		all.x=T, all.y=T
-	)
-	plot(y=obsData_raw[,4], x=obsData_raw$datetime,type='l', main=paste("Gauge:",gage))
+			sub_data$datetime[1], sub_data$datetime[nrow(sub_data)], by='1 day')),
+		all.x=T, all.y=T)
+	
+	plot(y=obsData_raw[,4], x=obsData_raw$datetime,type='l', main=paste("Gage:",gage))
 	lines(y=sub_data[,4], x=sub_data$datetime, col="#FF0000",lty=1,lwd=2)
 	legend(
 		"topright",
@@ -90,9 +99,8 @@ for (obs_file in obs_files) {
 		lty=c(1,1),
 		lwd=c(1,2),
 		col=c("black",'red'))
-	text(x=
-		as.Date(format(as.Date(sub_data$datetime[1]),"%Y"),"%Y"), y=min(obsData_raw[,4]), paste("Subset size:",total_data))
-	
+	text(x=as.Date(format(as.Date(sub_data$datetime[1]),"%Y"),"%Y"),
+		y=max(obsData_raw[,4],na.rm=T), paste("Subset size:",total_data))
 }
 dev.off()
 

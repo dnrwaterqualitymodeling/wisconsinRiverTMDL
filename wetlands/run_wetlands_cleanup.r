@@ -28,7 +28,7 @@ write.csv(
 # Creating layers of max and normal surface area
 if (file.exists(gdal_path)){
 	gdalbuildvrt = "gdalbuildvrt"
-
+	print("Creating layers of max and normal surface area")
 	for (lvl in c("Max", "Normal")){
 		file_list = list.files(
 			paste(wd, "/", dir_out_files, sep=''),

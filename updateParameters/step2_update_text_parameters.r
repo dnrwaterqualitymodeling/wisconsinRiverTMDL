@@ -1,15 +1,16 @@
-library(stringr)
-
-options(stringsAsFactors=F)
-
- projectDir = "C:/Users/ruesca/Desktop/WRB"
-#projectDir = "H:/WRB"
-txtinout = paste(projectDir, "Scenarios", "Default", "TxtInOut", sep="/")
 ###########################################
 # NOTE: This script should be run AFTER   #
 # re-write SWAT Input Files, which is run #
 # in ArcSWAT or SWATEditor                #
 ###########################################
+library(stringr)
+
+options(stringsAsFactors=F)
+
+# projectDir = "C:/Users/ruesca/Desktop/WRB"
+projectDir = "H:/WRB"
+txtinout = paste(projectDir, "Scenarios", "Default", "TxtInOut", sep="/")
+
 file_wetland_geometry = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/wetlands/wetland_parameters.csv"
 file_pond_geometry = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
 ## UPDATE POINT SOURCE TEXT FILES AND FIG.FIG
@@ -33,9 +34,10 @@ for (ps_file in ps_files) {
 		lne)
 	fig.fig[indx] = lne
 }
-
-file.copy(paste(txtinout, "fig.fig", sep="/"),
-	paste(txtinout, "fig.fig_bkp", sep="/"))
+if (!file.exists(paste(txtinout, "fig.fig_bkp", sep="/"))){
+	file.copy(paste(txtinout, "fig.fig", sep="/"),
+		paste(txtinout, "fig.fig_bkp", sep="/"))
+}
 writeLines(fig.fig, paste(txtinout, "fig.fig", sep="/"))
 
 dates = seq(
@@ -87,7 +89,7 @@ for (ps_file in ps_files) {
 	writeLines(ps_data_str, out_file)
 }
 
-## UPDATE WETLAND PARAMETERS
+## UPDATE POND AND WETLAND PARAMETERS
 
 wetland_geometry = read.csv(file_wetland_geometry)
 pond_geometry = read.csv(file_pond_geometry)
@@ -96,25 +98,36 @@ files_pnds = list.files(txtinout, "*.pnd")
 for (fl in files_pnds){
 	lnes = readLines(paste(txtinout, fl, sep="/"))
 	sb = as.numeric(substr(fl, 1, 5))
-	
+
+	pnd_fr = 0
+	pnd_psa = 0
+	pnd_pvol = 0
+	pnd_esa = 0
+	pnd_evol = 0
 	
 	print(paste("Working on Subbasin", sb))
 	
 	if (sb %in% pond_geometry$subbasin){
 		indx = which(pond_geometry$subbasin == sb)
-		substr(lnes[3], 9, 16) = sprintf("%8.3f", pond_geometry[indx,"PND_FR"])
-		substr(lnes[4], 9, 16) = sprintf("%8.3f", pond_geometry[indx,"PND_PSA"])
-		substr(lnes[5], 9, 16) = sprintf("%8.3f", pond_geometry[indx,"PND_PVOL"])
-		substr(lnes[6], 9, 16) = sprintf("%8.3f", pond_geometry[indx,"PND_ESA"])
-		substr(lnes[7], 9, 16) = sprintf("%8.3f", pond_geometry[indx,"PND_EVOL"])
-		# substr(lnes[34], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"PND_VOL"])
+		pnd_fr =  pond_geometry[indx,"PND_FR"]
+		pnd_psa =  pond_geometry[indx,"PND_PSA"]
+		pnd_pvol = pond_geometry[indx,"PND_PVOL"]
+		pnd_esa =  pond_geometry[indx,"PND_ESA"]
+		pnd_evol =  pond_geometry[indx,"PND_EVOL"]
 	}
+
 	indx = which(wetland_geometry$subbasin == sb)
-	substr(lnes[29], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"WET_FR"])
-	substr(lnes[30], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"WET_NSA"])
-	substr(lnes[31], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"WET_NVOL"])
-	substr(lnes[32], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"WET_MXSA"])
-	substr(lnes[33], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"WET_MXVOL"])
-	substr(lnes[34], 9, 16) = sprintf("%8.3f", wetland_geometry[indx,"WET_VOL"])
+	pnd_fr = pnd_fr + wetland_geometry[indx,"WET_FR"]
+	pnd_psa = pnd_psa + wetland_geometry[indx,"WET_NSA"]
+	pnd_pvol = pnd_pvol + wetland_geometry[indx,"WET_NVOL"]
+	pnd_esa = pnd_esa + wetland_geometry[indx,"WET_MXSA"]
+	pnd_evol = pnd_evol + wetland_geometry[indx,"WET_MXVOL"]
+	
+	substr(lnes[3], 9, 16) = sprintf("%8.3f", pnd_fr)
+	substr(lnes[4], 9, 16) = sprintf("%8.3f", pnd_psa)
+	substr(lnes[5], 9, 16) = sprintf("%8.3f", pnd_pvol)
+	substr(lnes[6], 9, 16) = sprintf("%8.3f", pnd_esa)
+	substr(lnes[7], 9, 16) = sprintf("%8.3f", pnd_evol)
+	
 	writeLines(lnes, paste(txtinout, fl, sep="/"))
 }
