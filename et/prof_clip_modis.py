@@ -27,6 +27,7 @@ tifs = os.listdir(inDir)
 for tif in tifs:
 	if not ".tif" == tif[-4:]:
 		continue
+
 	print "Beginning", tif
 	srcFile = inDir + tif
 	dstFile = tmpDir + "wtm_" + tif
@@ -41,7 +42,7 @@ for tif in tifs:
 	print "Old dst file:", dstFile
 	srcFile = dstFile
 	del dstFile
-	
+
 	dstFile = outDir + "wrb_" + tif
 	dstFile = dstFile.replace("/", "\\")
 	print "New dst file:", dstFile
