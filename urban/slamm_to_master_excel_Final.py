@@ -19,7 +19,7 @@ pcpLookup = "T:/Projects/Wisconsin_River/GIS_Datasets/Urban/SLAMM Model Area/MS4
 out_master_table = "T:/Projects/Wisconsin_River/Model_Inputs/WinSLAMM_Inputs/subbasin_muni_loads.txt"
 
 #temporary local workspace
-TempGDB = "C:/Users/hydrig/Documents/Projects/Wisconsin TMDL Local Files/Try4.gdb"
+TempGDB = "C:/Users/hydrig/Documents/Projects/Wisconsin_TMDL_Local_Files/Try6.gdb"
 arcpy.env.workspace = TempGDB
 
 #the folder which all SLAMM output .csv files should be in
@@ -85,25 +85,24 @@ def createReachsheds():
 	arcpy.env.workspace = PerMS4_folder
 	arcpy.Merge_management(PerMS4s, TempGDB + '\Permitted_reachsheds')
 	
+	#reset workspace
+	arcpy.env.workspace = TempGDB
+
 	#update subbasins with permitted sewershed changes
 	arcpy.Update_analysis(subbasins,"Permitted_reachsheds","test2")
 	arcpy.Dissolve_management("test2","test2_diss","Subbasin")
-	
-	#reset workspace
-	arcpy.env.workspace = TempGDB
-	
+		
 	#overlay Urban Area Boundaries with soils data
-	arcpy.FeatureClassToFeatureClass_conversion(soils, TempGDB, "Soils")
-	arcpy.FeatureClassToFeatureClass_conversion(UABs, TempGDB, "UABs")
-	arcpy.Union_analysis([UABs, soils], "soil_UABs_union")
+	arcpy.Intersect_analysis([UABs, soils], "soil_UABs_isect")
 	
-	#overlay with municipalities and finalize
-	arcpy.SpatialJoin_analysis("ST_UAB_DA_Union","FinalMunis","C:/Users/hydrig/Documents/Projects/Wisconsin TMDL Local Files/TimeSeriesScratch.gdb/ST_UAB_DA_Union_Muni2","JOIN_ONE_TO_ONE","KEEP_ALL","""LAST_SLA_2 "LAST_SLA_2" true true false 6 Text 0 0 ,First,#,C:/Users/hydrig/Documents/Projects/Wisconsin TMDL Local Files/TimeSeriesScratch.gdb/ST_UAB_DA_Union,LAST_SLA_2,-1,-1;Subbasin "Subbasin" true true false 4 Long 0 0 ,First,#,C:/Users/hydrig/Documents/Projects/Wisconsin TMDL Local Files/TimeSeriesScratch.gdb/ST_UAB_DA_Union,Subbasin,-1,-1;MCD_NAME "MCD_NAME" true true false 100 Text 0 0 ,First,#,T:/Projects/Wisconsin_River/GIS_Datasets/Urban/Urban Area Boundaries/SWAT_Urban_Areas.gdb/FinalMunis,MCD_NAME,-1,-1""","INTERSECT","#","#")
-	arcpy.Clip_analysis("ST_UAB_DA_Union_Muni2","SWAT_Urban_Areas6","FinalOverlay")
-	arcpy.Dissolve_management("FinalOverlay", "FinalOverlayForReal", ["Subbasin","MCD_NAME","LAST_SLA_2"])
+	#overlay that with subbasins
+	arcpy.Intersect_analysis(["soil_UABs_isect",'test2_diss'],"Soil_UAB_DA_Isect")
 	
-	#'join' precip file information by muni from pcpLookup
-	arcpy.AddField_management("FinalOverlayForReal", "BEST_PCP2", "TEXT")
+	#overlay that with municipalities and finalize
+	arcpy.Intersect_analysis([FinalMunis, 'Soil_UAB_DA_Isect'], "AlmostFinalOverlay")
+	arcpy.Dissolve_management("AlmostFinalOverlay", "FinalOverlayForReal", ["Subbasin","MCD_NAME","LAST_SLA_2"])
+	
+	#join precip file information by muni from pcpLookup
 	arcpy.TableToTable_conversion(pcpLookup, TempGDB, "pcpLookup")
 	arcpy.CalculateField_management("pcpLookup","NAMELSAD10", "!NAMELSAD10!.rpartition(' ')[0]", "PYTHON")
 	arcpy.JoinField_management("FinalOverlayForReal", "MCD_NAME", "pcpLookup", "NAMELSAD10", ["Best_PCP2"])
@@ -121,19 +120,21 @@ def noNull(inVal):
 def calcDailyReachLoads():
 	#get muni, subbasin, and area from each reachshed polygon
 	f = open(out_master_table, "w")
-	i = 0
+	headers = ["date", "subbasin", "flow_m3", "TSS_tons", "P_filt_kg", "P_part_kg", "muni"]
+	f.write("\t".join(headers) + "\n")
+	
 	with arcpy.da.SearchCursor('FinalOverlayForReal', overlayFOIs) as cursor:
 		for row in cursor:
-			i += 1
 			if row[1] in soil_key:
 				pre_file = row[2] + '_' + soil_key[row[1]]
 				print pre_file
-				acreage = row[0] * 0.0247105381 	#area in sqm converted to 100 acres
+				#acreage = row[0] * 0.0247105381 	#area in sqm converted to 100 acres
+				acreage = row[0] / 404686 	#area in sqm converted to 100 acres
 				subbasin = row[3]
 				muni = row[4]
 				all_loads = []
 				
-				#grab and calc precip events from precip file
+				#grab precip events from precip file and calc loads
 				csv_clean = SLAMM_folder + "/cleanedCsvs/" + pre_file + ".csv"
 				with arcpy.da.SearchCursor(csv_clean, precipFOIs_clean) as cursor2:
 					for row2 in cursor2:
@@ -150,10 +151,7 @@ def calcDailyReachLoads():
 
 				del cursor2
 
-				#write headers and output to tab delimited txt file
-				headers = ["date", "subbasin", "flow_m3", "TSS_tons", "P_filt_kg", "P_part_kg", "muni"]
-				if i == 1:
-					f.write("\t".join(headers) + "\n")
+				#write output to tab delimited txt file
 				for row3 in range(0, len(all_loads)):
 					out_row = list(all_loads[row3])
 					out_row[0] = out_row[0].strftime("%Y-%m-%d")
