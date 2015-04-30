@@ -1,117 +1,163 @@
 \subsection{Soil Data Aggregation}\label{sec:soils}
 
-Soils are a critical part of the SWAT modeling framework; properties such as texture, hydraulic conductivity, and
-available water capacity play a critical role in determining system hydrology
-. We used the county-scale Soil Survey Geographical
-Database (SSURGO) \citepalias{staff_gridded_2014}. For more information about SSURGO
-data see the SSURGO metadata\footnote{\url{http://www.nrcs.usda.gov/wps/portal/nrcs/detail/soils/survey}}.
+Soils are a critical part of the SWAT modeling framework; properties such as
+texture, hydraulic conductivity, and available water capacity play a critical
+role in determining system hydrology . We used the county-scale Soil Survey
+Geographical Database (SSURGO) \citepalias{staff_gridded_2014}. For more
+information about SSURGO data see the SSURGO
+metadata\footnote{\url{http://www.nrcs.usda.gov/wps/portal/nrcs/detail/soils/survey}}.
 The SSURGO database is structured in three levels of information: map units,
-components, and horizons (Figure \ref{fig:ssurgo_schematic}). Horizons are the fundamental unit of soil in SSURGO, and are therefore where the majority of soil information is stored in the database.
+components, and horizons (Figure \ref{fig:ssurgo_schematic}). Horizons are the
+fundamental unit of soil in SSURGO, and are therefore where the majority of soil
+information is stored in the database.
 Components are aggregations of horizons that represent a full soil profile,
-typically conforming to the Official Series Description (OSD). Map units
-are discrete polygons drawn on a map (originally mapped at scales from 1:12,000
-to 1:63,360) that contain one or more components that are stored non-spatially
-in the database---that is, only a list of components and their percent
-composition of the map unit is given. 
+typically conforming to the Official Series Description (OSD). Map units are
+discrete polygons drawn on a map (originally mapped at scales from 1:12,000 to
+1:63,360) that contain one or more components that are stored non-spatially in
+the database---that is, only a list of components and their percent composition
+of the map unit is given.
 
-We chose to use the gSSURGO distribution of SSURGO. gSSURGO is a form of the SSURGO database that is packaged in a more convenient form for coarse scale projects such as the WRB TMDL. The tabular data representing the components and
+We chose to use the gSSURGO distribution of SSURGO. gSSURGO is a form of the
+SSURGO database that is packaged in a more convenient form for coarse scale
+projects such as the WRB TMDL. The tabular data representing the components and
 horizons were joined together so that each component had the data required for
-the SWAT model (Table \ref{table:soil_attr_in_swat}). For all these properties, the representative value given by
-SSURGO was used.
+the SWAT model (Table \ref{table:soil_attr_in_swat}). For all these properties,
+the representative value given by SSURGO was used.
 
 HRU definition in a SWAT model is a balance of incorporating the most important
 pieces of information without overloading it with redundant or insignificant
 information---a modeler should represent every process that controls the system,
 however an overloaded model requires more computational resources, which may not
-be feasible to acquire. To reduce the number of HRUs in the model and generally create a 
-simpler and more efficient model, we aggregated
-soils together based on similarity of several key properties that impact the
-hydrologic cycle. This was a two step process: first, components within map
-units were aggregated
-together,\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/blob/model_setup_public/soils/step1_aggregate_gSSURGO.R} } 
-and second, map units were aggregated together based on
-similarity\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/blob/model_setup_public/soils/step2_aggregate_gSSURGO.R}} (Figure \ref{fig:agg_flow_diagram}).
+be feasible to acquire. To reduce the number of HRUs in the model and generally
+create a simpler and more efficient model, we aggregated soils together based on
+similarity of several key properties that impact the hydrologic cycle. This was
+a two step process: first, components within map units were aggregated
+together,\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/blob/model_setup_public/soils/step1_aggregate_gSSURGO.R}
+} and second, map units were aggregated together based on
+similarity\footnote{\url{https://github.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/blob/model_setup_public/soils/step2_aggregate_gSSURGO.R}}
+(Figure \ref{fig:agg_flow_diagram}).
 
 Several changes were made to the dataset before aggregation, in order to
 facilitate processing. Soil organic carbon content is required by SWAT, but is
-given by SSURGO as soil organic matter. The percent organic matter value given in SSURGO
-was converted to percent organic carbon by multiplying by 50\% which is the generally accepted average carbon content of soil organic matter \citep{brady_elements_2004}. 
-The HSG is denoted as a letter in SSURGO, either A through D, or if the soil has different characteristics when drained,
-as two letters, A/D, B/D or C/D, the former is if the soil is drained (i.e. through tiling or ditching), 
-while the latter is the drainage class of soil in its natural state.
-In order to average the different components it was necessary to convert these letters
-into numbers; groups A through D were converted to 1 through 4 to correspond
-with increasingly wetter drainage conditions. Once a number was obtained for the
-HSG, it was treated as any other soil property in the aggregation process,
-then rounded to the nearest integer, and converted in the same manner to a letter
-once the aggregation was finished. For those components with dual HSGs, we
-assumed that if half of the area in the map unit was agriculture it was drained
-and the first HSG taken. Conversely, if the land use was not majority agriculture
-then it was assumed to not be drained and the ``D'' designation was chosen. There is no evidence to suggest that this assumption accurately represents the properties of these soils in reality---rather, the 50\% threshold was chosen simply to give favor to the dominant condition. A more informed approach may be used in future developments of the model.
+given by SSURGO as soil organic matter. The percent organic matter value given
+in SSURGO was converted to percent organic carbon by multiplying by 50\% which
+is the generally accepted average carbon content of soil organic matter
+\citep{brady_elements_2004}.
+The HSG is denoted as a letter in SSURGO, either A through D, or if the soil has
+different characteristics when drained, as two letters, A/D, B/D or C/D, the
+former is if the soil is drained (i.e. through tiling or ditching), while the
+latter is the drainage class of soil in its natural state.
+In order to average the different components it was necessary to convert these
+letters into numbers; groups A through D were converted to 1 through 4 to
+correspond with increasingly wetter drainage conditions. Once a number was
+obtained for the HSG, it was treated as any other soil property in the
+aggregation process, then rounded to the nearest integer, and converted in the
+same manner to a letter once the aggregation was finished.
+
+For those components with dual HSGs, we assumed that if greater than 10\% of the
+area in the map unit was agriculture, the SSURGO map unit would be split into
+two seperature polygons, one where land was assumed to be drained and the other
+not drained. Conversely, if the land use was not majority agriculture then it
+was assumed to not be drained and the ``D'' designation was chosen. Where map
+unit polygons were greater than 10\% agriculture, raster pixels from the land
+cover dataset (Section \ref{sec:land_cover}) that represent agricultural land
+cover types were used to define the boundaries of drained land. For these map
+units, the agricultural portion of the polygon was assigned the first letter of
+the dual hydrologic soil group (e.g., ``A'' for ``A/D''), and the
+non-agricultural portion was assigned a ``D'' soil type.
 
 The first aggregation step was to aggregate components by map unit to conform to
 the SWAT soils data structure. The data structure for soils in SWAT does not
-directly conform to SSURGO data structure, mainly that there is no analogue to the
-SSURGO \textit{component} level in SWAT---in other words, soils in SWAT cannot
-be subdivided (Figure \ref{fig:component_schematic}). 
-Similar to \citet{gatzke_aggregation_2011}, who aggregated SSURGO data for a SWAT model, 
-we aggregated components by computing
-component-weighted averages of each soil property for any given depth of soil from the soil surface to the average depth.
-These averages were computed using the \texttt{slab} function in the \texttt{aqp} package in R \citep{beaudette_algorithms_2013}. We
-used this algorithm to apply a depth weighted average to each horizon, while
-also weighting the percent composition of each component. The depth and number of horizons of
-the aggregated soil profile produced by this algorithm must be specified before
-processing. The depth was calculated as a weighted mean of the full depths of
-soil profile in each of the components, with the weights equal to the percent composition of each
-component. As the number of horizons was assumed not to matter as much as the
-maximum depth, an arbitrary number of five horizons was chosen for the
-aggregation algorithm.
+directly conform to SSURGO data structure, mainly that there is no analogue to
+the SSURGO \textit{component} level in SWAT---in other words, soils in SWAT
+cannot be subdivided (Figure \ref{fig:component_schematic}).
+Similar to \citet{gatzke_aggregation_2011}, who aggregated SSURGO data for a
+SWAT model, we aggregated components by computing component-weighted averages of
+each soil property for any given depth of soil from the soil surface to the
+average depth. These averages were computed using the \texttt{slab} function in
+the \texttt{aqp} package in R \citep{beaudette_algorithms_2013}. We used this
+algorithm to apply a depth weighted average to each horizon, while also
+weighting the percent composition of each component. The depth and number of
+horizons of the aggregated soil profile produced by this algorithm must be
+specified before processing. The depth was calculated as a weighted mean of the
+full depths of soil profile in each of the components, with the weights equal to
+the percent composition of each component. As the number of horizons was assumed
+not to matter as much as the maximum depth, an arbitrary number of five horizons
+was chosen for the aggregation algorithm.
 
 Using the above aggregation method 48,585 individual soil components were
-aggregated to 1,603 map units. Because the HRUs used in
-SWAT were derived using unique combinations of land use, slope and soil types,
-this number of soil map units is still too many for efficient computation  and so
-the second step of the soils data configuration was necessary to further reduce
-the number of soil types.
+aggregated to 1,603 map units. Because the HRUs used in SWAT were derived using
+unique combinations of land use, slope and soil types, this number of soil map
+units is still too many for efficient computation  and so the second step of the
+soils data configuration was necessary to further reduce the number of soil
+types.
 
 Other researchers have aggregated soil types by their taxonomic class
-\citep{gatzke_aggregation_2011} but Soil Taxonomy, the soil classification system of the US, primarily classifies based on soil morphology and not
-necessarily on properties relevant to SWAT. We decided that the most relevant soils
-information to SWAT is hydrology data, specifically the HSG, which has a large impact on the soil curve number. With this
-consideration, aggregation was based around (and so preserved) the HSG of the
-map unit. Groups of the same HSG were divided into smaller groups (hereafter
-known as clusters) of homogeneous soil properties. The map units within each of these clusters were then averaged together to create an average profile for that homogeneous set of soils. These averages were then
-used as the soil types for the HRU definitions and the SWAT modeling.
+\citep{gatzke_aggregation_2011} but Soil Taxonomy, the soil classification
+system of the US, primarily classifies based on soil morphology and not
+necessarily on properties relevant to SWAT. We decided that the most relevant
+soils information to SWAT is hydrology data, specifically the HSG, which has a
+large impact on the soil curve number. With this consideration, aggregation was
+based around (and so preserved) the HSG of the map unit. Groups of the same HSG
+were divided into smaller groups (hereafter known as clusters) of homogeneous
+soil properties. The map units within each of these clusters were then averaged
+together to create an average profile for that homogeneous set of soils. These
+averages were then used as the soil types for the HRU definitions and the SWAT
+modeling.
 
-To begin, each map unit (each of which is an aggregation of components, as described above)
- was placed into one of four groups according to its hydrologic soil
-group, A, B, C or D. To subdivide these groups further, a clustering algorithm
-was used to objectively create clusters of map units with
-homogeneous soil properties. For this purpose, we used Gaussian mixture models to
-assign map units to clusters. The mixture model approach we used was implemented within the
-\texttt{Mclust} function in the \texttt{mclust} package in R \citep{fraley_mclust_2012}.
-A mixture model is a probabilistic model for representing the presence of
-subpopulations within an overall population. In our case, the overall population
-would be the group of map units of similar hydrologic soil groups (i.e., all map units
-with an HSG of A), while the (unknown) subpopulations are the clusters of
-map units with similar distributions of soil properties (such as a clusters of
-sandier soils, shallow soils, or slow saturated conductivity). Using the default
-settings of the function, we clustered all of the A HSG map units into
-6 clusters, B HSG map units had 8 clusters, and C and D both had 9 clusters.
+To begin, each map unit (each of which is an aggregation of components, as
+described above) was placed into one of four groups according to its hydrologic
+soil group, A, B, C or D. To subdivide these groups further, a clustering
+algorithm was used to objectively create clusters of map units with homogeneous
+soil properties. For this purpose, we used Gaussian mixture models to assign map
+units to clusters. The mixture model approach we used was implemented within the
+\texttt{Mclust} function in the \texttt{mclust} package in R
+\citep{fraley_mclust_2012}. A mixture model is a probabilistic model for
+representing the presence of subpopulations within an overall population. In our
+case, the overall population would be the group of map units of similar
+hydrologic soil groups (i.e., all map units with an HSG of A), while the
+(unknown) subpopulations are the clusters of map units with similar
+distributions of soil properties (such as a clusters of sandier soils, shallow
+soils, or slow saturated conductivity). We allowed the clustering algorithm to
+choose any number of clusters from 1 to 100 allowing the algorithm to converge
+on an optimal number of clusters. The resulting numbers of clusters within each
+HSG were 41 for A, 41 for B, 66 for C, and 15 for D. We also reserved a seperate
+HSG designation for drained classes that we clustered together regardless of
+their drained HSG type; we assumed that drained soil types are more more similar
+to other drained soils than those without drainage. In the case of drained soil
+clusters, the HSG was estimated by converting the drained HSG designations to
+integers (A--D = 1--4) and computing the average. A total of 11 clusters were
+created for drained HSG map units.
 
-In order to use the clustering function we had to put our data in a format in which it could 
-be used by the \texttt{Mclust} function. We calculated horizon depth-weighted averages of each soil property for each map unit, essentially collapsing the soil profile down to one aggregate horizon with average properties. Profile depth was still
-considered in the clustering algorithm using the total depth of the profile.
+In order to use the clustering function we had to put our data in a format in
+which it could be used by the \texttt{Mclust} function. We calculated horizon
+depth-weighted averages of each soil property for each map unit, essentially
+collapsing the soil profile down to one aggregate horizon with average
+properties. Profile depth was still considered in the clustering algorithm using
+the total depth of the profile.
 
-After each map unit had been assigned to a cluster, the map units within each cluster were
-aggregated together to form a composite or average soil profile. 
+After each map unit had been assigned to a cluster, the map units within each
+cluster were aggregated together to form a composite or average soil profile.
 The same soil profile aggregation algorithm \citep{beaudette_algorithms_2013}
-used to aggregate several components together in the first step was used to combine the soil profiles of a cluster into one
-composite soil profile. In this implementation, each map unit was given equal
-weight in the aggregation algorithm. 
+used to aggregate several components together in the first step was used to
+combine the soil profiles of a cluster into one composite soil profile. In this
+implementation, each map unit was given equal weight in the aggregation
+algorithm.
 
-Not every map unit was included in the clustering procedure. Several of the soil property fields of the SSURGO dataset were not populated or commonly had ``no data'' values, these properties were not used in the
-clustering process so the spurious zeros would not influence the algorithm (Table \ref{table:soil_attr_in_swat}). These properties were coarse fragments, calcium carbonate, and electrical conductivity. Albedo and pH were also excluded from the clustering algorithm. Mapunits that had no HSG designation were not included, nor were map units that did not have information on the soil properties of the horizons. Examining these excluded map units revealed that they were generally disturbed landscapes or those without a significant soil layer such as pits, landfills, urban or made land, rock outcrops, and water. These miscellaneous map units were all grouped together as one cluster with the exception of water. All water map units were collapsed into one using properties described in the default ArcSWAT SSURGO database\footnote{\url{http://swat.tamu.edu/media/63316/SWAT_US_SSURGO_Soils.zip}}. 
+Not every map unit was included in the clustering procedure. Several of the soil
+property fields of the SSURGO dataset were not populated or commonly had ``no
+data'' values, these properties were not used in the clustering process so the
+spurious zeros would not influence the algorithm (Table
+\ref{table:soil_attr_in_swat}). These properties were coarse fragments, calcium
+carbonate, and electrical conductivity. Albedo and pH were also excluded from
+the clustering algorithm. Mapunits that had no HSG designation were not
+included, nor were map units that did not have information on the soil
+properties of the horizons. Examining these excluded map units revealed that
+they were generally disturbed landscapes or those without a significant soil
+layer such as pits, landfills, urban or made land, rock outcrops, and water.
+These miscellaneous map units were all grouped together as one cluster with the
+exception of water. All water map units were collapsed into one using properties
+described in the default ArcSWAT SSURGO
+database\footnote{\url{http://swat.tamu.edu/media/63316/SWAT_US_SSURGO_Soils.zip}}.
 
-A total of 35 soil classes were distilled from this process. An example of the properties of each cluster are shown in Table \ref{table:soil_prop} and the number of map units in each cluster can be found in Table \ref{table:soil_clust}. The hydrologic soil groups and the clusters within these groups are displayed in Figure \ref{fig:soil_boxplots}, which shows the relative variability of soil properties of map units that were aggregated to clusters.
 

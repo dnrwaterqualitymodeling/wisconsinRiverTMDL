@@ -2,7 +2,7 @@
 # SWAT project
 
 projectDir = "D:/WRB1.Sufi2.SwatCup"
-simCount = 128
+simCount = 512
 subbasinCount = 337
 startYr = 2002
 endYr = 2013
@@ -11,7 +11,7 @@ monthly = F
 
 # Observations -- 
 #	variable name, column index in output.rch, subbasin ID, observed data
-obsDir = "D:/usgs_raw/calibration"
+obsDir = "D:/usgs_raw/calibration/spring_10_pct_exc"
 #obsDir =
 #	"D:/usgs_raw/calibration/spring_10_pct_exc"
 #gage_subbasin_lu =
@@ -65,38 +65,45 @@ setInternet2(TRUE)
 #	c("r__PND_EVOL.pnd",0,2)
 #)
 
-#parameterization = rbind(
-#	c("v__SFTMP.bsn",-2,2),
-#	c("v__SMTMP.bsn",-2,2),
-#	c("v__TIMP.bsn",0.01,1),
-#	c("v__SURLAG.hru",1,8),
-#	c("r__PND_EVOL.pnd",0,3),
-#	c("r__WET_MXVOL.pnd",0,3),
-#	c("v__OV_N.hru",0.1,0.3),
-#	c("r__CH_N2.rte",-0.1,0.1)
-#)
+parameterization = rbind(
+	c("r__CN2.mgt",-0.1,0.05),
+	c("v__SFTMP.bsn",0.5,2.5),
+	c("v__SMTMP.bsn",0.5,2.5),
+	c("v__TIMP.bsn",0.3,1),
+	c("v__SURLAG.hru",0.5,8),
+	c("r__PND_EVOL.pnd",0,3),
+#	c("v__NDTARG.pnd",7,30),
+	c("v__PND_K.pnd",0,150),
+	c("v__OV_N.hru",0.1,0.3),
+	c("r__CH_N2.rte",-0.1,0.1)
+)
 
 #parameterization = rbind(
 #	c("r__ALPHA_BF.gw",-0.99,-0.5),
-#	c("v__GW_DELAY.gw",0,200),
-#	c("v__RCHRG_DP.gw",0,1),
-#	c("v__GWQMN.gw",500,3000),
+#	c("v__GW_DELAY.gw",10,330),
+#	c("v__RCHRG_DP.gw",0.0001,0.15),
+#	c("v__GWQMN.gw",0,500),
 #	c("r__PND_EVOL.pnd",0,3),
-#	c("r__WET_MXVOL.pnd",0,3),
-#	c("v__GW_REVAP.gw",0.02,0.2),
-#	c("v__REVAPMN.gw",0,500)
+##	c("v__NDTARG.pnd",7,30),
+#	c("v__PND_K.pnd",0,150),
+#	c("v__GW_REVAP.gw",0.005,0.1),
+#	c("v__REVAPMN.gw",0,500),
+#	c("v__ESCO.hru",0.2,1),
+#	c("r__SOL_AWC().sol",-0.1,0.1),
+#	c("r__SOL_BD().sol",-0.1,0.1),
+#	c("r__SOL_K().sol",-0.1,0.1)
 #)
 
 #parameterization = rbind(
 #	c("r__CN2.mgt",-0.05,0.05)
 #)
 
-parameterization = rbind(
-	c("v__ESCO.hru",0.01,1),
-	c("r__SOL_AWC().sol",-0.1,0.1),
-	c("r__SOL_BD().sol",-0.1,0.1),
-	c("r__SOL_K().sol",-0.1,0.1)
-)
+#parameterization = rbind(
+#	c("v__ESCO.hru",0.01,1),
+#	c("r__SOL_AWC().sol",-0.1,0.1),
+#	c("r__SOL_BD().sol",-0.1,0.1),
+#	c("r__SOL_K().sol",-0.1,0.1)
+#)
 
 
 
