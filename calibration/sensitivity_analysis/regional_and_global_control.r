@@ -1,6 +1,10 @@
 script_sensitivity = "D:/wisconsinRiverTMDL/calibration/sensitivity_analysis/regional_and_global_sensitivity_analysis.r"
-dir_nc = "D:/WRB_sensitivity_sub"
-dir_out = dir_nc
+dir_nc = "D:/WRB_sensitivity_analysis"
+dir_out = paste(dir_nc, "output_data", sep='/')
+
+if (!file.exists(dir_out)){
+	dir.create(paste0(dir_out, "/"))
+}
 
 nc_files = list.files(dir_nc, pattern="\\.nc$", full.names=T)
 
@@ -8,9 +12,9 @@ pat = paste("(", paste(basename(nc_files), collapse="|"), ")", sep="")
 pat = gsub("\\.", "\\\\.", pat)
 
 # loop on parameter name
-processors = 0
+# processors = 0
 for (nc_file in nc_files) {
-	processors = processors + 1
+	# processors = processors + 1
 	# Create an empty temporary batch file for every 32 parameters
 	tmp_bat = tempfile(fileext = ".bat")
 	cmd = paste(
@@ -36,4 +40,25 @@ for (nc_file in nc_files) {
 		}
 	}
 	system(tmp_bat)
+}
+
+clean.up = F
+while (!clean.up) {
+	ps = grep(pat, system('tasklist /v', intern=TRUE), value=TRUE)
+	if (length(ps) < 1) {
+		clean.up = T
+	} else {
+		Sys.sleep(1)
+		clean.up = F
+	}
+}
+output_files = list.files(dir_out, "regional*", full.names=T)
+for (dat in c("rch", "sub")){
+	out_file_name = paste0(out_dir, "/",dat, "_regional_output.txt")
+	out_df = data.frame()
+	for (fl in output_files[grepl(dat, output_files)]){
+		reg_dat = read.delim(fl)
+		out_df = rbind(out_df, reg_dat)
+	}
+	write.table(out_df, out_file_name, sep='\t',row.names=F)
 }

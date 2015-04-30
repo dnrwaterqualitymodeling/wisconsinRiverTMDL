@@ -10,8 +10,8 @@ mod_per = seq(
 	by = '1 day'
 )
 # a subset of subbasins
-# sbs = c(1,53,74,80,141,149,171,189,191,197,221,247,257,268,275,276,299,329)
-procs = 5
+sbs = c(1,53,74,80,141,149,171,189,191,197,221,247,257,268,275,276,299,329)
+procs = 12
 strt_stps = round(seq(1,337+337/procs,by=337/procs))
 
 for (i in 1:(length(strt_stps)-1)){
@@ -40,9 +40,9 @@ for (i in 1:(length(strt_stps)-1)){
 }
 
 wtr =  data.frame()
-for (sb in 1:337){
+for (sb in sbs){
 	
-	fl_name = paste0("H:/output_wtr/", sb, ".txt")
+	fl_name = paste0("H:/output_hru/", sb, ".txt")
 	if (file.info(fl_name)$size ==0){ next }
 	print(basename(fl_name))
 	select_cols = list(
@@ -88,8 +88,6 @@ for (sb in 1:337){
 }
 
 wtr$NET_FLOW = wtr$PND_IN - wtr$PND_OUT
-
-
 
 wetland_geometry = read.csv(file_wetland_geometry)
 pond_geometry = read.csv(file_pond_geometry)

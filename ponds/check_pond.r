@@ -6,6 +6,8 @@ source("~/Code/swat_output_assessment/batch_grep.r")
 file_wetland_geometry = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/wetlands/wetland_parameters.csv"
 file_pond_geometry = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
 
+dir_net_pnd = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds"
+out_pnd = paste(dir_net_pnd, "pond_output.txt", sep='/')
 txtInout = "H:\\WRB\\Scenarios\\Default\\TxtInOut"
 mod_per = seq(
 	as.Date("2002-01-01", "%Y-%m-%d"),
@@ -92,13 +94,13 @@ for (sb in 1:337){
 
 wtr$NET_FLOW = wtr$PND_IN - wtr$PND_OUT
 
-
+write.table(wtr, out_pnd, sep="\t", row.names=F)
 
 wetland_geometry = read.csv(file_wetland_geometry)
 pond_geometry = read.csv(file_pond_geometry)
 
 pdf('pond_vols.pdf', height=8, width=11)
-for (sb in sbs){
+for (sb in 1:337){
 	sbst = subset(wtr_agg, SUB == sb)
 	if (nrow(sbst) == 0) { next }
 	pnd_evol = wetland_geometry[which(wetland_geometry$subbasin == sb),"WET_MXVOL"]

@@ -1,8 +1,12 @@
-## dir_nc = "D:/WRB_sensitivity_sub"
-dir_nc = "/media/d/WRB_sensitivity_sub"
-dir_out = dir_nc
-## file_subbasin_region_lu = "D:/Water_Budget/subbasin_region_lookup.txt"
-file_subbasin_region_lu = "/media/d/Water_Budget/subbasin_region_lookup.txt"
+arguments = commandArgs(trailingOnly = T)
+nc_file = arguments[1]
+dir_out = arguments[2]
+
+dir_nc = "D:/WRB_sensitivity_analysis"
+# dir_nc = "/media/d/WRB_sensitivity_analysis"
+# dir_out = dir_nc
+file_subbasin_region_lu = "D:/Water_Budget/subbasin_region_lookup.txt"
+# file_subbasin_region_lu = "/media/d/Water_Budget/subbasin_region_lookup.txt"
 
 library(ncdf)
 library(rgdal)
@@ -13,16 +17,20 @@ options(stringsAsFactors=FALSE)
  
 setwd(dir_out)
 
-vars = list(
+sub_vars = list(
 	c("water_yield", "Annual Average water yield (mm)"),
 	c("sediment", "Average daily sediment yield (metric tons/ha)"),
 	c("org_phosphorus", "Average daily organic P yield (kg/ha)"),
 	c("sol_phosphorus", "Average daily organic P yield (kg/ha)"),
 	c("sed_phosphorus", "Average daily organic P yield (kg/ha)"),
 	c("tot_phosphorus", "Average daily total P yield (kg/ha)")
-	# c("streamflow", "Annual Average streamflow (cms)"),
-	# c("sediment", "Average Daily Sediment Load (tons)"),
-	# c("phosphorus", "Average Daily P Load (kg)")
+)
+
+rch_vars = list(
+	c("streamflow", "Annual Average streamflow (cms)"),
+	c("sediment", "Average Daily Sediment Load (tons)"),
+	c("phosphorus", "Average Daily P Load (kg)"),
+	c("deltaQ", "Net Streamflow (cms)")
 )
 
 sb_region_lu = read.delim(file_subbasin_region_lu)
@@ -35,7 +43,7 @@ seasons = replace(seasons, as.integer(mos) %in% 6:8, "summer")
 seasons = replace(seasons, as.integer(mos) %in% 9:11, "autumn")
 seasons = replace(seasons, as.integer(mos) %in% c(12,1,2), "winter")
 
-nc_files = list.files(dir_nc, pattern="\\.nc$", full.names=T)
+all_nc_files = list.files(dir_nc, pattern="\\.nc$", full.names=T)
 
 percent_change = function(x) {
 	n_days = dim(x)[1]
@@ -49,11 +57,22 @@ percent_change = function(x) {
 }
 
 regional_all = NULL
+
+
+if (grepl("rch", nc_file){
+	vars = rch_vars
+	dat = "rch"
+} else {
+	vars = sub_vars
+	dat = "sub"
+}
+# nc_files = all_nc_files[grepl(dat, all_nc_files)]
 for (nc_file in nc_files) {
 	nc = open.ncdf(nc_file)
 	p = strsplit(nc_file, "\\.")[[1]][1]
 	
 	subbasins_all = NULL
+
 	for (v in vars) {
 		print(c(p, v[1]))
 		if (v[1] != "tot_phosphorus") {
@@ -115,7 +134,7 @@ for (nc_file in nc_files) {
 	names(subbasins_all)[1] = "subbasin"
 	subbasins_all = subbasins_all[order(subbasins_all$subbasin),]
 	subbasins_all = dcast(subbasins_all, subbasin ~ variable)
-	file_name = paste("subbasin_", basename(p), "_sensitivity_tst.txt", sep="")
+	file_name = paste("subbasin_", basename(p), "_sensitivity.txt", sep="")
 	write.table(
 			subbasins_all,
 			file_name,
@@ -123,7 +142,7 @@ for (nc_file in nc_files) {
 			row.names=F)
 	close.ncdf(nc)
 }
-file_region = "regional_sensitivity.txt"
+file_region = paste0(dat, "regional_sensitivity.txt")
 write.table(
 		regional_all,
 		file_region,
