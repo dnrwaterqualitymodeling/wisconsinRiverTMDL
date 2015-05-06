@@ -1,9 +1,9 @@
 library(stringr)
 options(stringsAsFactors=F)
 
-dir_exc = "JAJS_25_pct_exc"
-exc_val = 0.1
-mos = 6:9
+dir_exc = "spring_50_pct_exc"
+exc_val = 0.5
+mos = 3:5
 annual_basis = TRUE
 cal_dir = 
 	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration"
@@ -27,7 +27,7 @@ gauge_basin_lu_file =
 	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv"
 
 gauge_basin_lu = read.csv(gauge_basin_lu_file,
-	colClasses=c("character", "character", "integer", "integer", "character"))
+	colClasses=c("character", "character", "character", "integer", "integer", "character"))
 gauge_basin_lu = subset(gauge_basin_lu, Keep == 1)
 
 obs_files = list.files(cal_dir, pattern="^0[0-9]+\\.txt$", full.names=T)
