@@ -1,7 +1,7 @@
 library(ncdf)
 
-setwd("D:/WRB_sensitivity_sub")
-file_subbasin_region_lu = "D:/Water_Budget/subbasin_region_lookup.txt"
+setwd("H:/output_data/sensitivity_output")
+file_subbasin_region_lu = "T:/Projects/Wisconsin_river/GIS_Datasets/Water_Budget/subbasin_region_lookup.txt"
 
 vars = list(
 	c("water_yield", "Annual Average water yield (mm)"),

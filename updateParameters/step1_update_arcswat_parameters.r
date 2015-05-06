@@ -29,6 +29,8 @@ inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 ## for irrigation
 ## 0 is off, 1 from reach, 3 from shallow aquifer
 irr_sca = 3
+# If CNOP = T set CNOPs, else revert to CN2
+CNOP = F
 
 # UPDATE SLOPE AND SLOPE LENGTH BASED ON RECCS IN BAUMGART, 2005
 mean_slope = read.table(mean_slope_file, header=T)
@@ -136,72 +138,6 @@ for (rw in background_p$ID){
 	stdout = sqlQuery(con, gwp_query)
 }
 close(con)
-
-#UPDATE SWAT POND PARAMETERS
-# moved to step 2 because ArcSWAT was truncating values
-#pond_geometry = read.csv(pond_geometry_file)
-#
-#inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
-#con = odbcConnectAccess(inDb)
-## Setting default values for subbasins with no ponds
-#for (row in 1:337) {
-#	if (!row %in% pond_geometry$subbasin){
-#		print(paste("No pond data for subbasin", row))
-#		query = paste(
-#			"UPDATE pnd ",
-#			"SET PND_FR = ", 0, ",",
-#			"PND_PSA = ", 5, ",",
-#			"PND_PVOL = ", 25, ",",
-#			"PND_ESA = ", 8, ",",
-#			"PND_EVOL = ", 40, ",",
-#			"NDTARG = 15, IFLOD1 = 4, IFLOD2 = 6 ",
-#			"WHERE SUBBASIN = ", row, ";",
-#			sep = ""
-#		)
-#	} else {
-#		print(paste("Inputting pond data for subbasin", row))
-#		indx = which(pond_geometry$subbasin == row)
-#		query = paste(
-#			"UPDATE pnd ",
-#			"SET PND_FR = ", pond_geometry$PND_FR[indx], ",",
-#			"PND_PSA = ", pond_geometry$PND_PSA[indx], ",",
-#			"PND_PVOL = ", pond_geometry$PND_PVOL[indx], ",",
-#			"PND_ESA = ", pond_geometry$PND_ESA[indx], ",",
-#			"PND_EVOL = ", pond_geometry$PND_EVOL[indx], ",",
-#			"NDTARG = 15, IFLOD1 = 4, IFLOD2 = 6 ",
-#			"WHERE SUBBASIN = ", pond_geometry$subbasin[indx], ";",
-#			sep = ""
-#		)
-#	}
-#	stdout = sqlQuery(con, query)
-#}
-#close(con)
-
-#UPDATE SWAT WETLAND PARAMETERS
-# moved to step 2 because ArcSWAT was truncating values
-### This is now being run in Step 2
-# wetland_geometry = read.csv(wetland_geometry_file)
-
-# inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
-# con = odbcConnectAccess(inDb)
-
-# wetlandData = sqlQuery(con, "SELECT * FROM pnd")
-
-# for (row in 1:nrow(wetland_geometry)) {
-	# query = paste(
-		# "UPDATE pnd ",
-		# "SET WET_FR = ", wetland_geometry$WET_FR[row], ",",
-		# "WET_NSA = ", wetland_geometry$WET_NSA[row], ",",
-		# "WET_NVOL = ", wetland_geometry$WET_NVOL[row], ",",
-		# "WET_VOL = ", wetland_geometry$WET_VOL[row], ",",
-		# "WET_MXVOL = ", wetland_geometry$WET_MXVOL[row], ",",
-		# "WET_MXSA = ", wetland_geometry$WET_MXSA[row],
-		# " WHERE SUBBASIN = ", wetland_geometry$subbasin[row], ";",
-		# sep = ""
-	# )
-	# stdout = sqlQuery(con, query)
-# }
-# close(con)
 
 #UPDATE ALPHA_BF 
 
@@ -396,99 +332,103 @@ if (irr_sca == 0){
 }
 
 # CNOP
-hydgrp_lu = unique(sqlQuery(con_mgt2, "SELECT SOIL, HYDGRP from sol"))
-crop_cn_lu = unique(sqlQuery(con_swat2012, "SELECT ICNUM, CN2A, CN2B, CN2C, CN2D from crop"))
-
-# Update CNOP for planting operations
-for (hydgrp in LETTERS[1:4]) {
-	for (crop in c(19, 20, 21, 52, 56, 70, 84)) {
-		hydgrp_col = paste("CN2", hydgrp, sep="")
-		cnop = crop_cn_lu[crop_cn_lu$ICNUM == crop, hydgrp_col]
-		soils = hydgrp_lu[hydgrp_lu$HYDGRP == hydgrp, "SOIL"]
-		soils = paste("('", paste(soils, collapse="','"), "')", sep="")
-		query = paste(
-			"UPDATE mgt2 SET CNOP = ",
-			cnop,
-			" WHERE SOIL IN ",
-			soils,
-			" AND PLANT_ID = ",
-			crop,
-			";",
-			sep=""
-		)
-		stdout = sqlQuery(con_mgt2, query)
-	}
-}
-
-till_tr55 = list(
-	bare_soil = c(77,86,91,94),
-	poor_residue = c(76,85,90,93),
-	good_residue = c(74,83,88,90)
-)
-# We assume that 1-EFTMIX is equal to crop residue cover
-# Crop residue cover <20% is considered "good" according to TR-55
-# Moldboard leaves so little residue, we chose to give it bare soil properties.
-till_codes = list(
-	c('2', "good_residue"), # Generic spring plowing
-	c('6', "good_residue"), # Field cultivator
-	c('35', "good_residue"), # Cultivator 1 row
-	c('58', "good_residue"), # Chisel plow
-	c('61', "poor_residue"), # Disk plow
-	c('64', "bare_soil") # Moldboard plow
-) 
-
-# Upate CNOP for tillage operations
-for (hydgrp in LETTERS[1:4]) {
-	for (till in till_codes) {
-		soils = hydgrp_lu[hydgrp_lu$HYDGRP == hydgrp, "SOIL"]
-		soils = paste("('", paste(soils, collapse="','"), "')", sep="")
-		cnop = till_tr55[[till[2]]][LETTERS == hydgrp]
-		query = paste(
-			"UPDATE mgt2 SET CNOP = ",
-			cnop,
-			" WHERE TILLAGE_ID = ",
-			till[1],
-			" AND SOIL IN ",
-			soils,
-			";",
-			sep=""
-		)
-		stdout = sqlQuery(con_mgt2, query)
-	}
-}
-# Set CNOP as CN2 for non-ag land cover so that CNOP is the only calibrated parameter
-for (hydgrp in LETTERS[1:4]) {
-	soils = hydgrp_lu[hydgrp_lu$HYDGRP == hydgrp, "SOIL"]
-	soils = paste("('", paste(soils, collapse="','"), "')", sep="")
-	for (lc in c("WATR", "URML", "FRSD", "WETN", "RNGE", "ONIO", "CRRT")) {
-		query = paste(
-			"SELECT CN2 FROM mgt1 WHERE LANDUSE = '",
-			lc, 
-			"' AND SOIL IN ",
-			soils,
-			";",
-			sep=""
-		)
-		cn2 = sqlQuery(con_mgt2, query)
-		if (length(unique(cn2)) == 1) { # They should all be the same
-			cn2 = cn2[1,1]
+if (CNOP) {
+	hydgrp_lu = unique(sqlQuery(con_mgt2, "SELECT SOIL, HYDGRP from sol"))
+	crop_cn_lu = unique(sqlQuery(con_swat2012, "SELECT ICNUM, CN2A, CN2B, CN2C, CN2D from crop"))
+	
+	# Update CNOP for planting operations
+	for (hydgrp in LETTERS[1:4]) {
+		for (crop in c(19, 20, 21, 52, 56, 70, 84)) {
+			hydgrp_col = paste("CN2", hydgrp, sep="")
+			cnop = crop_cn_lu[crop_cn_lu$ICNUM == crop, hydgrp_col]
+			soils = hydgrp_lu[hydgrp_lu$HYDGRP == hydgrp, "SOIL"]
+			soils = paste("('", paste(soils, collapse="','"), "')", sep="")
 			query = paste(
 				"UPDATE mgt2 SET CNOP = ",
-				cn2,
-				" WHERE LANDUSE = '",
-				lc,
-				"' AND SOIL IN ",
+				cnop,
+				" WHERE SOIL IN ",
 				soils,
-				" AND MGT_OP = 1;",
+				" AND PLANT_ID = ",
+				crop,
+				";",
 				sep=""
 			)
 			stdout = sqlQuery(con_mgt2, query)
-		} else {
-			print("Why did one of these curve numbers get a different assignment than the others?")
 		}
 	}
+	
+	till_tr55 = list(
+		bare_soil = c(77,86,91,94),
+		poor_residue = c(76,85,90,93),
+		good_residue = c(74,83,88,90)
+	)
+	# We assume that 1-EFTMIX is equal to crop residue cover
+	# Crop residue cover <20% is considered "good" according to TR-55
+	# Moldboard leaves so little residue, we chose to give it bare soil properties.
+	till_codes = list(
+		c('2', "good_residue"), # Generic spring plowing
+		c('6', "good_residue"), # Field cultivator
+		c('35', "good_residue"), # Cultivator 1 row
+		c('58', "good_residue"), # Chisel plow
+		c('61', "poor_residue"), # Disk plow
+		c('64', "bare_soil") # Moldboard plow
+	) 
+	
+	# Upate CNOP for tillage operations
+	for (hydgrp in LETTERS[1:4]) {
+		for (till in till_codes) {
+			soils = hydgrp_lu[hydgrp_lu$HYDGRP == hydgrp, "SOIL"]
+			soils = paste("('", paste(soils, collapse="','"), "')", sep="")
+			cnop = till_tr55[[till[2]]][LETTERS == hydgrp]
+			query = paste(
+				"UPDATE mgt2 SET CNOP = ",
+				cnop,
+				" WHERE TILLAGE_ID = ",
+				till[1],
+				" AND SOIL IN ",
+				soils,
+				";",
+				sep=""
+			)
+			stdout = sqlQuery(con_mgt2, query)
+		}
+	}
+	# Set CNOP as CN2 for non-ag land cover so that CNOP is the only calibrated parameter
+	for (hydgrp in LETTERS[1:4]) {
+		soils = hydgrp_lu[hydgrp_lu$HYDGRP == hydgrp, "SOIL"]
+		soils = paste("('", paste(soils, collapse="','"), "')", sep="")
+		for (lc in c("WATR", "URML", "FRSD", "WETN", "RNGE", "ONIO", "CRRT")) {
+			query = paste(
+				"SELECT CN2 FROM mgt1 WHERE LANDUSE = '",
+				lc, 
+				"' AND SOIL IN ",
+				soils,
+				";",
+				sep=""
+			)
+			cn2 = sqlQuery(con_mgt2, query)
+			if (length(unique(cn2)) == 1) { # They should all be the same
+				cn2 = cn2[1,1]
+				query = paste(
+					"UPDATE mgt2 SET CNOP = ",
+					cn2,
+					" WHERE LANDUSE = '",
+					lc,
+					"' AND SOIL IN ",
+					soils,
+					" AND MGT_OP = 1;",
+					sep=""
+				)
+				stdout = sqlQuery(con_mgt2, query)
+			} else {
+				print("Why did one of these curve numbers get a different assignment than the others?")
+			}
+		}
+	}
+} else {
+	sqlQuery(con_mgt2, "UPDATE mgt2 SET CNOP=0;")
 }
-
+	
 #### UPDATE PLANT.DAT: 
 ######## 	insert calibrated BIO E and correct issue with Forest, re: PB's suggestion
 pth_plant.dat = paste(projectDir, "/plant.dat",sep='')

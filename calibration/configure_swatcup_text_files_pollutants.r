@@ -2,121 +2,26 @@
 # SWAT project
 
 projectDir = "D:/WRB1.Sufi2.SwatCup"
-simCount = 512
+simCount = 256
 subbasinCount = 337
 startYr = 2002
 endYr = 2013
 objFuncCode = 5
-monthly = F
+monthly = T
 
 # Observations -- 
 #	variable name, column index in output.rch, subbasin ID, observed data
-obsDir = "D:/usgs_raw/calibration/spring_50_pct_exc"
+obsDir = "T:/Projects/Wisconsin_River/GIS_Datasets/Water_Chemistry/USGS_pollutant_load_estimates/Final Daily Loads/SS_00530"
 #obsDir =
 #	"D:/usgs_raw/calibration/spring_10_pct_exc"
 #gage_subbasin_lu =
 #	read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
 
+file_poll_mod = "T:/Projects/Wisconsin_River/GIS_Datasets/Water_Chemistry/USGS_pollutant_load_estimates/Summary_All_4_30_15.xls"
+
 gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
 	colClasses=c("character", "character", "character", "integer", "integer", "character"))
 setInternet2(TRUE)
-
-# parameterization = rbind(
-    # c("r__ALPHA_BF.gw", -0.99, -0.5),
-    # c("r__CN2.mgt", -0.6, 0.2),
-    # c("a__SOL_AWC().sol", -0.05, 0.05),
-    # c("v__ESCO.hru", 0.9, 1),
-    # c("v__GWQMN.gw", 500, 3000),
-    # c("v__GW_REVAP.gw", 0.02, 0.2),
-    # c("v__REVAPMN.gw", 0, 500),
-	# c("v__RCHRG_DP.gw", 0, 1),
-	# c("v__SURLAG.bsn", 0.05, 24),
-	# c("v__GW_DELAY.gw", 0, 500),
-	# c("r__sol_z().sol", 1.5, 3),
-	# c("v__SMFMX.bsn", 0,20),
-	# c("v__canmx.hru", 0, 100),
-	# c("v__CH_K2.rte", -0.1, 500),
-	# c("r__SLSUBBSN.hru", 1.5, 2),
-	# c("v__ch_n1.sub", 0.01, 30),
-	# c("v__SFTMP.bsn",-20,20),
-	# c("v__SMTMP.bsn",-20,20),
-	# c("v__SMFMN.bsn",0,20),
-	# c("v__TIMP.bsn",0,1),
-	# c("v__BIOMIX.mgt",0,1),
-	# c("v__EPCO.hru",0,1)
-# )
-
-# parameterization = rbind(
-	# c("v__SFTMP.bsn",-5,5),
-	# c("v__SMTMP.bsn",-5,5),
-	# c("v__ESCO.hru", 0.9, 1),
-	# c("v__SURLAG.hru", 0.05, 24),
-	# c("r__ALPHA_BF.gw", -0.99, -0.5),
-	# c("v__GW_DELAY.gw", 0, 500),
-	# c("r__CNOP.mgt", -0.05, 0.05),
-	# c("v__CH_N2.sub", 0.023, 0.15),
-	# c("r__WET_MXVOL.pnd",0,2)
-# )
-
-#parameterization = rbind(
-#	c("r__CN2.mgt",-0.05,0.05),
-#	c("v__ESCO.hru",0.3,0.9),
-#	c("r__WET_MXVOL.pnd",0,2),
-#	c("r__PND_EVOL.pnd",0,2)
-#)
-
-#parameterization = rbind(
-#	c("r__CN2.mgt",-0.1,0.05),
-#	c("v__SFTMP.bsn",0.5,2.5),
-#	c("v__SMTMP.bsn",0.5,2.5),
-#	c("v__TIMP.bsn",0.3,1),
-#	c("v__SURLAG.hru",0.5,8),
-#	c("r__PND_EVOL.pnd",0,3),
-##	c("v__NDTARG.pnd",7,30),
-#	c("v__PND_K.pnd",0,150),
-#	c("v__OV_N.hru",0.1,0.3),
-#	c("r__CH_N2.rte",-0.1,0.1)
-#)
-
-#parameterization = rbind(
-#	c("r__ALPHA_BF.gw",-0.99,-0.5),
-#	c("v__GW_DELAY.gw",10,330),
-#	c("v__RCHRG_DP.gw",0.0001,0.15),
-#	c("v__GWQMN.gw",0,500),
-#	c("r__PND_EVOL.pnd",0,3),
-##	c("v__NDTARG.pnd",7,30),
-#	c("v__PND_K.pnd",0,150),
-#	c("v__GW_REVAP.gw",0.005,0.1),
-#	c("v__REVAPMN.gw",0,500),
-#	c("v__ESCO.hru",0.2,1),
-#	c("r__SOL_AWC().sol",-0.1,0.1),
-#	c("r__SOL_BD().sol",-0.1,0.1),
-#	c("r__SOL_K().sol",-0.1,0.1)
-#)
-
-#parameterization = rbind(
-#	c("r__CN2.mgt",-0.05,0.05)
-#)
-
-#parameterization = rbind(
-#	c("v__ESCO.hru",0.01,1),
-#	c("r__SOL_AWC().sol",-0.1,0.1),
-#	c("r__SOL_BD().sol",-0.1,0.1),
-#	c("r__SOL_K().sol",-0.1,0.1)
-#)
-
-#parameterization = rbind(
-#	c("r__CN2.mgt",-0.091943,-0.091943),
-#	c("v__SMTMP.bsn",1.501953,1.501953),
-#	c("v__TIMP.bsn",0.987012,0.987012),
-#	c("v__SURLAG.hru",0.565918,0.565918),
-#	c("r__PND_EVOL.pnd",0.055664,0.055664),
-#	c("r__CH_N2.rte",0.099805,0.099805),
-#	c("v__ESCO.hru",0.225781,0.225781),
-#	c("v__GW_DELAY.gw",245.3125,245.3125),
-#	c("r__ALPHA_BF.gw",-0.978037,-0.978037),
-#	c("r__SOL_AWC().sol",0.033789,0.033789)
-#)
 
 parameterization = rbind(
 	c("v__SFTMP.bsn",1.5,2.5),
@@ -126,10 +31,35 @@ parameterization = rbind(
 	c("v__SMFMX.bsn",2.5,6),
 	c("v__SNOCOVMX.bsn",10,20),
 	c("v__SNO50COV.bsn",0.5,1),
-	c("r__PND_FR.pnd",0,0.5),
-	c("r__PND_EVOL.pnd",0,3),
-	c("v__PND_K.pnd",0,150)
+	c("r__PND_FR.pnd",0,0.5)
 )
+
+usgs_se_lu = function(file_wb, poll) {
+	wb = loadWorkbook(file_poll_mod)
+	sheet = getSheets(wb)$Model_Selection
+	rows = getRows(sheet, 5:44)
+	cells = getCells(rows)
+	values = lapply(cells, getCellValue)
+	inds = paste(5:44, ".4", sep="")
+	usgs_ids = unlist(values[inds])
+	if (poll == "SS") {
+		colIndex = c(8,11)
+	} else if (poll == "TP") {
+		colIndex = c(53,56)
+	}
+	se5P_ind = paste(5:44, ".", colIndex[1], sep="")
+
+}
+	
+	
+
+sheet = getSheets(poll_mod)$Model_Selection
+
+mod_sel_rws = getRows(mod_sel, 5:44)
+
+cell = getCells(mod_sel_rws["5"], 11)
+
+getCellStyle(cell)
 
 # Don't change these
 source("https://raw.githubusercontent.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/master/calibration/functions_query_output.r")

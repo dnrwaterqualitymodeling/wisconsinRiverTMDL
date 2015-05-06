@@ -7,12 +7,13 @@ library(stringr)
 
 options(stringsAsFactors=F)
 
-# projectDir = "C:/Users/ruesca/Desktop/WRB"
-projectDir = "H:/WRB"
+ projectDir = "C:/Users/ruesca/Desktop/WRB"
+#projectDir = "H:/WRB"
 txtinout = paste(projectDir, "Scenarios", "Default", "TxtInOut", sep="/")
 
 file_wetland_geometry = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/wetlands/wetland_parameters.csv"
 file_pond_geometry = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
+file_merged_idas = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_and_wetland_geometry.txt"
 ## UPDATE POINT SOURCE TEXT FILES AND FIG.FIG
 ps_files = list.files(
 	"T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/point_sources",
@@ -89,12 +90,13 @@ for (ps_file in ps_files) {
 	writeLines(ps_data_str, out_file)
 }
 
-## UPDATE POND AND WETLAND PARAMETERS
+## UPDATE POND AND WETLAND PARAMETERS (combined)
 
 wetland_geometry = read.csv(file_wetland_geometry)
 pond_geometry = read.csv(file_pond_geometry)
 files_pnds = list.files(txtinout, "*.pnd")
 
+merge_idas = data.frame()
 for (fl in files_pnds){
 	lnes = readLines(paste(txtinout, fl, sep="/"))
 	sb = as.numeric(substr(fl, 1, 5))
@@ -122,12 +124,30 @@ for (fl in files_pnds){
 	pnd_pvol = pnd_pvol + wetland_geometry[indx,"WET_NVOL"]
 	pnd_esa = pnd_esa + wetland_geometry[indx,"WET_MXSA"]
 	pnd_evol = pnd_evol + wetland_geometry[indx,"WET_MXVOL"]
-	
+
 	substr(lnes[3], 9, 16) = sprintf("%8.3f", pnd_fr)
 	substr(lnes[4], 9, 16) = sprintf("%8.3f", pnd_psa)
 	substr(lnes[5], 9, 16) = sprintf("%8.3f", pnd_pvol)
 	substr(lnes[6], 9, 16) = sprintf("%8.3f", pnd_esa)
 	substr(lnes[7], 9, 16) = sprintf("%8.3f", pnd_evol)
+	substr(lnes[8], 9, 16) = sprintf("%8.3f", pnd_pvol)
+	lnes[12] =
+		"               3    | IFLOD1: Beginning month of non-flood season"
+	lnes[13] =
+		"               5    | IFLOD2: Ending month of non-flood season"
+	lnes[14] =
+		"          15.000    | NDTARG: Number of days needed to reach target storage from current pond storage"
 	
 	writeLines(lnes, paste(txtinout, fl, sep="/"))
+	
+	row = data.frame(
+		subbasin = as.integer(substr(fl,3,5)),
+		PND_FR = pnd_fr,
+		PND_PSA = pnd_psa,
+		PND_PVOL = pnd_pvol,
+		PND_ESA = pnd_esa,
+		PND_EVOL = pnd_evol
+	)
+	merge_idas = rbind(merge_idas, row)	
 }
+write.table(merge_idas, file_merged_idas, sep="\t", row.names=F)

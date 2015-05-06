@@ -9,12 +9,14 @@ options(stringsAsFactors = FALSE)
 source("./Code/figures/function_proper_legend.r")
 dir_sens = "T:/Projects/Wisconsin_River/GIS_Datasets/Sensitivity_Analysis"
 
+pal.brew = brewer.pal(9,"YlGnBu")
+
 subbasins = readOGR(
 	dsn="T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro",
 	layer="subbasins")
 basin = readOGR(
-	dsn=getwd(),
-	layer="arc_basins")
+	dsn="T:/Projects/Wisconsin_River/GIS_Datasets/Hydrology",
+	layer="wrb_basin")
 
 regions = readOGR(
 	dsn="T:/Projects/Wisconsin_River/GIS_Datasets/Water_Budget",
@@ -22,48 +24,125 @@ regions = readOGR(
 
 file_subbasin_region_lu = "./Code/calibration/sensitivity_analysis/subbasin_region_lookup.txt"
 
-# setwd("H:/sensitivity_text_files")
-vars = list(
+sub_vars = list(
 	c("water_yield_annual", "annual water yield (mm)"),
+	c("water_yield_autumn", "autumn water yield (mm)"),
 	c("water_yield_spring", "spring water yield (mm)"),
-	c("sediment_annual", "annual sediment (Mg)"), 
+	c("water_yield_summer", "summer water yield (mm)"),
+	c("water_yield_winter", "winter water yield (mm)"),
+	c("sediment_annual", "annual sediment (Mg)"),
+	c("sediment_autumn", "autumn sediment (Mg)"),
+	c("sediment_spring", "spring sediment (Mg)"),
+	c("sediment_summer", "summer sediment (Mg)"),
+	c("sediment_winter", "winter sediment (Mg)"),
+	c("tot_phosphorus_autumn", "autumn P yield (kg)"),
+	c("tot_phosphorus_spring", "spring P yield (kg)"),
+	c("tot_phosphorus_summer", "summer P yield (kg)"),
+	c("tot_phosphorus_winter", "winter P yield (kg)"),
 	c("tot_phosphorus_annual", "annual P yield (kg)")
-	# c("sediment", "Average Daily Sediment Load (tons)"),
-	# c("phosphorus", "Average Daily P Load (kg)")
+)
+rch_vars = list(
+	c("streamflow_annual", "Streamflow (cms)"),
+	c("streamflow_winter", "Streamflow (cms)"),
+	c("streamflow_spring", "Streamflow (cms)"),
+	c("streamflow_summer", "Streamflow (cms)"),
+	c("streamflow_autumn", "Streamflow (cms)"),
+	c("sediment_annual", "Average Daily Sediment Load (tons)"),
+	c("sediment_winter", "Average Daily Sediment Load (tons)"),
+	c("sediment_spring", "Average Daily Sediment Load (tons)"),
+	c("sediment_summer", "Average Daily Sediment Load (tons)"),
+	c("sediment_autumn", "Average Daily Sediment Load (tons)"),
+	c("phosphorus_annual", "Average Daily P Load (kg)"),
+	c("phosphorus_winter", "Average Daily P Load (kg)"),
+	c("phosphorus_spring", "Average Daily P Load (kg)"),
+	c("phosphorus_summer", "Average Daily P Load (kg)"),
+	c("phosphorus_autumn", "Average Daily P Load (kg)")
 )
 
 out_regional_file = paste(dir_sens, "regional_sensitivity.txt", sep="/")
 
 sb_region_lu = read.delim(file_subbasin_region_lu)
-out_subbasin_files = list.files(dir_sens, pattern="^subbasin*",full.name=T)
+out_subbasin_files = list.files(
+	paste(dir_sens, "subbasin", sep="/"),
+	pattern="^subbasin*",full.name=T)
+#############################################
+### First for just route/reach parameters
 
-
-all_params = NULL
-for (sub_file in out_subbasin_files) {
-	param = substr(basename(sub_file), 10, 20)
+rte_params = NULL
+for (sub_file in out_subbasin_files[grepl("rte", out_subbasin_files)]) {
+	param = basename(sub_file)
+	param = gsub("subbasin_", "", param)
+	param = gsub("_sensitivity.txt", "", param)
 
 	sb_fl = read.delim(sub_file)
 	sb_fl['param_name'] = param
-	all_params = rbind(all_params, sb_fl)
+	rte_params = rbind(rte_params, sb_fl)
 }
 
-all_params = subset(all_params, !(param_name %in% c("TIMP_bsn_se", "SMTMP_bsn_s", "SMFMX_bsn_s", "SMFMN_bsn_s", "SLSUBBSN_hr", "SLSOIL_hru_", "SFTMP_bsn_s", "HRU_SLP_hru")))
-# for easy merging
-names(all_params)[1] = "Subbasin"
-pal.brew = brewer.pal(9,"YlGnBu")
+names(rte_params)[1] = "Subbasin"
 
-for (v in vars){
+for (v in rch_vars){
 	print(v)
-	toClass = all_params[v[1]]
+	toClass = rte_params[v[1]]
 	toClass = as.matrix(toClass)
 	prop_int = classIntervals(toClass, 9, 'kmeans')
 #     prop_colr = findColours(prop_int, pal)
     brks <- prop_int$brks
 	pdf(paste(v[1],'_subbasin_maps.pdf',sep=''))
-    for (param in unique(all_params$param_name)){
+    for (param in unique(rte_params$param_name)){
 		print(paste("Working on ",param))
-		ind_param = which(all_params$param_name == param)
-		param_df = all_params[ind_param,]
+		ind_param = which(rte_params$param_name == param)
+		param_df = rte_params[ind_param,]
+		param_subbasins = merge(subbasins, param_df)
+
+		plot(subbasins,
+			col=pal.brew[findInterval(toClass[ind_param,v[1]], 
+                brks,
+                all.inside = T)],
+			main = paste(param,v[1]),
+			border = NA)
+		title(main=v[1])
+        txt <- properLegend(findColours(prop_int, pal.brew), sig_figs=4)
+        legend('bottomright', 
+			legend = txt, 
+			bg = 'white', 
+			bty = 'n',
+            fill = pal.brew,
+            title = paste(param))
+		plot(basin, add=T)
+	}
+	dev.off()
+}
+#############################################
+### For just water yield output
+
+sub_params = NULL
+for (sub_file in out_subbasin_files[!grepl("rte", out_subbasin_files)]) {
+	param = basename(sub_file)
+	param = gsub("subbasin_", "", param)
+	param = gsub("_sensitivity.txt", "", param)
+
+	sb_fl = read.delim(sub_file)
+	sb_fl['param_name'] = param
+	sub_params = rbind(sub_params, sb_fl)
+}
+
+names(sub_params)[1] = "Subbasin"
+### removing CNOPs 
+sub_params = subset(sub_params, !grepl("CNOP", param_name))
+
+for (v in sub_vars){
+	print(v)
+	toClass = sub_params[v[1]]
+	toClass = as.matrix(toClass)
+	prop_int = classIntervals(toClass, 9, 'kmeans')
+#     prop_colr = findColours(prop_int, pal)
+    brks <- prop_int$brks
+	pdf(paste(v[1],'_subbasin_maps.pdf',sep=''))
+    for (param in unique(sub_params$param_name)){
+		print(paste("Working on ",param))
+		ind_param = which(sub_params$param_name == param)
+		param_df = sub_params[ind_param,]
 		param_subbasins = merge(subbasins, param_df)
 
 		plot(subbasins,
@@ -85,6 +164,8 @@ for (v in vars){
 	dev.off()
 }
 
+#########################################################################
+#########   Never quite figured out how to ge this to work ##############
 #########################################################################
 #### For regional and global plotting ###################################
 #########################################################################
@@ -148,23 +229,4 @@ for (v in vars){
 	# plot(prop_int, pal.brew,main=mth)
 # }
 # dev.off()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
