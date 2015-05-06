@@ -11,8 +11,8 @@ library(foreign)
 options(stringsAsFactors=F)
 options(warn=1)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
-projectDir = "C:/Users/ruesca/Desktop/WRB"
-#projectDir = "H:/WRB"
+#projectDir = "C:/Users/ruesca/Desktop/WRB"
+projectDir = "F:/WRB"
 mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
 
 #pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
@@ -534,6 +534,25 @@ for (crop in c("CORN", "CSIL", "SOYB", "ALFA")) {
 		# )
 # sqlQuery(con_swat2012, pst_query)
 
+# UPDATE SURLAG
+inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
+con = odbcConnectAccess(inDb)
+
+#read areas in from subbasins shapefile - make sure geometry hasn't changed, as shapefiles do not auto update areas!
+surlag_vals = data.frame(readOGR(dsn="T:\\Projects\\Wisconsin_River\\Model_Inputs\\SWAT_Inputs\\hydro", layer="subbasins_minus_urban_boundaries"))
+#set max and min
+maxAr = max(testDF$AREA)
+minAr = 0
+
+#convert to 0-1 ratio
+surlag_vals = (surlag_vals$AREA - minAr) / (maxAr - minAr)
+
+#update query using this data in r
+for (row in 1:nrow(surlag_vals)) {
+	query = paste("UPDATE hru SET SURLAG = ", surlag_vals[row], ";", sep="")
+	stdout = sqlQuery(con, query)
+}
+close(con)
+
+
 odbcCloseAll()
-
-
