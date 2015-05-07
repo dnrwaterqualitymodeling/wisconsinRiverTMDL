@@ -1,21 +1,33 @@
 library(stringr)
 options(stringsAsFactors=F)
 
-dir_exc = "JJAS_50_pct_exc"
-exc_val = 0.5
-mos = 6:9
+# VARIABLES THAT NEED TO BE EDITED
+
+dir_exc = "driftless"
+exc_val = 0
+mos = 1:12
 annual_basis = TRUE
-cal_dir = 
-	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration"
-# This function needs to be edited
-# depending on how the flow data should be sliced 
+ecos = c(
+	"Driftless Area",
+	"Southeastern Wisconsin Till Plains"
+#	"North Central Hardwood Forests",
+#	"Northern Lakes and Forests"
+)
+# This function needs to be edited depending on how the flow data should be sliced 
 subset_cal_data = function(data_raw, mos, exc_val) {
 	pct_exc = quantile(data_raw[,4], 1 - exc_val)
 	mo_bool = as.integer(format(data_raw[,3], "%m")) %in% mos
-	exc_bool = data_raw[,4] <= pct_exc
+	exc_bool = data_raw[,4] <= pct_exc # this is likely the only line to change
 	bool = mo_bool & exc_bool
 	return(bool)
 }
+cal_dir = 
+	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration"
+file_sb_eco_lu = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/SB_by_ECO_lookup.txt"
+
+# STOP EDITING BELOW HERE
+
+sb_eco_lu = read.table(file_sb_eco_lu, sep="\t", header=T)
 
 out_dir = paste(cal_dir, dir_exc, sep="/")
 if (!file.exists(out_dir)) {
@@ -27,12 +39,12 @@ gauge_basin_lu_file =
 	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv"
 
 gauge_basin_lu = read.csv(gauge_basin_lu_file,
-	colClasses=c("character", "character", "character", "integer", "integer", "character"))
+	colClasses=c("character", "character", "character", "character", "integer", "integer", "character"))
 gauge_basin_lu = subset(gauge_basin_lu, Keep == 1)
 
 obs_files = list.files(cal_dir, pattern="^0[0-9]+\\.txt$", full.names=T)
-gauge_ids = str_extract(basename(obs_files), "^0[0-9]+")
-obs_files = obs_files[gauge_ids %in% gauge_basin_lu$USGS_ID]
+gauge_ids_eco = subset(gauge_basin_lu, ECOREGION %in% ecos)$USGS_ID
+obs_files = obs_files[grep(paste(gauge_ids_eco, collapse="|"), obs_files)]
 
 model_period = seq(as.Date("2002-01-01"), as.Date("2013-12-31"), "1 day")
 
