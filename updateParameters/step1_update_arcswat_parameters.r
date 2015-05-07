@@ -8,6 +8,8 @@
 library(RODBC)
 library(stringr)
 library(foreign)
+library(rgeos)
+library(rgdal)
 options(stringsAsFactors=F)
 options(warn=1)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
@@ -23,6 +25,8 @@ file_bio_e = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/crop/Bio_E_Ca
 lu_op_xwalk_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/landuse_operation_crosswalk.csv"
 background_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/phosphorus/background_P_from_EPZ.txt"
 soil_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Soil_Phosphorus/soil_phosphorus_by_subbasin.txt"
+hydro_dir = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro"
+subbasins_file = "subbasins_minus_urban_boundaries"
 
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 
@@ -479,17 +483,18 @@ inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 con = odbcConnectAccess(inDb)
 
 #read areas in from subbasins shapefile - make sure geometry hasn't changed, as shapefiles do not auto update areas!
-surlag_vals = data.frame(readOGR(dsn="T:\\Projects\\Wisconsin_River\\Model_Inputs\\SWAT_Inputs\\hydro", layer="subbasins_minus_urban_boundaries"))
+subbasins = readOGR(dsn=hydro_dir, layer=subbasins_file)
 #set max and min
-maxAr = max(testDF$AREA)
-minAr = 0
-
+maxAr = max(gArea(subbasins, byid=T))
 #convert to 0-1 ratio
-surlag_vals = (surlag_vals$AREA - minAr) / (maxAr - minAr)
+surlag_vals = gArea(subbasins, byid=T) / maxAr
 
 #update query using this data in r
-for (row in 1:nrow(surlag_vals)) {
-	query = paste("UPDATE hru SET SURLAG = ", surlag_vals[row], ";", sep="")
+for (row in subbasins@data$Subbasin) {
+	query = paste(
+		"UPDATE hru SET SURLAG = ", 
+		surlag_vals[row], 
+		" WHERE SUBBASIN = ", row, ";", sep="")
 	stdout = sqlQuery(con, query)
 }
 close(con)
