@@ -1,7 +1,8 @@
 # CHANGE THESE ###########
 # SWAT project
 
-projectDir = "D:/WRB1.Sufi2.SwatCup"
+#projectDir = "D:/WRB1.Sufi2.SwatCup"
+projectDir = "C:/Users/ruesca/Documents/WRB.Sufi2.SwatCup"
 simCount = 256
 subbasinCount = 337
 startYr = 2002
@@ -9,19 +10,12 @@ endYr = 2013
 objFuncCode = 5
 monthly = T
 
-# Observations -- 
-#	variable name, column index in output.rch, subbasin ID, observed data
-obsDir = "T:/Projects/Wisconsin_River/GIS_Datasets/Water_Chemistry/USGS_pollutant_load_estimates/Final Daily Loads/SS_00530"
-#obsDir =
-#	"D:/usgs_raw/calibration/spring_10_pct_exc"
-#gage_subbasin_lu =
-#	read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
-
-file_poll_mod = "T:/Projects/Wisconsin_River/GIS_Datasets/Water_Chemistry/USGS_pollutant_load_estimates/Summary_All_4_30_15.xls"
-
-gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
+dir_obs = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_loads"
+file_se = "T:/Projects/Wisconsin_River/GIS_Datasets/Water_Chemistry/USGS_pollutant_load_estimates/usgs_id_standard_error_lu.txt"
+gage_subbasin_lu =
+	read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
+#gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
 	colClasses=c("character", "character", "character", "integer", "integer", "character"))
-setInternet2(TRUE)
 
 parameterization = rbind(
 	c("v__SFTMP.bsn",1.5,2.5),
@@ -33,37 +27,6 @@ parameterization = rbind(
 	c("v__SNO50COV.bsn",0.5,1),
 	c("r__PND_FR.pnd",0,0.5)
 )
-
-usgs_se_lu = function(file_wb, poll) {
-	wb = loadWorkbook(file_poll_mod)
-	sheet = getSheets(wb)$Model_Selection
-	rows = getRows(sheet, 5:44)
-	cells = getCells(rows)
-	values = lapply(cells, getCellValue)
-	inds = paste(5:44, ".4", sep="")
-	usgs_ids = unlist(values[inds])
-	if (poll == "SS") {
-		colIndex = c(8,11)
-	} else if (poll == "TP") {
-		colIndex = c(53,56)
-	}
-	se5P_ind = paste(5:44, ".", colIndex[1], sep="")
-
-}
-	
-	
-
-sheet = getSheets(poll_mod)$Model_Selection
-
-mod_sel_rws = getRows(mod_sel, 5:44)
-
-cell = getCells(mod_sel_rws["5"], 11)
-
-getCellStyle(cell)
-
-# Don't change these
-source("https://raw.githubusercontent.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/master/calibration/functions_query_output.r")
-#source("C:/Users/evansdm/Documents/Code/calibration/functions_query_output.r")
 
 # Change absolute values for ponds and wetlands
 file_abs_vol = paste(projectDir, "Absolute_SWAT_Values.txt", sep="/")
@@ -91,14 +54,8 @@ abs_vol[433] =
 	"WET_VOL		        0	  50000		      	Initial volume of water in ponds."
 writeLines(abs_vol, file_abs_vol)
 
-gage_subbasin_lu = subset(gage_subbasin_lu, Keep == 1)
-gage_subbasin_lu = gage_subbasin_lu[c("USGS_ID", "WRB_SubbasinID")]
-observed_table = cbind(rep("FLOW_OUT", nrow(gage_subbasin_lu)),
-    rep(6, nrow(gage_subbasin_lu)),
-    gage_subbasin_lu$WRB_SubbasinID,
-    paste(obsDir, "/", gage_subbasin_lu$USGS_ID, ".txt", sep="")
-)
-observed_table = observed_table[order(as.integer(observed_table[,3])),]
+gage_subbasin_lu = subset(gage_subbasin_lu, LOAD_ID != "" & Keep == 1)
+gage_subbasin_lu = gage_subbasin_lu[c("LOAD_ID", "WRB_SubbasinID")]
 
 inDir = paste(projectDir,
     "/",
@@ -154,7 +111,7 @@ if (monthly) {
 } else {
 	file.cio.dat[59] = "               1    | IPRINT: print code (month, day, year)"
 }
-file.cio.dat[65] = "   2   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
+file.cio.dat[65] = "  10  49   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
 file.cio.dat[67] = "   4   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
 file.cio.dat[69] = "   6   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
 file.cio.dat[71] = "   1   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
@@ -174,6 +131,23 @@ writeLines(paste(l1, "\n", l2, sep=""), swEdit_file)
 ########################
 # Write observed_rch and observed.txt file
 ########################
+
+
+observed_table = rbind(
+	cbind(
+		rep("SED_OUT", nrow(gage_subbasin_lu)),
+		rep(10, nrow(gage_subbasin_lu)),
+		gage_subbasin_lu$WRB_SubbasinID,
+		paste(dir_obs, "/calibration", gage_subbasin_lu$LOAD_ID, ".txt", sep="")
+	), cbind(
+		rep("TOT_P", nrow(gage_subbasin_lu)),
+		rep(49, nrow(gage_subbasin_lu)),
+		gage_subbasin_lu$WRB_SubbasinID,
+		paste(dir_obs, "/calibration", gage_subbasin_lu$LOAD_ID, ".txt", sep="")
+	)
+observed_table = observed_table[order(as.integer(observed_table[,3])),]
+
+
 l1 = paste(nrow(observed_table), ": number of observed variables", sep="\t")
 write(l1, observed_rch_file)
 # write('\n', observed_rch_file, append=T)
@@ -247,6 +221,8 @@ for (obs_i in 1:nrow(observed_table)) {
     write.table(obsData, observed_file, sep="\t", row.names=F, col.names=F, append=T, quote=F)
     write("\n", observed_file, append=T)   
 }
+
+
 # write extract_rch table
 write("output.rch     : swat output file name", extract_rch_file)
 write(paste(length(unique(observed_table[,1])), ": number of variables to get", sep="\t"),

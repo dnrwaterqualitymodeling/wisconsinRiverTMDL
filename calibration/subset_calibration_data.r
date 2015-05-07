@@ -1,9 +1,9 @@
 library(stringr)
 options(stringsAsFactors=F)
 
-dir_exc = "spring_50_pct_exc"
+dir_exc = "JJAS_50_pct_exc"
 exc_val = 0.5
-mos = 3:5
+mos = 6:9
 annual_basis = TRUE
 cal_dir = 
 	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration"
@@ -12,7 +12,7 @@ cal_dir =
 subset_cal_data = function(data_raw, mos, exc_val) {
 	pct_exc = quantile(data_raw[,4], 1 - exc_val)
 	mo_bool = as.integer(format(data_raw[,3], "%m")) %in% mos
-	exc_bool = data_raw[,4] >= pct_exc
+	exc_bool = data_raw[,4] <= pct_exc
 	bool = mo_bool & exc_bool
 	return(bool)
 }
