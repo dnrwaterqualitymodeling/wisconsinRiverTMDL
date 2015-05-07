@@ -11,8 +11,8 @@ library(foreign)
 options(stringsAsFactors=F)
 options(warn=1)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
-#projectDir = "C:/Users/ruesca/Desktop/WRB"
-projectDir = "F:/WRB"
+projectDir = "C:/Users/ruesca/Desktop/WRB"
+#projectDir = "F:/WRB"
 mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
 
 #pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
@@ -26,11 +26,19 @@ soil_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Soil_Phosphorus/soil_pho
 
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 
-## for irrigation
-## 0 is off, 1 from reach, 3 from shallow aquifer
+# UPDATE IRRIGATION
+# 0 is off, 1 from reach, 3 from shallow aquifer
 irr_sca = 3
 # If CNOP = T set CNOPs, else revert to CN2
 CNOP = F
+
+# UPDATE CANMX
+
+con = odbcConnectAccess(inDb)
+# Wu and Johnston, 2008
+# Hydrologic comparison between a forested and a wetland/lake dominated watershed using SWAT
+canmx_query = "UPDATE hru SET CANMX = 2.5 WHERE LANDUSE = 'FRSD';"
+stdout = sqlQuery(con, canmx_query) 
 
 # UPDATE SLOPE AND SLOPE LENGTH BASED ON RECCS IN BAUMGART, 2005
 mean_slope = read.table(mean_slope_file, header=T)
@@ -192,7 +200,7 @@ close(con_mgt1)
 con_mgt2 = odbcConnectAccess(prjDb)
 sqlQuery(con_mgt2, "SELECT * INTO mgt2_backup FROM mgt2;")
 sqlQuery(con_mgt2, "DROP TABLE mgt2")
-sqlQuery(con_mgt2, "Select * Into mgt2 From mgt2_backup Where 1 = 2")
+sqlQuery(con_mgt2, "Select * INTO mgt2 From mgt2_backup Where 1 = 2")
 close(con_mgt2)
 
 # for irrigation
@@ -207,14 +215,20 @@ write(paste("import arcpy; arcpy.Compact_management('", inDb, "')", sep=""), py_
 con_mgt2 = odbcConnectAccess(prjDb)
 con_swat2012 = odbcConnectAccess(swatDb)
 
+sol = sqlQuery(con_mgt2, "SELECT SUBBASIN, HRU, SLOPE_CD, SNAM FROM sol")
+sol_drained = subset(
+	sol,
+	SLOPE_CD %in% c("0-0.5","0.5-1.5") & grepl("^E", SNAM)
+)
+
 oidStart = 1
 for (row in 1:nrow(mgt1)) {
-	
     row_data = mgt1[row,]
-    print(paste('Subbasin:',as.character(row_data$SUBBASIN),'hru:', as.character(row_data$HRU)))
-    lu = as.character(row_data$LANDUSE)
+	sb = as.character(row_data$SUBBASIN)
+	hru = as.character(row_data$HRU)
+	lu = as.character(row_data$LANDUSE)
+    print(paste('Subbasin:',sb,'hru:',hru,'lu:',lu))
     opCode = unique(as.character(crosswalk$OPCODE[crosswalk$LANDUSE == lu]))
-
     if (substr(opCode, 1, 1) == "3" & substr(opCode, 4, 4) == "c") {
         igro_query = paste("UPDATE mgt1 SET IGRO = 1, PLANT_ID = 52, NROT = 0 WHERE SUBBASIN = ",
             as.character(row_data$SUBBASIN),
@@ -225,6 +239,15 @@ for (row in 1:nrow(mgt1)) {
         )
         sqlQuery(con_mgt2, igro_query)
     }
+	# UPDATE TILE DRAIN PARAMETERS
+	if (sb %in% sol_drained$SUBBASIN & hru %in% sol_drained$HRU) {
+		tile_query = paste(
+			"UPDATE mgt1 SET DDRAIN = 900, TDRAIN = 48, GDRAIN = 20 WHERE ",
+			"SUBBASIN = ", sb, " AND HRU = ", hru, ";",
+			sep=""
+		)
+		stdout = sqlQuery(con_mgt2, tile_query)
+	}
 	# UPDATE IRRIGATION PARAMETERS
 	# 	opschedules.mdb currently has place holders for irrigation
 	#	these lines set the necessary parameters, later they get turned on.
@@ -326,7 +349,7 @@ irri_query = paste(
 		sep=''
 )
 if (irr_sca == 0){
-		#print("NOT TURNING ON IRRIGATION")
+		# print("NOT TURNING ON IRRIGATION")
 } else {
 	stout = sqlQuery(con_mgt2, irri_query)
 }
