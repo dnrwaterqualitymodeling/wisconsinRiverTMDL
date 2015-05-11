@@ -3,21 +3,21 @@ options(stringsAsFactors=F)
 
 # VARIABLES THAT NEED TO BE EDITED
 
-dir_exc = "driftless"
-exc_val = 0
-mos = 1:12
+dir_exc = "MAMJ_50_pct_exc"
+exc_val = 0.5
+mos = 3:6
 annual_basis = TRUE
 ecos = c(
 	"Driftless Area",
-	"Southeastern Wisconsin Till Plains"
-#	"North Central Hardwood Forests",
-#	"Northern Lakes and Forests"
+	"Southeastern Wisconsin Till Plains",
+	"North Central Hardwood Forests",
+	"Northern Lakes and Forests"
 )
 # This function needs to be edited depending on how the flow data should be sliced 
 subset_cal_data = function(data_raw, mos, exc_val) {
 	pct_exc = quantile(data_raw[,4], 1 - exc_val)
 	mo_bool = as.integer(format(data_raw[,3], "%m")) %in% mos
-	exc_bool = data_raw[,4] <= pct_exc # this is likely the only line to change
+	exc_bool = data_raw[,4] >= pct_exc # this is likely the only line to change
 	bool = mo_bool & exc_bool
 	return(bool)
 }
