@@ -17,11 +17,11 @@ setwd(wd)
 
 stationFile = "wgnstations.dbf"
 stations = read.dbf(stationFile)
-
+stations=subset(stations,NAME!="USW00094985")
 prjTemplateFile = 'ClimateStationLocations_WRB_2mileBuffer'
 prjTemplate = readOGR(wd, prjTemplateFile)
 
-demFile = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/DEM/30m_dem_wrb_2milebuffer.img"
+demFile = "T:/GIS/Statewide_Coverages/DEM/dem_30m"
 dem = raster(demFile)
 
 spinupStartDate = '19900101'
