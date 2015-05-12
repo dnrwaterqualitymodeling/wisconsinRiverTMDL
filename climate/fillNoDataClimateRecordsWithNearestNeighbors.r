@@ -18,6 +18,7 @@ setwd(wd)
 stationFile = "wgnstations.dbf"
 stations = read.dbf(stationFile)
 stations=subset(stations,NAME!="USW00094985")
+stations=subset(stations,NAME!="USC002078912")
 prjTemplateFile = 'ClimateStationLocations_WRB_2mileBuffer'
 prjTemplate = readOGR(wd, prjTemplateFile)
 
