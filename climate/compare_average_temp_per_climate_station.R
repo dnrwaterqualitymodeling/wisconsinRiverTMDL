@@ -1,4 +1,4 @@
-file_tmp = "C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut/Tmp1.Tmp"
+file_tmp = "C:/Users/radeca/Desktop/WRB/Scenarios/Default/TxtInOut/Tmp1.Tmp"
 file_summary = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/climate/tmp_summary.txt"
 
 stations = readLines(file_tmp, n=1)
@@ -31,7 +31,7 @@ station_means_max = colMeans(data[seq(3,by=2,length.out=length(stations))])
 
 write.table(
 	data.frame(
-		station=names(station_means_min),
+		station=strsplit(names(station_means_min),"_")[[1]][1],
 		mean_min=station_means_min,
 		mean_max=station_means_max
 	),
