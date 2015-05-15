@@ -1,4 +1,4 @@
-file_tmp = "C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut/Tmp1.Tmp"
+file_tmp = "C:/Users/radeca/Desktop/WRB/Scenarios/Default/TxtInOut/Tmp1.Tmp"
 file_summary = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/climate/tmp_summary.txt"
 
 stations = readLines(file_tmp, n=1)
@@ -29,9 +29,19 @@ data = subset(data, date > as.Date("2002-01-01"))
 station_means_min = colMeans(data[seq(2,by=2,length.out=length(stations))])
 station_means_max = colMeans(data[seq(3,by=2,length.out=length(stations))])
 
+station_names = strsplit(names(station_means_min),"_")
+station_names = unlist(
+  lapply(
+    station_names,
+    function(x) {
+      x[1]
+    }
+  )
+)
+
 write.table(
 	data.frame(
-		station=names(station_means_min),
+		station=station_names,
 		mean_min=station_means_min,
 		mean_max=station_means_max
 	),

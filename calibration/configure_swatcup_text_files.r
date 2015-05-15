@@ -1,7 +1,7 @@
 # CHANGE THESE ###########
 # SWAT project
 
-projectDir = "D:/WRB.Sufi2.SwatCup"
+projectDir = "D:/WRB_temp.Sufi2.SwatCup"
 simCount = 768
 subbasinCount = 337
 startYr = 2002
@@ -18,7 +18,7 @@ obsDir = "D:/usgs_raw/calibration/MAMJ_50_pct_exc"
 #	read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
 
 gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
-	colClasses=c("character", "character", "character", "integer", "integer", "character"))
+	colClasses=c(rep("character", 3), "integer", "integer", "character"))
 setInternet2(TRUE)
 
 # parameterization = rbind(
@@ -312,8 +312,8 @@ for (obs_i in 1:nrow(observed_table)) {
         obsData = obsData[order(obsData$i),]
         obsData$VARNAME_DATE = paste(
             observed_table[obs_i, 1],
-            format(obsData$DATE, "%d"),
             format(obsData$DATE, "%m"),
+            format(obsData$DATE, "%d"),
             format(obsData$DATE, "%Y"),
             sep="_")
     }
