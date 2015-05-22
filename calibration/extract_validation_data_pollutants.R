@@ -6,7 +6,7 @@ val_dir = paste(dir_out, "/validation", sep="")
 cal_dir = paste(dir_out, "/calibration", sep="")
 gage_subbasin_lu =
 	read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
-	colClasses=c("character", "character", "character", "integer", "integer", "character"))
+	colClasses=c(rep("character", 4), "integer", "integer", "character"))
 start_end_lu = read.table("T:/Projects/Wisconsin_River/GIS_Datasets/Water_Chemistry/USGS_pollutant_load_estimates/ss_start_end_dates.txt",
 		sep="\t", header=T)
 fraction_for_validation = 1/4
@@ -31,7 +31,7 @@ for (id in gage_subbasin_lu$LOAD_ID) {
 			date < as.Date(paste(end_year, "-12-31", sep=""))
 	)
 	data_site_mo = aggregate(
-		actual_00530 ~ format(date, "%Y") + format(date, "%m"),
+		dload_00530 ~ format(date, "%Y") + format(date, "%m"),
 		data=data_site,
 		FUN=sum,
 		na.rm=T
@@ -81,7 +81,7 @@ val_dir = paste(dir_out, "/validation", sep="")
 cal_dir = paste(dir_out, "/calibration", sep="")
 gage_subbasin_lu =
 	read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
-		colClasses=c("character", "character", "character", "integer", "integer", "character"))
+		colClasses=c(rep("character", 4), "integer", "integer", "character"))
 start_end_lu = read.table("T:/Projects/Wisconsin_River/GIS_Datasets/Water_Chemistry/USGS_pollutant_load_estimates/tp_start_end_dates.txt",
 	sep="\t", header=T)
 fraction_for_validation = 1/4
@@ -106,7 +106,7 @@ for (id in gage_subbasin_lu$LOAD_ID) {
 			date < as.Date(paste(end_year, "-12-31", sep=""))
 	)
 	data_site_mo = aggregate(
-		actual_00665 ~ format(date, "%Y") + format(date, "%m"),
+		dload_00665 ~ format(date, "%Y") + format(date, "%m"),
 		data=data_site,
 		FUN=sum,
 		na.rm=T

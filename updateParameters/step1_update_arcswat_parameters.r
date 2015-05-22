@@ -42,7 +42,11 @@ con = odbcConnectAccess(inDb)
 # Wu and Johnston, 2008
 # Hydrologic comparison between a forested and a wetland/lake dominated watershed using SWAT
 canmx_query = "UPDATE hru SET CANMX = 2.5 WHERE LANDUSE = 'FRSD';"
-stdout = sqlQuery(con, canmx_query) 
+stdout = sqlQuery(con, canmx_query)
+# Zinke, 1967, Forest interception studies in the United States
+canmx_query = "UPDATE hru SET CANMX = 1.25 WHERE LANDUSE NOT IN ('FRSD','WATR','URML');"
+stdout = sqlQuery(con, canmx_query)
+close(con)
 
 # UPDATE SLOPE AND SLOPE LENGTH BASED ON RECCS IN BAUMGART, 2005
 mean_slope = read.table(mean_slope_file, header=T)
