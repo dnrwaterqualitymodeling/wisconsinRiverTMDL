@@ -5,7 +5,7 @@ arcpy.CheckOutExtension("Spatial")
 env.overwriteOutput = True
 
 landcoverDir = 'T:/Projects/Wisconsin_River/GIS_Datasets/landcover'
-outLc = landcoverDir + '/WiRiverTmdlLandCoverDefinition_fullForest.img'
+outLc = landcoverDir + '/WiRiverTmdlLandCoverDefinition_fullForestDef.img'
 
 cdl = landcoverDir + '/Crop_Data_Layers_2008_2012/WTM_Reprojection/wrb_cdl_2011'
 
@@ -26,7 +26,9 @@ lcs = [\
 	"Open water",\
 	"Developed",\
 	"Barren",\
-	"Forest",\
+	"Deciduous Forest",\
+	"Evergreen Forest",\
+	"Mixed Forest",\
 	"Shrubland",\
 	"Grassland / herbaceous",\
 	"Woody wetlands",\

@@ -14,7 +14,7 @@ if (!file.exists(local_dir)){
 inCDLRasterCLU = "CDLRotations_2mileBuffer_MajorityPerCLU.img"
 inCDLRasterPixels = "WRB_2mileBuffer_Rotations.img"
 crop_codes = "CropCodes_CountyApproved_grid.img"
-inLandCover = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/WiRiverTmdlLandCoverDefinition.img"
+inLandCover = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/WiRiverTmdlLandCoverDefinition_fullForestDef.img"
 inCDL2MileBuffer = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/Cropland/CLU/CLU_WRB_2mileBuffer.shp"
 
 remap1_txt = "remap_from_county_codes_to_numeric_code.txt"
@@ -87,7 +87,7 @@ n_cells = c(1000,1000,50)
 zone_vals = c(
 	"[300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310]",
 	"[400, 401, 402]",
-	"[111, 121, 131, 141, 152, 171, 190, 195, 250]")
+	"[111, 121, 131, 141, 142, 143, 152, 171, 190, 195, 250]")
 inFiles = c(
 	rep("LumpedRotationsRaster.tif",2),
 	inLandCover)
@@ -218,7 +218,7 @@ swat_lc = setValues(swat_lc, cdl_randomized_zonal)
 swat_lc = reclassify(swat_lc, remap2)
 
 writeGDAL(as(swat_lc, "SpatialGridDataFrame"),
-    "swat_lc.tif",
+    "swat_lc_fullForestDef.tif",
     drivername = "GTiff",
     type = "Byte",
     mvFlag=255)
