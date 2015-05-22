@@ -1,8 +1,9 @@
 # CHANGE THESE ###########
 # SWAT project
 
-projectDir = "D:/WRB1.Sufi2.SwatCup"
-simCount = 2
+#projectDir = "D:/WRB1.Sufi2.SwatCup"
+projectDir = "F:/WRB.Sufi2.SwatCup"
+simCount = 1
 subbasinCount = 337
 startYr = 2002
 endYr = 2013
@@ -11,14 +12,14 @@ monthly = F
 
 # Observations -- 
 #	variable name, column index in output.rch, subbasin ID, observed data
-obsDir = "D:/usgs_raw/calibration/JJAS_50_pct_exc"
-#obsDir =
+#obsDir = "D:/usgs_raw/calibration/JJAS_50_pct_exc"
+obsDir = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration"
 #	"D:/usgs_raw/calibration/spring_10_pct_exc"
-#gage_subbasin_lu =
-#	read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
+gage_subbasin_lu =
+	read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
 
-gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
-	colClasses=c("character", "character", "character", "integer", "integer", "character"))
+#gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
+	colClasses=c("character", "character", "character", "character", "integer", "integer", "character"))
 setInternet2(TRUE)
 
 # parameterization = rbind(
