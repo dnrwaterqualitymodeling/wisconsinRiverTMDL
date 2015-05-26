@@ -15,7 +15,7 @@ file_se = "T:/Projects/Wisconsin_River/GIS_Datasets/Water_Chemistry/USGS_polluta
 gage_subbasin_lu =
 	read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
 #gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
-	colClasses=c("character", "character", "character", "integer", "integer", "character"))
+	colClasses=c(rep("character", 4), "integer", "integer", "character"))
 
 parameterization = rbind(
 	c("v__SFTMP.bsn",1.5,2.5),
@@ -111,7 +111,7 @@ if (monthly) {
 } else {
 	file.cio.dat[59] = "               1    | IPRINT: print code (month, day, year)"
 }
-file.cio.dat[65] = "  10  49   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
+file.cio.dat[65] = "   6  44   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
 file.cio.dat[67] = "   4   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
 file.cio.dat[69] = "   6   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
 file.cio.dat[71] = "   1   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0"
@@ -138,14 +138,19 @@ observed_table = rbind(
 		rep("SED_OUT", nrow(gage_subbasin_lu)),
 		rep(10, nrow(gage_subbasin_lu)),
 		gage_subbasin_lu$WRB_SubbasinID,
-		paste(dir_obs, "/calibration", gage_subbasin_lu$LOAD_ID, ".txt", sep="")
+		paste(dir_obs, "/SS/calibration/", gage_subbasin_lu$LOAD_ID, ".txt", sep="")
 	), cbind(
 		rep("TOT_P", nrow(gage_subbasin_lu)),
 		rep(49, nrow(gage_subbasin_lu)),
 		gage_subbasin_lu$WRB_SubbasinID,
-		paste(dir_obs, "/calibration", gage_subbasin_lu$LOAD_ID, ".txt", sep="")
+		paste(dir_obs, "/TP/calibration/", gage_subbasin_lu$LOAD_ID, ".txt", sep="")
 	)
-observed_table = observed_table[order(as.integer(observed_table[,3])),]
+)
+observed_table = observed_table[
+	order(
+		as.integer(observed_table[,2]),
+		as.integer(observed_table[,3])
+	),]
 
 
 l1 = paste(nrow(observed_table), ": number of observed variables", sep="\t")
@@ -157,19 +162,12 @@ write(paste(objFuncCode, ": Objective function type, 1=mult,2=sum,3=r2,4=chi2,5=
 write("0.5\t: min value of objective function threshold for the behavioral solutions", observed_file, append=T)
 write("\n", observed_file, append=T)
 
+se = read.table(file_se, sep="\t", header=T)
+
 for (obs_i in 1:nrow(observed_table)) {
-    obsData = read.table(observed_table[obs_i,4], skip=2, sep="\t", header=T)
-    obsData = obsData[-1,]
-    obsData = obsData[obsData[,5] == "A",]
-    obsData = data.frame(DATE = as.Date(as.character(obsData[,3])),
-        FLOW_OBSERVED=as.numeric(as.character(obsData[,4])))
+    obsData = read.table(observed_table[obs_i,4], sep="\t", header=T)
     if (monthly) {
-        months = as.POSIXlt(obsData$DATE)$mo + 1
-        years = as.POSIXlt(obsData$DATE)$year + 1900
-        date = paste(years, months, "01", sep="-")
-        obsMonthly = aggregate(FLOW_OBSERVED ~ date, data=obsData, mean)
-        obsData = data.frame(DATE=as.Date(obsMonthly[,1]),
-            FLOW_OBSERVED=obsMonthly[,2])
+        obsData$DATE = as.Date(paste(obsData$YEAR,obsData$MO, "01", sep="-"))
         obsData = merge(time_series, obsData, all.y=T, all.x=F)
         obsData = obsData[order(obsData$i),]
         obsData$VARNAME_DATE = paste(
@@ -178,21 +176,14 @@ for (obs_i in 1:nrow(observed_table)) {
             format(obsData$DATE, "%Y"),
             sep="_")
     } else {
-        obsData = data.frame(DATE=as.Date(obsData[,1]),
-            FLOW_OBSERVED=obsData[,2])
-        obsData = merge(time_series, obsData, all.y=T, all.x=F)
-        obsData = obsData[order(obsData$i),]
-        obsData$VARNAME_DATE = paste(
-            observed_table[obs_i, 1],
-            format(obsData$DATE, "%d"),
-            format(obsData$DATE, "%m"),
-            format(obsData$DATE, "%Y"),
-            sep="_")
+		stop("Routines not written for daily data")
     }
-    obsData = obsData[c("i","VARNAME_DATE", "FLOW_OBSERVED")]
-    #converting from cf/s to cm/s
-    obsData$FLOW_OBSERVED <- obsData$FLOW_OBSERVED * 0.0283168466
-    l1 = paste(observed_table[obs_i,1], "_", observed_table[obs_i,3],
+	poll_col_name = names(obsData)[5]
+    obsData = obsData[c("i","VARNAME_DATE", poll_col_name)]
+ 	if (poll_col_name == "SS_KG") {
+    	obsData$SS_KG = obsData$SS_KG / 1000
+	}
+	l1 = paste(observed_table[obs_i,1], "_", observed_table[obs_i,3],
         "   : this is the name of the variable and the subbasin number to be included in the objective function",
         sep="")
     l2 = paste(nrow(obsData), "   : number of data points for this variable as it follows below. First column is a sequential number from beginning", sep="")
@@ -210,8 +201,20 @@ for (obs_i in 1:nrow(observed_table)) {
                 "\t: this is the name of the variable and the subbasin number to be included in the objective function",
                 sep=""),
           observed_file, append=T)
-    write("1     : weight of the variable in the objective function\n-1    : Dynamic flow separation. Not considered if -1. If 1, then values should be added in the forth column below after observations\n-1    : constant flow separation, threshold value. (not considered if -1)\n1     : if separation of signal is considered, this is weight of the smaller values in the objective function\n1     : if separation of signal is considered, this is weight of the larger values in the objective function\n10    : percentage of measurement error",
-          observed_file, append=T)
+	if (poll_col_name == "SS_KG") {
+		se_col_name = "SS_SE"
+	} else {
+		se_col_name = "TP_SE"
+	}
+	loadid = strsplit(basename(observed_table[obs_i,4]), "\\.")[[1]][1]
+	wt = subset(se, LOADID == loadid, select=se_col_name)
+    write(
+		paste(
+			1/wt,
+			"\t: weight of the variable in the objective function\n-1    : Dynamic flow separation. Not considered if -1. If 1, then values should be added in the forth column below after observations\n-1    : constant flow separation, threshold value. (not considered if -1)\n1     : if separation of signal is considered, this is weight of the smaller values in the objective function\n1     : if separation of signal is considered, this is weight of the larger values in the objective function\n10    : percentage of measurement error",
+			sep=""
+		),
+		observed_file, append=T)
     write(paste(nrow(obsData), ": number of data points for this variable as it follows below. First column is a sequential number from beginning",
         sep="\t"),
         observed_file, append=T)
@@ -229,10 +232,10 @@ write(paste(length(unique(observed_table[,1])), ": number of variables to get", 
       extract_rch_file,
       append=T)
 write(
-    paste(
-        paste(unique(observed_table[,2]), sep=" "),
-        ": variable column number(s) in the swat output file (as many as the above number)"
-        , sep="\t"),
+#    paste(
+#        paste(unique(observed_table[,2]), collapse=" "),
+        "6 7\t: variable column number(s) in the swat output file (as many as the above number)",
+#        , sep="\t"),
     extract_rch_file,
     append=T
 )
