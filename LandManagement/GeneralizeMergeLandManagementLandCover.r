@@ -4,21 +4,51 @@ library(foreign)
 
 overlay_dir = "T:/Projects/Wisconsin_River/GIS_Datasets/Land_Management/Finalizing_Land_Management/Overlay_Process"
 rotation_dir = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/Rotations"
+
+inLandCover = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/WiRiverTmdlLandCoverDefinition_fullForestDef.img"
+inCDL2MileBuffer = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/Cropland/CLU/CLU_WRB_2mileBuffer.shp"
+eco_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/ecoregions.img"
+
+inCDLRasterCLU = "CDLRotations_2mileBuffer_MajorityPerCLU.img"
+inCDLRasterPixels = "WRB_2mileBuffer_Rotations.img"
+crop_codes = "CropCodes_CountyApproved_grid.img"
+
+remap1_txt = "remap_from_county_codes_to_numeric_code.txt"
+remap2_txt = "remap_from_numeric_codes_to_swat_codes.txt"
+
+
 local_dir = "C:/TEMP/land_mgt_overlay"
 if (!file.exists(local_dir)){
     dir.create(local_dir)
 }
 
-# Set local variables
-
-inCDLRasterCLU = "CDLRotations_2mileBuffer_MajorityPerCLU.img"
-inCDLRasterPixels = "WRB_2mileBuffer_Rotations.img"
-crop_codes = "CropCodes_CountyApproved_grid.img"
-inLandCover = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/WiRiverTmdlLandCoverDefinition_fullForestDef.img"
-inCDL2MileBuffer = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/Cropland/CLU/CLU_WRB_2mileBuffer.shp"
-
-remap1_txt = "remap_from_county_codes_to_numeric_code.txt"
-remap2_txt = "remap_from_numeric_codes_to_swat_codes.txt"
+writeRaster(
+	raster(paste(rotation_dir, inCDLRasterCLU, sep="/")),
+	paste(local_dir, inCDLRasterCLU, sep="/"),
+	"HFA"
+)
+writeRaster(
+	raster(paste(rotation_dir, inCDLRasterPixels, sep="/")),
+	paste(local_dir, inCDLRasterPixels, sep="/"),
+	"HFA"
+)
+writeRaster(
+	raster(paste(overlay_dir, crop_codes, sep="/")),
+	paste(local_dir, crop_codes, sep="/"),
+	"HFA"
+)
+writeRaster(
+	raster(eco_file),
+	paste(local_dir, basename(eco_file), sep="/"),
+	"HFA"
+)
+writeRaster(
+	raster(inLandCover),
+	paste(local_dir, basename(inLandCover), sep="/"),
+	"HFA"
+)
+eco_file = basename(eco_file)
+inLandCover = basename(inLandCover)
 
 expandFiles = list.files(overlay_dir, "^expand.*(img|rrd)$")
 for (fl in expandFiles){    
@@ -28,6 +58,7 @@ for (fl in expandFiles){
             local_dir)
     }
 }
+
 if (!file.exists(paste(local_dir, basename(inCDL2MileBuffer), sep='/'))){
     print("Copying CLU layer...")
     bsnme = substr(basename(inCDL2MileBuffer), 1, nchar(basename(inCDL2MileBuffer)) - 4)
@@ -38,9 +69,6 @@ if (!file.exists(paste(local_dir, basename(inCDL2MileBuffer), sep='/'))){
             local_dir)
     }
 }
-# writeRaster(
-# 	raster(paste(rotation_dir, inCDLRasterPixels, sep="/")),
-# 	paste(local_dir, inCDLRasterPixels, sep="/"))
 
 file.copy(paste(overlay_dir, remap1_txt, sep="/"), 
     paste(local_dir, remap1_txt, sep="/"))
@@ -216,6 +244,11 @@ cdl_randomized_zonal[which(is.na(cdl_randomized_zonal))] =
 swat_lc = raster('cdl_randomized.tif')
 swat_lc = setValues(swat_lc, cdl_randomized_zonal)
 swat_lc = reclassify(swat_lc, remap2)
+
+eco = raster(eco_file)
+
+swat_lc[swat_lc == 9 & eco == 3] = 5
+swat_lc[swat_lc == 9] = 4
 
 writeGDAL(as(swat_lc, "SpatialGridDataFrame"),
     "swat_lc_fullForestDef.tif",
