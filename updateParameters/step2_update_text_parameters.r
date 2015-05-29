@@ -132,9 +132,9 @@ for (fl in files_pnds){
 	substr(lnes[7], 9, 16) = sprintf("%8.3f", pnd_evol)
 	substr(lnes[8], 9, 16) = sprintf("%8.3f", pnd_pvol)
 	lnes[12] =
-		"               3    | IFLOD1: Beginning month of non-flood season"
+		"               7    | IFLOD1: Beginning month of non-flood season"
 	lnes[13] =
-		"               5    | IFLOD2: Ending month of non-flood season"
+		"               2    | IFLOD2: Ending month of non-flood season"
 	lnes[14] =
 		"          15.000    | NDTARG: Number of days needed to reach target storage from current pond storage"
 	

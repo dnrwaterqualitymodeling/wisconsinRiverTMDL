@@ -3,15 +3,15 @@ options(stringsAsFactors=F)
 
 # VARIABLES THAT NEED TO BE EDITED
 
-dir_exc = "MAMJ_50_pct_exc"
+dir_exc = "MAMJ_50_pct_exc_north_central"
 exc_val = 0.5
 mos = 3:6
 annual_basis = TRUE
 ecos = c(
-	"Driftless Area",
-	"Southeastern Wisconsin Till Plains",
-	"North Central Hardwood Forests",
-	"Northern Lakes and Forests"
+#	"Driftless Area",
+#	"Southeastern Wisconsin Till Plains"
+	"North Central Hardwood Forests"
+#	"Northern Lakes and Forests"
 )
 # This function needs to be edited depending on how the flow data should be sliced 
 subset_cal_data = function(data_raw, mos, exc_val) {

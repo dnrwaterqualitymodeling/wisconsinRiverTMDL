@@ -41,10 +41,14 @@ CNOP = F
 con = odbcConnectAccess(inDb)
 # Wu and Johnston, 2008
 # Hydrologic comparison between a forested and a wetland/lake dominated watershed using SWAT
-canmx_query = "UPDATE hru SET CANMX = 2.5 WHERE LANDUSE = 'FRSD';"
+canmx_query = "UPDATE hru SET CANMX = 2.0 WHERE LANDUSE = 'FRSD';"
+stdout = sqlQuery(con, canmx_query)
+canmx_query = "UPDATE hru SET CANMX = 4.3 WHERE LANDUSE = 'FRST';"
+stdout = sqlQuery(con, canmx_query)
+canmx_query = "UPDATE hru SET CANMX = 6.6 WHERE LANDUSE = 'FRSE';"
 stdout = sqlQuery(con, canmx_query)
 # Zinke, 1967, Forest interception studies in the United States
-canmx_query = "UPDATE hru SET CANMX = 1.25 WHERE LANDUSE NOT IN ('FRSD','WATR','URML');"
+canmx_query = "UPDATE hru SET CANMX = 1.25 WHERE LANDUSE NOT IN ('FRSD','FRST','FRSE','WATR','URML');"
 stdout = sqlQuery(con, canmx_query)
 close(con)
 
@@ -302,7 +306,7 @@ for (row in 1:nrow(mgt1)) {
 		)
 		sqlQuery(con_mgt2, insertQuery)
 	}
-	if (!(opCode %in% c('BARR','FRSD', 'WATR', 'URML', 'RNGB','RNGE','PAST','WETF', 'WETN','HAY'))){ 
+	if (!(opCode %in% c('BARR','FRSD', 'FRSE', 'FRST', 'WATR', 'URML', 'RNGB','RNGE','PAST','WETF', 'WETN','HAY'))){ 
 		husc_query = paste("UPDATE mgt1 SET HUSC = 1, NROT = 6, ISCROP = 1 WHERE SUBBASIN = ",
 			as.character(row_data$SUBBASIN),
 			" AND HRU = ",
@@ -428,7 +432,7 @@ if (CNOP) {
 	for (hydgrp in LETTERS[1:4]) {
 		soils = hydgrp_lu[hydgrp_lu$HYDGRP == hydgrp, "SOIL"]
 		soils = paste("('", paste(soils, collapse="','"), "')", sep="")
-		for (lc in c("WATR", "URML", "FRSD", "WETN", "RNGE", "ONIO", "CRRT")) {
+		for (lc in c("WATR", "URML", "FRSD", "FRSE", "FRST", "WETN", "RNGE", "ONIO", "CRRT")) {
 			query = paste(
 				"SELECT CN2 FROM mgt1 WHERE LANDUSE = '",
 				lc, 
