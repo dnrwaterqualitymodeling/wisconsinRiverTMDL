@@ -153,6 +153,8 @@ for (fl in files_pnds){
 }
 write.table(merge_idas, file_merged_idas, sep="\t", row.names=F)
 
+# New parameters for Vadas and White model
+
 file.copy(file_fert_dat, paste(txtinout, "/fert.dat", sep=""), overwrite=T)
 file_basins_bsn = paste(txtinout, "/basins.bsn", sep="")
 write("               1    | manp_flag : 1 = use manure P model\n               0    | isolp flag !! if = 1  prints out solp.out\n",
