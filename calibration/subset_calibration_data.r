@@ -3,16 +3,16 @@ options(stringsAsFactors=F)
 
 # VARIABLES THAT NEED TO BE EDITED
 
-dir_exc = "MAMJ_50_pct_exc_north_central"
+dir_exc = "AMJJASO_50_pct_exc_northern"
 exc_val = 0.5
-mos = 3:6
+mos = 4:10
 annual_basis = TRUE
-ecos = c(
-#	"Driftless Area",
-#	"Southeastern Wisconsin Till Plains"
-	"North Central Hardwood Forests"
-#	"Northern Lakes and Forests"
-)
+ecos =
+#	"Driftless Area and Southeastern Till Plains"
+#	"Central Sands and Moraines"
+#	"North Central Hardwood Forests"
+	"Northern Lakes and Forests"
+
 # This function needs to be edited depending on how the flow data should be sliced 
 subset_cal_data = function(data_raw, mos, exc_val) {
 	pct_exc = quantile(data_raw[,4], 1 - exc_val)
@@ -39,7 +39,7 @@ gauge_basin_lu_file =
 	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv"
 
 gauge_basin_lu = read.csv(gauge_basin_lu_file,
-	colClasses=c("character", "character", "character", "character", "integer", "integer", "character"))
+	colClasses=c(rep("character", 4), "integer", "integer", "character"))
 gauge_basin_lu = subset(gauge_basin_lu, Keep == 1)
 
 obs_files = list.files(cal_dir, pattern="^0[0-9]+\\.txt$", full.names=T)

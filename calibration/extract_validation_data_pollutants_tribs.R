@@ -1,7 +1,7 @@
 ## SEDIMENT
 
 dir_load = "T:/Projects/Wisconsin_River/GIS_Datasets/Water_Chemistry/USGS_pollutant_load_estimates/Final Daily Loads/SS_00530/Loads"
-dir_out = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_loads/SS"
+dir_out = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_loads/tribs/SS"
 val_dir = paste(dir_out, "/validation", sep="")
 cal_dir = paste(dir_out, "/calibration", sep="")
 gage_subbasin_lu =
@@ -76,7 +76,7 @@ write.table(summ_table, file_summ_table, sep="\t", row.names=F, quote=F)
 ## PHOSPHORUS
 
 dir_load = "T:/Projects/Wisconsin_River/GIS_Datasets/Water_Chemistry/USGS_pollutant_load_estimates/Final Daily Loads/TP_00665/Loads"
-dir_out = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_loads/TP"
+dir_out = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_loads/tribs/TP"
 val_dir = paste(dir_out, "/validation", sep="")
 cal_dir = paste(dir_out, "/calibration", sep="")
 gage_subbasin_lu =
@@ -95,16 +95,26 @@ start_end_lu$end = as.Date(start_end_lu$end, format="%m/%d/%Y")
 
 summ_table = NULL
 for (id in gage_subbasin_lu$LOAD_ID) {
-	file_site = paste(dir_load, "/", id, ".gz", sep="")
-	data_site = read.table(file_site, sep="\t", header=T)
-	data_site$date = as.Date(data_site$date, format="%m/%d/%Y")
-	start_year = format(subset(start_end_lu, station_id == id)$start, "%Y")
-	end_year = format(subset(start_end_lu, station_id == id)$end, "%Y")
-	data_site = subset(
-		data_site,
-		date > as.Date(paste(start_year, "-1-1", sep="")) &
-			date < as.Date(paste(end_year, "-12-31", sep=""))
-	)
+	if (id == "5390680") {
+		file_site = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_loads/USGS_NWIS/05390680.txt"
+		data_site = read.table(file_site)
+		data_site = data_site[-(1:2),3:4]
+		names(data_site) = c("date","dload_00665")
+		data_site$date = as.Date(as.character(data_site$date))
+		data_site$dload_00665 = as.numeric(as.character(data_site$dload_00665))
+		data_site$dload_00665 = data_site$dload_00665 * 0.453592 # lbs to kgs
+	} else {
+		file_site = paste(dir_load, "/", id, ".gz", sep="")
+		data_site = read.table(file_site, sep="\t", header=T)
+		data_site$date = as.Date(data_site$date, format="%m/%d/%Y")
+		start_year = format(subset(start_end_lu, station_id == id)$start, "%Y")
+		end_year = format(subset(start_end_lu, station_id == id)$end, "%Y")
+		data_site = subset(
+			data_site,
+			date > as.Date(paste(start_year, "-1-1", sep="")) &
+				date < as.Date(paste(end_year, "-12-31", sep=""))
+		)
+	}
 	data_site_mo = aggregate(
 		dload_00665 ~ format(date, "%Y") + format(date, "%m"),
 		data=data_site,
@@ -115,25 +125,31 @@ for (id in gage_subbasin_lu$LOAD_ID) {
 	data_site_mo = data_site_mo[order(data_site_mo$YEAR, data_site_mo$MO),]
 	file_site_all = paste(dir_out, "/", id, ".txt", sep="")
 	write.table(data_site_mo, file_site_all, row.names=F, sep="\t", quote=F)
-	
-	n_obs_in_yr = aggregate(
-		actual_00665 ~ format(date, "%Y"),
-		data=data_site,
-		FUN = function(X) {
-			sum(!is.na(X))
-		}
-	)
-	names(n_obs_in_yr) = c("YEAR", "N_OBS")
-	full_yrs = subset(n_obs_in_yr, N_OBS >= full_yr_threshold)
-	n_samples = floor(nrow(full_yrs) * fraction_for_validation)
-	val_yrs = with(full_yrs, sample(YEAR, n_samples))
-	n_obs_in_yr = cbind(
-		data.frame(station_id=id),
-		n_obs_in_yr)
-	n_obs_in_yr$VALIDATION[n_obs_in_yr$YEAR %in% val_yrs] = 1
-	n_obs_in_yr$VALIDATION[is.na(n_obs_in_yr$VALIDATION)] = 0
-	summ_table = rbind(summ_table, n_obs_in_yr)
-	
+	if (id != "5390680") {
+		n_obs_in_yr = aggregate(
+			actual_00665 ~ format(date, "%Y"),
+			data=data_site,
+			FUN = function(X) {
+				sum(!is.na(X))
+			}
+		)
+		names(n_obs_in_yr) = c("YEAR", "N_OBS")
+		full_yrs = subset(n_obs_in_yr, N_OBS >= full_yr_threshold)
+		n_samples = floor(nrow(full_yrs) * fraction_for_validation)
+		val_yrs = with(full_yrs, sample(YEAR, n_samples))
+		n_obs_in_yr = cbind(
+			data.frame(station_id=id),
+			n_obs_in_yr)
+		n_obs_in_yr$VALIDATION[n_obs_in_yr$YEAR %in% val_yrs] = 1
+		n_obs_in_yr$VALIDATION[is.na(n_obs_in_yr$VALIDATION)] = 0
+		summ_table = rbind(summ_table, n_obs_in_yr)
+	} else {
+		n_obs_in_yr = data.frame(
+			YEAR = 2010:2012,
+			N_OBS = 0,
+			VALIDATION = 0
+		)
+	}
 	for (val_bool in c(0,1)) {
 		sub_yrs = subset(n_obs_in_yr, VALIDATION == val_bool)$YEAR
 		sub_bool = with(data_site_mo,
