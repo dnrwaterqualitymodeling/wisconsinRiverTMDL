@@ -4,8 +4,9 @@
 #projectDir = "D:/WRB.Sufi2.SwatCup"
 #projectDir = "D:/WRB_driftless.Sufi2.SwatCup"
 #projectDir = "D:/WRB_north_central.Sufi2.SwatCup"
-projectDir = "D:/WRB_northern.Sufi2.SwatCup"
-simCount = 800
+#projectDir = "D:/WRB_northern.Sufi2.SwatCup"
+projectDir = "E:/WRB_NCDC.Sufi2.SwatCup"
+simCount = 1
 subbasinCount = 337
 startYr = 2002
 endYr = 2013
@@ -27,13 +28,19 @@ monthly = F
 
 #obsDir = "D:/usgs_raw/calibration/JJAS_50_pct_exc_driftless"
 #obsDir = "D:/usgs_raw/calibration/JJAS_50_pct_exc_north_central"
-obsDir = "D:/usgs_raw/calibration/JJAS_50_pct_exc_northern"
+#obsDir = "D:/usgs_raw/calibration/JJAS_50_pct_exc_northern"
+obsDir = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration"
 
-#gage_subbasin_lu =
-#	read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
-gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
+gage_subbasin_lu =
+	read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
+#gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
 	colClasses=c(rep("character", 4), "integer", "integer", "character"))
 setInternet2(TRUE)
+
+##### DUMMY #########
+
+parameterization = rbind(
+	c("r__SMTMP.bsn",0,0))
 
 ##### SNOWMELT #####
 
