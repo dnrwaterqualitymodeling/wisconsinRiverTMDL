@@ -90,7 +90,11 @@ close(con)
 con = odbcConnectAccess(inDb)
 query = "UPDATE hru SET OV_N = 0.1;"
 stdout = sqlQuery(con, query)
-query = "UPDATE rte SET CH_N2 = 0.065;"
+query = "UPDATE rte SET CH_N1 = 0.065;"
+# Average of Eau Claire and Little Rib FEMA 2010 Marathon County Flood Insurance Study
+stdout = sqlQuery(con, query)
+query = "UPDATE rte SET CH_N2 = 0.043;"
+
 stdout = sqlQuery(con, query)
 close(con)
 

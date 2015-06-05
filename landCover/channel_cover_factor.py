@@ -1,17 +1,30 @@
 import arcpy
 import os
-import imp
 import tempfile
 import uuid
 import random
+import sys
+import urllib
+import ftplib
+import zipfile
+import time
+import shutil
 import subprocess
+import xml
+import json
+import math
+import numpy as np
+from subprocess import Popen
 from arcpy import env
+from arcpy.sa import *
+arcpy.CheckOutExtension("Spatial")
 env.overwriteOutput = True
 
 dir_evaal = "C:/Users/ruesca/Documents/EVAAL"
 file_swat_reaches = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/hydro.shp"
 file_all_reaches = "K:/24kAttribution/Spatial24k03142013.gdb/reaches" 
 file_rip_buffs = "K:/24kAttribution/Spatial24k03142013.gdb/riparianBuffers"
+file_out = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/reach_cover_factor.txt"
 #===============================================================================
 # evaal = imp.load_source(
 #     "evaal",
@@ -70,9 +83,7 @@ def downloadCroplandDataLayer(yrStart, yrEnd, tempDir, watershedCdlPrj, rid):
             + str(ext.YMax)
         try:
             downloadLocXml = tempDir + '/download_' + year + '_' + rid + '.xml'
-            print clipUrl
             urllib.urlretrieve(clipUrl, downloadLocXml)
-            print downloadLocXml
             tiffUrl = xml.etree.ElementTree.parse(downloadLocXml).getroot()[0].text
             downloadTiff = tempDir + '/cdl_' + year + '_' + rid + '.tif'
             urllib.urlretrieve(tiffUrl, downloadTiff)
@@ -271,15 +282,29 @@ def calculateCFactor(downloadBool, localCdlList, watershedFile, rasterTemplateFi
     arcpy.ProjectRaster_management(outHigh1, outHigh, wtm, 'BILINEAR', outRes)
     arcpy.ProjectRaster_management(outLow1, outLow, wtm, 'BILINEAR', outRes)
 
-all_reaches_clip = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
-all_reaches_poly = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
-rip_buffs_clip = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
-rip_buffs_poly = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
-rip_sel = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
-rotation = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
-low_c = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
-high_c = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
+# all_reaches_clip = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
+# all_reaches_poly = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
+# rip_buffs_clip = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
+# rip_buffs_poly = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
+# rip_sel = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
+# rotation = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
+# low_c = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
+# high_c = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
+
+f = open(file_out, "w")
+f.write("Subbasin\tmean_riparian_c_factor\n")
 for reach in range(1,338):
+    print "####################"
+    print str(reach)
+    print "####################"
+    all_reaches_clip = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
+    all_reaches_poly = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
+    rip_buffs_clip = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
+    rip_buffs_poly = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
+    rip_sel = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
+    rotation = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
+    low_c = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
+    high_c = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
     arcpy.MakeFeatureLayer_management(
         file_swat_reaches,
         "reach_line",
@@ -352,9 +377,15 @@ for reach in range(1,338):
         high_c,
         low_c,
         dir_evaal + '/etc/cdlLegend.csv',
-        dir_evaal + "/etc/cFactorLookup.csv",
+        dir_evaal + '/etc/cFactorLookup.csv',
         env.scratchFolder,
         env.scratchGDB
     )
-    calculateCFactor(downloadBool, localCdlList, watershedFile, rasterTemplateFile, yrStart, yrEnd,\
-    outRotation, outHigh, outLow, legendFile, cFactorXwalkFile, tempDir, tempGdb)
+    ave_c = (Raster(low_c) + Raster(high_c)) / 2
+    overall_ave_c = arcpy.GetRasterProperties_management(
+        ave_c,
+        "MEAN"
+    )
+    overall_ave_c = str(float(overall_ave_c.getOutput(0)))
+    f.write(str(reach) + "\t" + str(overall_ave_c) + '\n')
+f.close()

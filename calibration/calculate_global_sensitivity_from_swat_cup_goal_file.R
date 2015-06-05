@@ -1,4 +1,4 @@
-file_goal = "D:/WRB.Sufi2.SwatCup/Iterations/snowmelt_sands/Sufi2.Out/goal.txt"
+file_goal = "C:/Users/ruesca/Documents/WRB.Sufi2.SwatCup/Iterations/growing_runoff_north_central/Sufi2.Out/goal.txt"
 
 cols = strsplit(readLines(file_goal, n=4)[4], "\\s+")[[1]]
 cols = gsub("^[0-9]+:", "", cols)
