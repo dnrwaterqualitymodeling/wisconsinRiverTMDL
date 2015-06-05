@@ -8,6 +8,7 @@ dir_out = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/climate/daymet"
 wd = "C:/TEMP/daymet"
 dir_ncdc = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/climate"
 inDb = "C:/Users/ruesca/Desktop/WRB_climate_station/WRB.mdb"
+
 #read in subbasins
 subbasins = readOGR(
 	"T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro",
@@ -39,7 +40,6 @@ daymetTimeSeries = daymetTimeSeries[
 		-which(daymetTimeSeries == as.Date("2012-12-31"))
 	)
 ]
-
 sub_var_lu = list(
 	pcp = "SubPcp",
 	tmp = "SubTmp",
@@ -64,6 +64,7 @@ for (subbasin in subbasins@data$Subbasin) {
 	for (var in c("pcp", "tmp", "solar", "rh")) {
 		file_out_clim = paste(wd, "/", var, "_", subbasin, ".txt", sep="")
 		print(file_out_clim)
+
 		var_col = var_col_lu[[var]]
 		clim = data_daymet[var_col]
 		

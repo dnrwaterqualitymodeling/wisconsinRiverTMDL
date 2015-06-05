@@ -13,8 +13,8 @@ library(rgdal)
 options(stringsAsFactors=F)
 options(warn=1)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
-projectDir = "C:/Users/ruesca/Desktop/WRB"
-#projectDir = "F:/WRB"
+#projectDir = "C:/Users/ruesca/Desktop/WRB"
+projectDir = "E:/WRB"
 mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
 
 #pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
@@ -27,6 +27,8 @@ background_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/groundWater/phosph
 soil_p_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Soil_Phosphorus/soil_phosphorus_by_subbasin.txt"
 hydro_dir = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro"
 subbasins_file = "subbasins_minus_urban_boundaries"
+lulc_manN_lu = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/lulc_manN_lu.csv"
+SWAT_manID_lu = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/SWAT_manID_lu.csv"
 
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 
@@ -94,9 +96,31 @@ query = "UPDATE rte SET CH_N1 = 0.065;"
 # Average of Eau Claire and Little Rib FEMA 2010 Marathon County Flood Insurance Study
 stdout = sqlQuery(con, query)
 query = "UPDATE rte SET CH_N2 = 0.043;"
-
 stdout = sqlQuery(con, query)
 close(con)
+
+# UPDATE MANNINGS N OVERLAND FLOW
+# OV_N values: natural LULCs - McCuen 1998, moldboard - Engman 1986, all else - Engman 1983
+con = odbcConnectAccess(inDb)
+
+N_by_lulc = read.csv(lulc_manN_lu)
+SWAT_lulc_by_manID = read.csv(SWAT_manID_lu)
+
+for (row in 1:nrow(N_by_lulc)) {
+	temp = SWAT_lulc_by_manID$Man_ID == row
+	lulc = toString(paste(
+		"'",
+		SWAT_lulc_by_manID$SWAT_LULC[temp],
+		"'", sep = ""))
+	query = paste(
+		"UPDATE hru SET OV_N = ",
+		N_by_lulc$ManningsN[row],
+		" WHERE LANDUSE IN (", lulc, ");",
+		sep = "")
+	stdout = sqlQuery(con, query)
+}
+close(con)
+
 
 # SET EVAPOTRANSPIRATION EQUATION TO PENMAN MONTEITH
 
