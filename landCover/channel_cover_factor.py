@@ -105,7 +105,7 @@ def downloadCroplandDataLayer(yrStart, yrEnd, tempDir, watershedCdlPrj, rid):
 def calculateCFactor(downloadBool, localCdlList, watershedFile, rasterTemplateFile, yrStart, yrEnd,\
     outRotation, outHigh, outLow, legendFile, cFactorXwalkFile, tempDir, tempGdb):
 
-    setupTemp(tempDir,tempGdb)
+    # setupTemp(tempDir,tempGdb)
 
     env.workspace = tempGdb
     os.environ['ARCTMPDIR'] = tempDir
@@ -264,23 +264,12 @@ def calculateCFactor(downloadBool, localCdlList, watershedFile, rasterTemplateFi
         arcpy.SetProgressorPosition()
     arcpy.ResetProgressor()
     del row, rows
-
-    arcpy.AddMessage("Converting points to raster...")
-    arcpy.PointToRaster_conversion(samplePts, "rotation", outRotation1, 'MOST_FREQUENT', \
-        '', minResCdlTiff)
-    arcpy.PointToRaster_conversion(samplePts, "cFactorHigh", outHigh1, 'MEAN', \
-        '', minResCdlTiff)
-    arcpy.PointToRaster_conversion(samplePts, "cFactorLow", outLow1, 'MEAN', \
-        '', minResCdlTiff)
-
-    wtm = arcpy.Describe(rasterTemplateFile).spatialReference
-    outRes = int(arcpy.GetRasterProperties_management(rasterTemplateFile, 'CELLSIZEX').getOutput(0))
-    env.mask = rasterTemplateFile
-    env.snapRaster = rasterTemplateFile
-    env.extent = rasterTemplateFile
-    arcpy.ProjectRaster_management(outRotation1, outRotation, wtm, 'NEAREST', outRes)
-    arcpy.ProjectRaster_management(outHigh1, outHigh, wtm, 'BILINEAR', outRes)
-    arcpy.ProjectRaster_management(outLow1, outLow, wtm, 'BILINEAR', outRes)
+    
+    means = [0] * ptCount
+    with arcpy.da.SearchCursor(samplePts, ["cFactorHigh","cFactorLow"]) as cursor:
+        for i,row in enumerate(cursor):
+            means[i] = (row[0] + row[1]) / 2
+    return np.mean(means)
 
 # all_reaches_clip = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
 # all_reaches_poly = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
@@ -293,7 +282,8 @@ def calculateCFactor(downloadBool, localCdlList, watershedFile, rasterTemplateFi
 
 f = open(file_out, "w")
 f.write("Subbasin\tmean_riparian_c_factor\n")
-for reach in range(1,338):
+f.close()
+for reach in range(114,338):
     print "####################"
     print str(reach)
     print "####################"
@@ -318,6 +308,8 @@ for reach in range(1,338):
         "#",
         "NONE"
     )
+    env.extent = all_reaches_clip
+    env.snapRaster = all_reaches_clip
     arcpy.RasterToPolygon_conversion(
         all_reaches_clip,
         all_reaches_poly,
@@ -360,13 +352,19 @@ for reach in range(1,338):
         for row in cursor:
             i += 1
             hydroids[i] = int(row[0])
+    if len(hydroids) == 1:
+        expr = "GRIDCODE = " + str(hydroids[0])
+    else:
+        expr = "GRIDCODE IN " + str(tuple(hydroids))
     arcpy.SelectLayerByAttribute_management(
         "rip_buffs_poly", 
         "NEW_SELECTION",
-        "GRIDCODE IN " + str(tuple(hydroids))
+        expr
     )
     arcpy.CopyFeatures_management("rip_buffs_poly", rip_sel)
-    calculateCFactor(
+    env.extent = None
+    env.snapRaster = None
+    c_mean = calculateCFactor(
         'true',
         '',
         rip_sel,
@@ -381,11 +379,7 @@ for reach in range(1,338):
         env.scratchFolder,
         env.scratchGDB
     )
-    ave_c = (Raster(low_c) + Raster(high_c)) / 2
-    overall_ave_c = arcpy.GetRasterProperties_management(
-        ave_c,
-        "MEAN"
-    )
-    overall_ave_c = str(float(overall_ave_c.getOutput(0)))
-    f.write(str(reach) + "\t" + str(overall_ave_c) + '\n')
-f.close()
+    f = open(file_out, "a")
+    f.write(str(reach) + "\t" + str(c_mean) + '\n')
+    f.close()
+    
