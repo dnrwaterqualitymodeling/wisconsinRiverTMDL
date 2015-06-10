@@ -13,8 +13,8 @@ library(rgdal)
 options(stringsAsFactors=F)
 options(warn=1)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
-#projectDir = "C:/Users/ruesca/Desktop/WRB"
-projectDir = "E:/WRB"
+projectDir = "C:/Users/ruesca/Documents/WRB"
+#projectDir = "E:/WRB"
 mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
 
 #pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
@@ -547,6 +547,7 @@ subbasins = readOGR(dsn=hydro_dir, layer=subbasins_file)
 maxAr = max(gArea(subbasins, byid=T))
 #convert to 0-1 ratio
 surlag_vals = gArea(subbasins, byid=T) / maxAr
+surlag_vals = (1 - surlag_vals) + 1
 
 #update query using this data in r
 for (row in subbasins@data$Subbasin) {
