@@ -97,7 +97,7 @@ for (var in c("pcp", "tmp")) {
             write(clim$PCP, file=outClimFile, ncolumns=1, append=T)
         } else {
             write(rep("-99,-99",daysOfSpinup), file=outClimFile, ncolumns=1, append=T)
-            write(t(as.matrix(clim[c("MIN", "MAX")])),
+            write(t(as.matrix(clim[c("MAX", "MIN")])),
                   file=outClimFile,
                   ncolumns=2,
                   append=T,
@@ -125,9 +125,9 @@ for (var in c("pcp", "tmp")) {
     write.csv(stationTable, paste(var,".txt",sep=""), row.names=F, quote=F)
 }
 
-filenames = dir(wd)
-sapply(filenames, function(x) {
-    file.copy(from=paste(wd, x, sep="/"),
-              to=paste(netdir, x, sep="/"),
-              overwrite=overwrite)
+# filenames = dir(wd)
+# sapply(filenames, function(x) {
+    # file.copy(from=paste(wd, x, sep="/"),
+              # to=paste(netdir, x, sep="/"),
+              # overwrite=overwrite)
 })

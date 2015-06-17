@@ -6,8 +6,8 @@
 #projectDir = "D:/WRB_sands.Sufi2.SwatCup"
 #projectDir = "D:/WRB_north_central.Sufi2.SwatCup"
 
-projectDir = "D:/WRB_northern.Sufi2.SwatCup"
-simCount = 576
+projectDir = "E:/Daymet_Recheck_try2/WRB_daymet_recheck2.Sufi2.SwatCup"
+simCount = 4
 subbasinCount = 337
 startYr = 2002
 endYr = 2013
@@ -19,6 +19,7 @@ monthly = F
 #	variable name, column index in output.rch, subbasin ID, observed data
 
 # 1. Snowmelt, 1a. basin, 1b. ecoregion
+obsDir = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration"
 #obsDir = "D:/usgs_raw/calibration"
 #obsDir = "D:/usgs_raw/calibration/MAMJ_50_pct_exc_driftless"
 #obsDir = "D:/usgs_raw/calibration/MAMJ_50_pct_exc_sands"
@@ -29,7 +30,7 @@ monthly = F
 #obsDir = "D:/usgs_raw/calibration/AMJJASO_50_pct_exc_driftless"
 #obsDir = "D:/usgs_raw/calibration/AMJJASO_50_pct_exc_sands"
 #obsDir = "D:/usgs_raw/calibration/AMJJASO_50_pct_exc_north_central"
-obsDir = "D:/usgs_raw/calibration/AMJJASO_50_pct_exc_northern"
+#obsDir = "D:/usgs_raw/calibration/AMJJASO_50_pct_exc_northern"
 
 # 4. Groundwater
 #obsDir = "D:/usgs_raw/calibration/JJAS_50_pct_exc_driftless"
@@ -43,6 +44,11 @@ gage_subbasin_lu =
 #gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
 	colClasses=c(rep("character", 4), "integer", "integer", "character"))
 setInternet2(TRUE)
+
+###########DUMMY############
+parameterization = rbind(
+	c("r__SMTMP.bsn",-0.5,0.5)
+)
 
 
 ####### MASTER PARAMETERIZATION, FITTED ########
