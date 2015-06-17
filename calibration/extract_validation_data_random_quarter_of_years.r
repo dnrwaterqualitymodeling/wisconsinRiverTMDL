@@ -13,8 +13,8 @@ summ_table_file =
 set.seed(6546494)
 
 gauge_basin_lu = read.csv(gauge_basin_lu_file,
-	colClasses=c("character", "character", "integer", "integer", "character"))
-gauge_basin_lu = subset(gauge_basin_lu, Keep == 1)
+	colClasses=c(rep("character", 5), "integer", "integer", "character"))
+#gauge_basin_lu = subset(gauge_basin_lu, Keep == 1)
 
 obs_files = list.files(usgs_raw_dir, pattern="^0[0-9]+\\.txt$", full.names=T)
 gauge_ids = str_extract(basename(obs_files), "^0[0-9]+")
