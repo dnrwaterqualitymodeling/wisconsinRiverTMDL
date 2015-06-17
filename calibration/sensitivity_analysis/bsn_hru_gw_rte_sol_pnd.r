@@ -15,18 +15,18 @@ iter = as.integer(arguments[9])
 ##
 #
 #txtinout = "H:/WRB/Scenarios/Default/TxtInOut"
-txtinout = "F:/WRB/Scenarios/Default/TxtInOut"
-dir_out = "H:/wrb_sensitivity_test"
-temp_dir = "H:/temp_directory"
+#txtinout = "F:/WRB/Scenarios/Default/TxtInOut"
+#dir_out = "H:/wrb_sensitivity_test"
+#temp_dir = "H:/temp_directory"
 # txtinout = "C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut"
 # dir_out = "C:/Users/ruesca/Desktop/WRB_sensitivity"
 # temp_dir = "C:/Users/ruesca/Desktop/temp_directory"
-p = "CANMX"
-ext = "hru"
-mn = 0
-mx = 50
-method = "a"
-iter = 25
+#p = "CANMX"
+#ext = "hru"
+#mn = 0
+#mx = 50
+#method = "a"
+#iter = 25
 
 # operation = "planting"#"tillage"#
 if (ext == "rte"){

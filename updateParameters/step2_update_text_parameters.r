@@ -7,7 +7,7 @@ library(stringr)
 
 options(stringsAsFactors=F)
 
-projectDir = "C:/Users/ruesca/Desktop/WRB"
+projectDir = "C:/Users/ruesca/Desktop/daymet_test_for_guy/WRB"
 #projectDir = "H:/WRB"
 
 txtinout = paste(projectDir, "Scenarios", "Default", "TxtInOut", sep="/")
@@ -16,6 +16,7 @@ file_wetland_geometry = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/we
 file_pond_geometry = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
 file_merged_idas = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_and_wetland_geometry.txt"
 file_fert_dat = "T:/Projects/Wisconsin_River/swat_install_software/SWAT_EXE_and_file_updates/fert.dat"
+manure = F
 ## UPDATE POINT SOURCE TEXT FILES AND FIG.FIG
 ps_files = list.files(
 	"T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/point_sources",
@@ -156,10 +157,11 @@ write.table(merge_idas, file_merged_idas, sep="\t", row.names=F)
 
 # New parameters for Vadas and White model
 
-file.copy(file_fert_dat, paste(txtinout, "/fert.dat", sep=""), overwrite=T)
-file_basins_bsn = paste(txtinout, "/basins.bsn", sep="")
-write("               1    | manp_flag : 1 = use manure P model\n               0    | isolp flag !! if = 1  prints out solp.out\n",
-	file_basins_bsn,
-	append=T
-)
-
+if (manure) {
+	file.copy(file_fert_dat, paste(txtinout, "/fert.dat", sep=""), overwrite=T)
+	file_basins_bsn = paste(txtinout, "/basins.bsn", sep="")
+	write("               1    | manp_flag : 1 = use manure P model\n               0    | isolp flag !! if = 1  prints out solp.out\n",
+		file_basins_bsn,
+		append=T
+	)
+}

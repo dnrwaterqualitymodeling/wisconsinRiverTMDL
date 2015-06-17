@@ -19,6 +19,6 @@ num_mat = data.frame(
 	observed = num_mat[,1],
 	simulated = num_mat[,2]
 )
-plot(observed ~ simulated, data=num_mat)
+plot(observed ~ simulated, data=num_mat, log="xy")
 lm1 = lm(observed ~ simulated, data=num_mat)
 ns = nash_sutcliffe(num_mat$simulated, num_mat$observed)

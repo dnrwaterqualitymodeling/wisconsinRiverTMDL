@@ -1,17 +1,30 @@
 import arcpy
 import os
-import imp
 import tempfile
 import uuid
 import random
+import sys
+import urllib
+import ftplib
+import zipfile
+import time
+import shutil
 import subprocess
+import xml
+import json
+import math
+import numpy as np
+from subprocess import Popen
 from arcpy import env
+from arcpy.sa import *
+arcpy.CheckOutExtension("Spatial")
 env.overwriteOutput = True
 
 dir_evaal = "C:/Users/ruesca/Documents/EVAAL"
 file_swat_reaches = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/hydro.shp"
 file_all_reaches = "K:/24kAttribution/Spatial24k03142013.gdb/reaches" 
 file_rip_buffs = "K:/24kAttribution/Spatial24k03142013.gdb/riparianBuffers"
+file_out = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/reach_cover_factor.txt"
 #===============================================================================
 # evaal = imp.load_source(
 #     "evaal",
@@ -70,9 +83,7 @@ def downloadCroplandDataLayer(yrStart, yrEnd, tempDir, watershedCdlPrj, rid):
             + str(ext.YMax)
         try:
             downloadLocXml = tempDir + '/download_' + year + '_' + rid + '.xml'
-            print clipUrl
             urllib.urlretrieve(clipUrl, downloadLocXml)
-            print downloadLocXml
             tiffUrl = xml.etree.ElementTree.parse(downloadLocXml).getroot()[0].text
             downloadTiff = tempDir + '/cdl_' + year + '_' + rid + '.tif'
             urllib.urlretrieve(tiffUrl, downloadTiff)
@@ -94,7 +105,7 @@ def downloadCroplandDataLayer(yrStart, yrEnd, tempDir, watershedCdlPrj, rid):
 def calculateCFactor(downloadBool, localCdlList, watershedFile, rasterTemplateFile, yrStart, yrEnd,\
     outRotation, outHigh, outLow, legendFile, cFactorXwalkFile, tempDir, tempGdb):
 
-    setupTemp(tempDir,tempGdb)
+    # setupTemp(tempDir,tempGdb)
 
     env.workspace = tempGdb
     os.environ['ARCTMPDIR'] = tempDir
@@ -253,33 +264,37 @@ def calculateCFactor(downloadBool, localCdlList, watershedFile, rasterTemplateFi
         arcpy.SetProgressorPosition()
     arcpy.ResetProgressor()
     del row, rows
+    
+    means = [0] * ptCount
+    with arcpy.da.SearchCursor(samplePts, ["cFactorHigh","cFactorLow"]) as cursor:
+        for i,row in enumerate(cursor):
+            means[i] = (row[0] + row[1]) / 2
+    return np.mean(means)
 
-    arcpy.AddMessage("Converting points to raster...")
-    arcpy.PointToRaster_conversion(samplePts, "rotation", outRotation1, 'MOST_FREQUENT', \
-        '', minResCdlTiff)
-    arcpy.PointToRaster_conversion(samplePts, "cFactorHigh", outHigh1, 'MEAN', \
-        '', minResCdlTiff)
-    arcpy.PointToRaster_conversion(samplePts, "cFactorLow", outLow1, 'MEAN', \
-        '', minResCdlTiff)
+# all_reaches_clip = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
+# all_reaches_poly = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
+# rip_buffs_clip = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
+# rip_buffs_poly = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
+# rip_sel = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
+# rotation = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
+# low_c = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
+# high_c = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
 
-    wtm = arcpy.Describe(rasterTemplateFile).spatialReference
-    outRes = int(arcpy.GetRasterProperties_management(rasterTemplateFile, 'CELLSIZEX').getOutput(0))
-    env.mask = rasterTemplateFile
-    env.snapRaster = rasterTemplateFile
-    env.extent = rasterTemplateFile
-    arcpy.ProjectRaster_management(outRotation1, outRotation, wtm, 'NEAREST', outRes)
-    arcpy.ProjectRaster_management(outHigh1, outHigh, wtm, 'BILINEAR', outRes)
-    arcpy.ProjectRaster_management(outLow1, outLow, wtm, 'BILINEAR', outRes)
-
-all_reaches_clip = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
-all_reaches_poly = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
-rip_buffs_clip = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
-rip_buffs_poly = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
-rip_sel = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
-rotation = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
-low_c = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
-high_c = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
-for reach in range(1,338):
+f = open(file_out, "w")
+f.write("Subbasin\tmean_riparian_c_factor\n")
+f.close()
+for reach in range(115,338):
+    print "####################"
+    print str(reach)
+    print "####################"
+    all_reaches_clip = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
+    all_reaches_poly = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
+    rip_buffs_clip = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
+    rip_buffs_poly = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
+    rip_sel = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
+    rotation = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
+    low_c = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
+    high_c = td + "\\" + str(uuid.uuid4()).replace("-","") + ".img"
     arcpy.MakeFeatureLayer_management(
         file_swat_reaches,
         "reach_line",
@@ -293,6 +308,8 @@ for reach in range(1,338):
         "#",
         "NONE"
     )
+    env.extent = all_reaches_clip
+    env.snapRaster = all_reaches_clip
     arcpy.RasterToPolygon_conversion(
         all_reaches_clip,
         all_reaches_poly,
@@ -335,13 +352,19 @@ for reach in range(1,338):
         for row in cursor:
             i += 1
             hydroids[i] = int(row[0])
+    if len(hydroids) == 1:
+        expr = "GRIDCODE = " + str(hydroids[0])
+    else:
+        expr = "GRIDCODE IN " + str(tuple(hydroids))
     arcpy.SelectLayerByAttribute_management(
         "rip_buffs_poly", 
         "NEW_SELECTION",
-        "GRIDCODE IN " + str(tuple(hydroids))
+        expr
     )
     arcpy.CopyFeatures_management("rip_buffs_poly", rip_sel)
-    calculateCFactor(
+    env.extent = None
+    env.snapRaster = None
+    c_mean = calculateCFactor(
         'true',
         '',
         rip_sel,
@@ -352,9 +375,11 @@ for reach in range(1,338):
         high_c,
         low_c,
         dir_evaal + '/etc/cdlLegend.csv',
-        dir_evaal + "/etc/cFactorLookup.csv",
+        dir_evaal + '/etc/cFactorLookup.csv',
         env.scratchFolder,
         env.scratchGDB
     )
-    calculateCFactor(downloadBool, localCdlList, watershedFile, rasterTemplateFile, yrStart, yrEnd,\
-    outRotation, outHigh, outLow, legendFile, cFactorXwalkFile, tempDir, tempGdb)
+    f = open(file_out, "a")
+    f.write(str(reach) + "\t" + str(c_mean) + '\n')
+    f.close()
+    

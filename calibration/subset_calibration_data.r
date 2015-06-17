@@ -3,15 +3,19 @@ options(stringsAsFactors=F)
 
 # VARIABLES THAT NEED TO BE EDITED
 
-dir_exc = "AMJJASO_50_pct_exc_northern"
-exc_val = 0.5
-mos = 4:10
+dir_exc = "AMJJASO_sand_plains"
+exc_val = 1
+mos = 1:12
 annual_basis = TRUE
-ecos =
-#	"Driftless Area and Southeastern Till Plains"
-#	"Central Sands and Moraines"
-#	"North Central Hardwood Forests"
-	"Northern Lakes and Forests"
+ecos = c(
+#	"Western Coulees and Ridges"
+	"Central Sand Plains"
+#	"Forest Transition"
+#	"Northern Highland"
+)
+gauge_basin_lu_file =
+	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv"
+
 
 # This function needs to be edited depending on how the flow data should be sliced 
 subset_cal_data = function(data_raw, mos, exc_val) {
@@ -35,15 +39,12 @@ if (!file.exists(out_dir)) {
 }
 pdf(paste(out_dir, "/", dir_exc, ".pdf",sep=''), width=11, height=8)
 # subset_dir = paste(cal_dir, "/10_pct_exceedance_mam", sep="")
-gauge_basin_lu_file =
-	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv"
-
 gauge_basin_lu = read.csv(gauge_basin_lu_file,
-	colClasses=c(rep("character", 4), "integer", "integer", "character"))
+	colClasses=c(rep("character", 5), "integer", "integer", "character"))
 gauge_basin_lu = subset(gauge_basin_lu, Keep == 1)
 
 obs_files = list.files(cal_dir, pattern="^0[0-9]+\\.txt$", full.names=T)
-gauge_ids_eco = subset(gauge_basin_lu, ECOREGION %in% ecos)$USGS_ID
+gauge_ids_eco = subset(gauge_basin_lu, ECOLOGICAL_LANDSCAPE %in% ecos)$USGS_ID
 obs_files = obs_files[grep(paste(gauge_ids_eco, collapse="|"), obs_files)]
 
 model_period = seq(as.Date("2002-01-01"), as.Date("2013-12-31"), "1 day")

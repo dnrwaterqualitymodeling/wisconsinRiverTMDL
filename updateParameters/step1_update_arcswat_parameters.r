@@ -13,8 +13,8 @@ library(rgdal)
 options(stringsAsFactors=F)
 options(warn=1)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
-#projectDir = "C:/Users/ruesca/Desktop/WRB"
-projectDir = "E:/WRB"
+projectDir = "C:/Users/ruesca/Documents/WRB"
+#projectDir = "E:/WRB"
 mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
 
 #pond_geometry_file = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
@@ -90,9 +90,12 @@ close(con)
 # UPDATE MANNINGS N BASED ON RECCS IN BAUMGART, 2005
 
 con = odbcConnectAccess(inDb)
-# query = "UPDATE hru SET OV_N = 0.1;"
-# stdout = sqlQuery(con, query)
-query = "UPDATE rte SET CH_N2 = 0.065;"
+query = "UPDATE hru SET OV_N = 0.1;"
+stdout = sqlQuery(con, query)
+query = "UPDATE rte SET CH_N1 = 0.065;"
+# Average of Eau Claire and Little Rib FEMA 2010 Marathon County Flood Insurance Study
+stdout = sqlQuery(con, query)
+query = "UPDATE rte SET CH_N2 = 0.043;"
 stdout = sqlQuery(con, query)
 close(con)
 
@@ -105,8 +108,15 @@ SWAT_lulc_by_manID = read.csv(SWAT_manID_lu)
 
 for (row in 1:nrow(N_by_lulc)) {
 	temp = SWAT_lulc_by_manID$Man_ID == row
-	lulc = toString(paste("'", SWAT_lulc_by_manID$SWAT_LULC[temp], "'", sep = ""))
-	query = paste("UPDATE hru SET OV_N = ", N_by_lulc$ManningsN[row], " WHERE LANDUSE IN (", lulc, ");", sep = "")
+	lulc = toString(paste(
+		"'",
+		SWAT_lulc_by_manID$SWAT_LULC[temp],
+		"'", sep = ""))
+	query = paste(
+		"UPDATE hru SET OV_N = ",
+		N_by_lulc$ManningsN[row],
+		" WHERE LANDUSE IN (", lulc, ");",
+		sep = "")
 	stdout = sqlQuery(con, query)
 }
 close(con)
@@ -537,6 +547,7 @@ subbasins = readOGR(dsn=hydro_dir, layer=subbasins_file)
 maxAr = max(gArea(subbasins, byid=T))
 #convert to 0-1 ratio
 surlag_vals = gArea(subbasins, byid=T) / maxAr
+surlag_vals = (1 - surlag_vals) + 1
 
 #update query using this data in r
 for (row in subbasins@data$Subbasin) {
