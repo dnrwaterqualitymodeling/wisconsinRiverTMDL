@@ -283,7 +283,7 @@ def calculateCFactor(downloadBool, localCdlList, watershedFile, rasterTemplateFi
 f = open(file_out, "w")
 f.write("Subbasin\tmean_riparian_c_factor\n")
 f.close()
-for reach in range(114,338):
+for reach in range(115,338):
     print "####################"
     print str(reach)
     print "####################"
