@@ -19,12 +19,13 @@ startYr = 2002
 endYr = 2013
 objFuncCode = 5
 thresh = 0
-monthly = F
+monthly = T
 weight_by_sample_size = F
+
 excl_ec_pine_rib = T
 sands_east = F
 sands_west = F
-just_muskellunge = T
+just_muskellunge = F
 
 # Observations -- 
 #	variable name, column index in output.rch, subbasin ID, observed data
@@ -41,7 +42,7 @@ just_muskellunge = T
 #obsDir = "D:/usgs_raw/calibration/AMJJASO_50_pct_exc_driftless"
 #obsDir = "D:/usgs_raw/calibration/AMJJASO_sands"
 #obsDir = "D:/usgs_raw/calibration/AMJJASO_north_central"
-obsDir = "D:/usgs_raw/calibration/AMJJASO_northern"
+obsDir = "D:/usgs_raw/calibration/northern"
 
 # 4. Groundwater
 #obsDir = "D:/usgs_raw/calibration/AMJJASO_driftless"
@@ -93,7 +94,6 @@ parameterization = rbind(
 	c("r__SOL_K().sol________113-121,123-135,160,161,163-165,167,168,209,221-224,226,271-273,277,278,280,281,283-285,300,309,315,316,318,319,334-337",-0.15,0),
 	c("v__GW_DELAY.gw________113-121,123-135,160,161,163-165,167,168,209,221-224,226,271-273,277,278,280,281,283-285,300,309,315,316,318,319,334-337",0,500),
 	c("r__ALPHA_BF.gw________113-121,123-135,160,161,163-165,167,168,209,221-224,226,271-273,277,278,280,281,283-285,300,309,315,316,318,319,334-337",-0.999,-0.5),
-	c("v__RCHRG_DP.gw________113-121,123-135,160,161,163-165,167,168,209,221-224,226,271-273,277,278,280,281,283-285,300,309,315,316,318,319,334-337",0.0001,0.15),
 	c("v__GWQMN.gw________113-121,123-135,160,161,163-165,167,168,209,221-224,226,271-273,277,278,280,281,283-285,300,309,315,316,318,319,334-337",0,3000),
 	c("v__GW_REVAP.gw________113-121,123-135,160,161,163-165,167,168,209,221-224,226,271-273,277,278,280,281,283-285,300,309,315,316,318,319,334-337",0.005,0.1),
 	c("v__REVAPMN.gw________113-121,123-135,160,161,163-165,167,168,209,221-224,226,271-273,277,278,280,281,283-285,300,309,315,316,318,319,334-337",0,3000)	
