@@ -125,9 +125,9 @@ for (var in c("pcp", "tmp")) {
     write.csv(stationTable, paste(var,".txt",sep=""), row.names=F, quote=F)
 }
 
-filenames = dir(wd)
-sapply(filenames, function(x) {
-    file.copy(from=paste(wd, x, sep="/"),
-              to=paste(netdir, x, sep="/"),
-              overwrite=overwrite)
+# filenames = dir(wd)
+# sapply(filenames, function(x) {
+    # file.copy(from=paste(wd, x, sep="/"),
+              # to=paste(netdir, x, sep="/"),
+              # overwrite=overwrite)
 })

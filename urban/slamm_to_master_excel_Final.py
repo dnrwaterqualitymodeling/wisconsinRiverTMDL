@@ -12,7 +12,7 @@ arcpy.env.overwriteOutput = True
 
 
 soils = "T:/Projects/Wisconsin_River/GIS_Datasets/Urban/SLAMM Model Area/SLAMM_Soil_Texture_Draft_1.shp"
-UABs = "T:/Projects/Wisconsin_River/GIS_Datasets/Urban/Urban Area Boundaries/SWAT_Urban_Areas.gdb/SWAT_Urban_Areas6"
+UABs = "T:/Projects/Wisconsin_River/GIS_Datasets/Urban/Urban Area Boundaries/SWAT_Urban_Areas.gdb/SWAT_Urban_Areas7"
 subbasins = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/subbasins.shp"
 FinalMunis = "T:/Projects/Wisconsin_River/GIS_Datasets/Urban/Urban Area Boundaries/SWAT_Urban_Areas.gdb/FinalMunis"
 pcpLookup = "T:/Projects/Wisconsin_River/GIS_Datasets/Urban/SLAMM Model Area/MS4_Subbasins/PCP_export.xlsx/'Guy Lookup$'"
@@ -80,6 +80,7 @@ def cleanCSVs():
 	p.wait()
 
 #create sewer/reach sheds by unique muni, subbasin, soil type, and add best precip file
+#****** we are now using Daymet - so how should we go about the precip???***
 def createReachsheds():
 	#create an feature class of all the modified permitted sewersheds
 	arcpy.env.workspace = PerMS4_folder
