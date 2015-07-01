@@ -13,7 +13,7 @@ library(rgdal)
 options(stringsAsFactors=F)
 options(warn=1)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
-projectDir = "C:/Users/ruesca/Documents/WRB"
+projectDir = "C:/Users/ruesca/Desktop/SwatProject"
 #projectDir = "E:/WRB"
 mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
 
@@ -34,12 +34,17 @@ inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 
 # UPDATE IRRIGATION
 # 0 is off, 1 from reach, 3 from shallow aquifer
-irr_sca = 3
+irr_sca = 0
 # If CNOP = T set CNOPs, else revert to CN2
 CNOP = F
 
-# UPDATE CANMX
+# UPDATE SOIL TEXTURES
+con = odbcConnectAccess(inDb)
+txtr_query = "UPDATE sol SET TEXTURE = HYDGRP;"
+stdout = sqlQuery(con, txtr_query)
+close(con)
 
+# UPDATE CANMX
 con = odbcConnectAccess(inDb)
 # Wu and Johnston, 2008
 # Hydrologic comparison between a forested and a wetland/lake dominated watershed using SWAT
@@ -92,7 +97,7 @@ close(con)
 con = odbcConnectAccess(inDb)
 query = "UPDATE hru SET OV_N = 0.1;"
 stdout = sqlQuery(con, query)
-query = "UPDATE rte SET CH_N1 = 0.065;"
+query = "UPDATE sub SET CH_N1 = 0.065;"
 # Average of Eau Claire and Little Rib FEMA 2010 Marathon County Flood Insurance Study
 stdout = sqlQuery(con, query)
 query = "UPDATE rte SET CH_N2 = 0.043;"
@@ -291,12 +296,17 @@ for (row in 1:nrow(mgt1)) {
 	# UPDATE IRRIGATION PARAMETERS
 	# 	opschedules.mdb currently has place holders for irrigation
 	#	these lines set the necessary parameters, later they get turned on.
+	if (irr_sca > 0) {
+		irrno = row_data$SUBBASIN
+	} else {
+		irrno = 0
+	}
 	if (lu %in% pot_veggie_landuses){
 		irri_mgt1_query = paste(
 			"UPDATE mgt1 SET IRRSC =",
 			irr_sca,
 			", IRRNO = ",
-			row_data$SUBBASIN,
+			irrno,
 			" WHERE SUBBASIN = ",
 			as.character(row_data$SUBBASIN),
 			" AND LANDUSE = '",
@@ -364,13 +374,19 @@ for (row in 1:nrow(mgt1)) {
 }
 ### IRRIGATION PARAMETERS
 # already have a slot in wrb.mdb (from opschedules) for every year in potato veggie ops
-
-wstrs_id = 1
-auto_wstrs = 1
-irr_eff = 90
-irr_mx = 90
-irr_asq = 0.02
-
+if (irr_sca > 0) {
+	wstrs_id = 1
+	auto_wstrs = 1
+	irr_eff = 90
+	irr_mx = 90
+	irr_asq = 0.02
+} else {
+	wstrs_id = 1
+	auto_wstrs = 0
+	irr_eff = 0
+	irr_mx = 0
+	irr_asq = 0
+}
 #### for (lu in pot_veggie_landuses){
 irri_query = paste(
 		"UPDATE mgt2 SET WSTRS_ID = ",
@@ -388,11 +404,7 @@ irri_query = paste(
 		" WHERE MGT_OP = 10;",
 		sep=''
 )
-if (irr_sca == 0){
-		# print("NOT TURNING ON IRRIGATION")
-} else {
-	stout = sqlQuery(con_mgt2, irri_query)
-}
+stout = sqlQuery(con_mgt2, irri_query)
 
 # CNOP
 if (CNOP) {
