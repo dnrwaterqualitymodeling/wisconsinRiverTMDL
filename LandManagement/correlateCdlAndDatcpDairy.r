@@ -1,7 +1,7 @@
 library(raster)
 library(rgdal)
 
-wd = 'T:/Projects//Wisconsin_River/GIS_Datasets/Land_Management/Validations/DairyDensity_Comparisons'
+wd = 'T:/Projects/Wisconsin_River/GIS_Datasets/Land_Management/Validations/DairyDensity_Comparisons'
 setwd(wd)
 cdlFile = 'CDLbyCLU_DairyPixelDensity.img'
 datcpFile = 'DairyProducerDensity_Statewide.tif'

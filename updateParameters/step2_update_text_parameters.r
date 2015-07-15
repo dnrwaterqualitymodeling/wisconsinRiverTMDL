@@ -7,7 +7,7 @@ library(stringr)
 
 options(stringsAsFactors=F)
 
-projectDir = "C:/Users/ruesca/Desktop/SwatProject"
+projectDir = "C:/Users/ruesca/Desktop/WRB"
 #projectDir = "H:/WRB"
 
 txtinout = paste(projectDir, "Scenarios", "Default", "TxtInOut", sep="/")

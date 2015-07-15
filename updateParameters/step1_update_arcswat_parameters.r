@@ -13,7 +13,7 @@ library(rgdal)
 options(stringsAsFactors=F)
 options(warn=1)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
-projectDir = "C:/Users/ruesca/Desktop/SwatProject"
+projectDir = "C:/Users/ruesca/Desktop/WRB"
 #projectDir = "E:/WRB"
 mean_slope_file = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/slope/subbasin_landuse_mean_slope.txt"
 
@@ -34,9 +34,9 @@ inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 
 # UPDATE IRRIGATION
 # 0 is off, 1 from reach, 3 from shallow aquifer
-irr_sca = 0
+irr_sca = 3
 # If CNOP = T set CNOPs, else revert to CN2
-CNOP = F
+CNOP = T
 
 # UPDATE SOIL TEXTURES
 con = odbcConnectAccess(inDb)
@@ -472,7 +472,7 @@ if (CNOP) {
 	for (hydgrp in LETTERS[1:4]) {
 		soils = hydgrp_lu[hydgrp_lu$HYDGRP == hydgrp, "SOIL"]
 		soils = paste("('", paste(soils, collapse="','"), "')", sep="")
-		for (lc in c("WATR", "URML", "FRSD", "FRSE", "FRST", "WETN", "RNGE", "ONIO", "CRRT")) {
+		for (lc in c("WATR", "URML", "FRSD", "FRSE", "FRST", "WETN", "RNGE", "PAST", "ONIO", "CRRT")) {
 			query = paste(
 				"SELECT CN2 FROM mgt1 WHERE LANDUSE = '",
 				lc, 

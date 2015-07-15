@@ -1,9 +1,9 @@
 library(stringr)
-options(stringsAsFactors=F)
+options(stringsAsFactors=F, warn=2)
 
 # VARIABLES THAT NEED TO BE EDITED
 
-dir_exc = "AMJJASO_sand_plains"
+dir_exc = "central_sands"
 exc_val = 1
 mos = 1:12
 annual_basis = TRUE
@@ -13,8 +13,10 @@ ecos = c(
 #	"Forest Transition"
 #	"Northern Highland"
 )
+use_reservoirs = F
 gauge_basin_lu_file =
 	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv"
+file_sb_eco_lu = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/SB_by_ECO_lookup_ecological_landscapes.txt"
 
 
 # This function needs to be edited depending on how the flow data should be sliced 
@@ -27,8 +29,8 @@ subset_cal_data = function(data_raw, mos, exc_val) {
 }
 cal_dir = 
 	"T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_raw/calibration"
-file_sb_eco_lu = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/SB_by_ECO_lookup.txt"
-
+res_dir =
+	"T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/reservoir"
 # STOP EDITING BELOW HERE
 
 sb_eco_lu = read.table(file_sb_eco_lu, sep="\t", header=T)
@@ -44,24 +46,60 @@ gauge_basin_lu = read.csv(gauge_basin_lu_file,
 gauge_basin_lu = subset(gauge_basin_lu, Keep == 1)
 
 obs_files = list.files(cal_dir, pattern="^0[0-9]+\\.txt$", full.names=T)
+if (use_reservoirs) {
+	obs_files = c(
+		obs_files,
+		list.files(res_dir, pattern="^subbasin_[0-9]+\\.txt$", full.names=T)
+		)
+}
 gauge_ids_eco = subset(gauge_basin_lu, ECOLOGICAL_LANDSCAPE %in% ecos)$USGS_ID
-obs_files = obs_files[grep(paste(gauge_ids_eco, collapse="|"), obs_files)]
+obs_files = obs_files[
+	grep(paste("(", paste(gauge_ids_eco, collapse="|"), ")\\.txt$", sep=""), obs_files)
+]
 
 model_period = seq(as.Date("2002-01-01"), as.Date("2013-12-31"), "1 day")
 
 for (obs_file in obs_files) {
-	obsData_raw = read.table(
-		obs_file,
-		skip=2,
-		sep="\t",
-		header=T
-	)
-	obsData_raw = obsData_raw[-1,]
-	obsData_raw[,3] = as.Date(obsData_raw[,3])
-	obsData_raw = obsData_raw[obsData_raw[,4] != "Ice",]
-	obsData_raw[,4] = as.numeric(obsData_raw[,4])
-    obsData_raw = obsData_raw[obsData_raw[,5] == "A",]
-
+	if (length(grep("usgs_raw", obs_file)) == 1) {
+		obsData_raw = read.table(
+			obs_file,
+			skip=2,
+			sep="\t",
+			header=T
+		)
+		obsData_raw = obsData_raw[-1,]
+		obsData_raw[,3] = as.Date(obsData_raw[,3])
+		obsData_raw = obsData_raw[obsData_raw[,4] != "Ice",]
+		obsData_raw = obsData_raw[obsData_raw[,4] != "Dis",]
+		obsData_raw[,4] = as.numeric(obsData_raw[,4])
+	    obsData_raw = obsData_raw[obsData_raw[,5] == "A",]
+		out_file = paste(out_dir, basename(obs_file), sep="/")
+		
+		raw_txt = readLines(obs_file)
+		header_lines = grep("#", raw_txt)
+		header_lines = 1:(max(header_lines) + 2)
+		header = raw_txt[header_lines]
+	} else {
+		subbasin = strsplit(basename(obs_file), "_|\\.")[[1]][2]
+		obsData_raw = read.csv(obs_file)
+		obsData_raw = data.frame(
+			agency_cd = NA,
+			site_no = subbasin,
+			datetime = as.Date(obsData_raw$DATE, "%m/%d/%Y"),
+			X02_00060_00003 = obsData_raw$RESOUTFLOW * 35.3146667,
+			X02_00060_00003 = "A"
+		)
+		obsData_raw = subset(obsData_raw,
+			datetime >= as.Date("2002-01-01") & datetime <= as.Date("2013-12-31")
+		)
+		out_file = paste(out_dir, "/", subbasin, ".txt", sep="")
+		header = paste(
+			paste(rep("#\n", 22), collapse=""),
+			"agency_cd\tsite_no\tdatetime\t02_00060_00003\t02_00060_00003_cd\n",
+			"5s\t15s\t20d\t14n\t10s",
+			sep=""
+		)
+	}
 	if (annual_basis){
 		sub_data = data.frame()
 		obs_years = unique(format(obsData_raw[,3], "%Y"))
@@ -79,11 +117,7 @@ for (obs_file in obs_files) {
 			obsData_raw,
 			subset_cal_data(obsData_raw, mos, exc_val))
 	}
-	out_file = paste(out_dir, basename(obs_file), sep="/")
-	raw_txt = readLines(obs_file)
-	header_lines = grep("#", raw_txt)
-	header_lines = 1:(max(header_lines) + 2)
-	header = raw_txt[header_lines]
+
 	writeLines(header, out_file)
 	write.table(sub_data,
 		out_file,
@@ -93,7 +127,11 @@ for (obs_file in obs_files) {
 		col.names=F,
 		quote=F)
 #	# Below used for plotting only
-	gage =  gsub(".txt", "", basename(obs_file))
+	if (length(grep("usgs_raw", obs_file)) == 1) {
+		gage =  gsub(".txt", "", basename(obs_file))
+	} else {
+		gage = strsplit(basename(obs_file), "_|\\.")[[1]][2]
+	}
 	total_data = nrow(sub_data)
 	obsData_raw = merge(obsData_raw, 
 		data.frame(datetime=seq(
@@ -104,7 +142,14 @@ for (obs_file in obs_files) {
 			sub_data$datetime[1], sub_data$datetime[nrow(sub_data)], by='1 day')),
 		all.x=T, all.y=T)
 	
-	plot(y=obsData_raw[,4], x=obsData_raw$datetime,type='l', main=paste("Gage:",gage))
+	plot(
+		y=obsData_raw[,4],
+		x=obsData_raw$datetime,
+		type='l',
+		main=paste("Gage:",gage),
+		xlab="Date",
+		ylab="Discharge (cfs)"
+	)
 	lines(y=sub_data[,4], x=sub_data$datetime, col="#FF0000",lty=1,lwd=2)
 	legend(
 		"topright",
