@@ -5,9 +5,15 @@ r = '"C:\\Program Files\\R\\R-3.1.2\\bin\\x64\\Rscript.exe"'
 cal_script = "D:/wisconsinRiverTMDL/calibration/crop_yield/calibrate_crop_yields_using_response_curve.r"
 is_bio_e = FALSE
 
+if (is_bio_e){
+	iter_eq = seq(10,90,15)
+} else {
+	iter_eq = seq(0.1,1,0.1)
+}
+
 for (crop in c("CORN", "SOYB", "ALFA")) {
-	# for (bio_e in seq(10,90,15)) {
-	for (bio_e in seq(0.1,1,0.1)) {
+
+	for (bio_e in iter_seq) {
 		bat = tempfile(fileext=".bat")
 		cmd = paste(
 			'START "',
