@@ -19,6 +19,7 @@ for (crop in c("CORN", "SOYB", "ALFA")) {
 			td, " ",
 			crop, " ",
 			bio_e,
+			is_bio_e,
 			sep=""
 		)
 		writeLines(cmd, bat)
