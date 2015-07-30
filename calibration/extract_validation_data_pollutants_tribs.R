@@ -6,7 +6,7 @@ val_dir = paste(dir_out, "/validation", sep="")
 cal_dir = paste(dir_out, "/calibration", sep="")
 gage_subbasin_lu =
 	read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
-	colClasses=c(rep("character", 4), "integer", "integer", "character"))
+	colClasses=c(rep("character", 5), "integer", "integer", "character"))
 start_end_lu = read.table("T:/Projects/Wisconsin_River/GIS_Datasets/Water_Chemistry/USGS_pollutant_load_estimates/ss_start_end_dates.txt",
 		sep="\t", header=T)
 fraction_for_validation = 1/4
@@ -20,6 +20,7 @@ start_end_lu$end = as.Date(start_end_lu$end, format="%m/%d/%Y")
 
 summ_table = NULL
 for (id in gage_subbasin_lu$LOAD_ID) {
+	if (id %in% c("5390680","5392083")) {next}
 	file_site = paste(dir_load, "/", id, ".gz", sep="")
 	data_site = read.table(file_site, sep="\t", header=T)
 	data_site$date = as.Date(data_site$date, format="%m/%d/%Y")
@@ -81,7 +82,7 @@ val_dir = paste(dir_out, "/validation", sep="")
 cal_dir = paste(dir_out, "/calibration", sep="")
 gage_subbasin_lu =
 	read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
-		colClasses=c(rep("character", 4), "integer", "integer", "character"))
+		colClasses=c(rep("character", 5), "integer", "integer", "character"))
 start_end_lu = read.table("T:/Projects/Wisconsin_River/GIS_Datasets/Water_Chemistry/USGS_pollutant_load_estimates/tp_start_end_dates.txt",
 	sep="\t", header=T)
 fraction_for_validation = 1/4
@@ -95,8 +96,13 @@ start_end_lu$end = as.Date(start_end_lu$end, format="%m/%d/%Y")
 
 summ_table = NULL
 for (id in gage_subbasin_lu$LOAD_ID) {
-	if (id == "5390680") {
-		file_site = "T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_loads/USGS_NWIS/05390680.txt"
+	if (id %in% c("5390680","5392083")) {
+		file_site = paste(
+			"T:/Projects/Wisconsin_River/GIS_Datasets/observed/usgs_loads/USGS_NWIS/0",
+			id,
+			".txt",
+			sep=""
+		)
 		data_site = read.table(file_site)
 		data_site = data_site[-(1:2),3:4]
 		names(data_site) = c("date","dload_00665")
@@ -125,7 +131,7 @@ for (id in gage_subbasin_lu$LOAD_ID) {
 	data_site_mo = data_site_mo[order(data_site_mo$YEAR, data_site_mo$MO),]
 	file_site_all = paste(dir_out, "/", id, ".txt", sep="")
 	write.table(data_site_mo, file_site_all, row.names=F, sep="\t", quote=F)
-	if (id != "5390680") {
+	if (!(id %in% c("5390680","5392083"))) {
 		n_obs_in_yr = aggregate(
 			actual_00665 ~ format(date, "%Y"),
 			data=data_site,
@@ -145,7 +151,7 @@ for (id in gage_subbasin_lu$LOAD_ID) {
 		summ_table = rbind(summ_table, n_obs_in_yr)
 	} else {
 		n_obs_in_yr = data.frame(
-			YEAR = 2010:2012,
+			YEAR = sort(as.integer(unique(data_site_mo$YEAR))),
 			N_OBS = 0,
 			VALIDATION = 0
 		)

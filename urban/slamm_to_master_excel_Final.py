@@ -19,16 +19,16 @@ pcpLookup = "T:/Projects/Wisconsin_River/GIS_Datasets/Urban/SLAMM Model Area/MS4
 out_master_table = "T:/Projects/Wisconsin_River/Model_Inputs/WinSLAMM_Inputs/subbasin_muni_loads.txt"
 
 #temporary local workspace
-TempGDB = "C:/Users/hydrig/Documents/Projects/Wisconsin_TMDL_Local_Files/Try6.gdb"
+TempGDB = "C:/TEMP/temp.gdb"
 arcpy.env.workspace = TempGDB
 
 #the folder which all SLAMM output .csv files should be in
-SLAMM_folder = "T:/Projects/Wisconsin_River/Model_Inputs/WinSLAMM_Inputs/WinSLAMM"
+SLAMM_folder = "T:/Projects/Wisconsin_River/Model_Inputs/WinSLAMM_Inputs/WinSLAMM_Daymet"
 
 #folder for cleaned up CSV files
-cleanCSV = "C:/Users/hydrig/Documents/Projects/wisconsinRiverTMDL/urban/clean_csv.r"
-#Location of R -- You’ll want to check your version here, you’re maybe 3.3.1…
-rscript = os.path.expanduser("~")+"\\Documents\\R\\R-3.1.3\\bin\\Rscript.exe"
+cleanCSV = "C:/Users/ruesca/Documents/wisconsinRiverTMDL/urban/clean_csv.r"
+#Location of R -- You'll want to check your version here, you're maybe 3.3.1
+rscript = os.path.expanduser("~") + "\\Documents\\R\\R-3.1.2\\bin\\Rscript.exe"
 
 #location of permitted sewersheds
 PerMS4_folder = "T:/Projects/Wisconsin_River/GIS_Datasets/Urban/SLAMM Model Area/Urban Subbasins/To Kurt"
@@ -45,7 +45,9 @@ PerMS4s = [
 'SB_Merrill.shp',
 'SB_Marshfield.shp',
 'SB_Kronen2.shp',
-'SB_Baraboo.shp'
+'SB_Baraboo.shp',
+'SB_Portage.shp',
+'SB_Stettin.shp'
 ]
 
 #Soil type from field to .csv file naming convention key
@@ -56,7 +58,7 @@ soil_key = {'CLAY': 'CL', 'SILT': 'SL', 'SAND': 'SA'}
 overlayFOIs = [
 'Shape_Area',
 'LAST_SLA_2',
-'Best_PCP2',
+# 'Best_PCP2',
 'Subbasin',
 'MCD_NAME'
 ]
@@ -127,12 +129,12 @@ def calcDailyReachLoads():
 	with arcpy.da.SearchCursor('FinalOverlayForReal', overlayFOIs) as cursor:
 		for row in cursor:
 			if row[1] in soil_key:
-				pre_file = row[2] + '_' + soil_key[row[1]]
+				pre_file = row[3].replace(" ", "_") + '_' + soil_key[row[1]]
 				print pre_file
 				#acreage = row[0] * 0.0247105381 	#area in sqm converted to 100 acres
 				acreage = row[0] / 404686 	#area in sqm converted to 100 acres
-				subbasin = row[3]
-				muni = row[4]
+				subbasin = row[2]
+				muni = row[3]
 				all_loads = []
 				
 				#grab precip events from precip file and calc loads

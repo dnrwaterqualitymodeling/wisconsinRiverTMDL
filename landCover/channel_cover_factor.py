@@ -19,6 +19,7 @@ from arcpy import env
 from arcpy.sa import *
 arcpy.CheckOutExtension("Spatial")
 env.overwriteOutput = True
+env.addOutputsToMap = False
 
 dir_evaal = "C:/Users/ruesca/Documents/EVAAL"
 file_swat_reaches = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/hydro.shp"
@@ -280,10 +281,11 @@ def calculateCFactor(downloadBool, localCdlList, watershedFile, rasterTemplateFi
 # low_c = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
 # high_c = td + "\\" + str(uuid.uuid4()).replace("-","") + ".shp"
 
-f = open(file_out, "w")
-f.write("Subbasin\tmean_riparian_c_factor\n")
-f.close()
-for reach in range(115,338):
+# f = open(file_out, "w")
+# f.write("Subbasin\tmean_riparian_c_factor\n")
+# f.close()
+
+for reach in range(11,114):
     print "####################"
     print str(reach)
     print "####################"

@@ -1,5 +1,37 @@
-\subsection{Discharge}
-Observed data for discharge were obtained from USGS in late September, 2014.
+\subsection{Streamflow}
+
+After exploring model sensitivity to typically adjusted parameters, we began
+calibrating streamflow. Streamflow estimates from SWAT were calibrated by
+comparing model estimates to observed flow at 21 USGS gage stations and 3 reservoir spillways operated by WVIC (Table \ref{tab:calibration_sites}). The
+objective functions used to assess model fit were Nash-Sutcliffe Efficiency
+(\(E_ns\)), percent bias (PBIAS), and (\(r^2\)). Objective functions serve
+different purposes in calibrating hydrologic models and as such, we optimized
+different objective functions depending on the goal. For example, we aimed to
+maximize (\(E_ns\)) when adjusting parameters associated with high flow or
+runoff events because an optimized (\(E_ns\)) tends to favor the calibration of
+larger values, and we aimed to minimize PBIAS when adjusting
+parameters associated with low flow or baseflow because it better represents an overall
+water budget and ensures there are no systemic over or under-estimations
+(*citation?*).
+
+
+
+For all ecoregions, USGS gage sites were used for calculating the objective
+function value of model estimates with the exception of the Northern Highland
+region. The Northern Highland region contains only two gages that are not
+significantly impacted by anthropogenic water regulation. The two remaining gage
+sites drain relatively small watersheds, both of which contain a significant
+fraction of land that does not contribute to surface runoff. To supplement these
+data, we included observed data from 3 reservoir outfalls that were explictly
+defined in the model: Willow Reservoir, Rainbow Reservoir, and Rice Flowage. The
+reservoir observations that were explicitly incorporated into the model at these
+sites should theoretically match perfectly given a well calibrated water budget
+and therefore the results of the calibration at these sites cannot be
+interpreted as benchmarks for accuracy. However, they provided a means for
+assuring that the calibration at the other 2 USGS gage sites were representative
+of the general water budget of the whole Northern Highlands region by minimizing
+the number of events when the reservoir is estimated to spill over or be
+depleted of storage.
 
 \subsubsection{Iterative calibration notes}
 \begin{itemize}

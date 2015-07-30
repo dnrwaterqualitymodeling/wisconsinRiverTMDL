@@ -1,13 +1,99 @@
-\subsection{Calibration Setup}
-	\subsubsection{Calibration software}
+\subsection{General Methods}
+
 The primary software used for calibrating flows (discharge) and in-stream
-pollutants was SWAT-CUP 2012, SWAT Calibration and Uncertainty Programs (see
-``SWAT-CUP'' folder in ``SWAT-General'' folder in the e\textunderscore Library).
-This software offers the capability to run several different analysis routines;
-SUFI-2 is the routine that will be used in this project.
+pollutants was SWAT-CUP 2012 v.5.1.6.2 (SWAT Calibration and Uncertainty
+Programs). SWAT-CUP allows users to adjust parameters in various ways:
+
+\begin{itemize}
+  \item Adjustment type
+  \begin{itemize}
+      \item Relative adjustment by a scalar
+      \item Absolute adjustment by addition or subtraction
+      \item Replacing default values
+  \end{itemize}
+  \item Adjustment filters
+  \begin{itemize}
+      \item Hydrologic Soil Group
+      \item Soil Texture Class
+      \item Land-use
+      \item Subbasin
+      \item Slope
+      \item Other manual or text-file-specific conditions
+   \end{itemize}
+\end{itemize}
 	
-	\subsubsection{SUFI-2}
-SUFI-2 (sequential uncertainty fitting, version 2)
-	  
-	\subsubsection{Hardware Considerations}
+SWAT-CUP software was chosen because it is relatively easy to set up and
+understand, it is flexible enough for most users with typical SWAT projects, and
+it offers a parallel processing module for users that are calibrating large
+projects with many HRUs. We chose to use the parallel processing module because
+of a substantial reliance on auto-calibration.
+Auto-calibration was required due to the large number of HRUs in the WRB and the
+number of calibration sites for streamflow, sediment, and phosphorus that span a
+wide range of land-use, soil, and topographic geographies. Because we chose to
+run SWAT scenarios in parallel using SWAT-CUP, we were committed to using the
+SWAT-CUP-specific SUFI-2 algorithm (Sequential Uncertainty Fitting), which is
+non-iterative or convergent within a set of simulations (i.e. the parameter
+adjustments of each subsequent model run do not rely on objective function
+values of any prior model run) and is thus amendable to parallel
+computing (*citation for SUFI2*).
+
+Because we relied heavily on auto-calibration using parallel processing, we
+required computing resources with many processors, enough random access
+memory (RAM) to support numerous runs across processors, and disk storage with
+short access times and minimized latency. We chose to rent cloud computing from Amazon Web Services
+Elastic Cloud Computing (EC2) service. All calibration computing for the WRB
+SWAT model was executed on an EC2 instance with 16 dual-core Intel Xeon
+E5-2680 processors, 60 gigabytes of RAM, and a solid-state drive with 750
+general purpose Input/Output Operations per Second (IOPS) and 3000 burst IOPS.
+
+Even after reducing the number of HRUs by aggregating land-use, soil, and slope
+classes, model run time was insufficiently slow for auto-calibration. For the
+purpose of debugging, exploratory analysis, and general calibration, the full
+model with 5,351 HRUs was reduced to 1,651 by increasing percent thresholds for
+preserving land-use, soil, and slope classes to at least 5, 50, and 50\%
+respectively (discussed in more detail in Section \ref{sec:hru_definition}). The
+1,651-HRU model was only used for narrowing the ranges of parameter adjustments,
+whereas the full model was used to calibrate the final parameter values and
+the model uncertainty associated with those parameter ranges.
+
+Because hydrologic properties vary widely across the WRB, we chose to split
+parameter sets by geographical filters that were known \textit{a priori} to
+bound similar hydrologic properties. First, we split USGS gage sites, and the
+SWAT subbasins associated with them, by an edited version of Ecological
+Landscapes of Wisconsin (*Cleland et al 1997*
+http://dnr.wi.gov/topic/landscapes/documents/StateMaps/Map_S1_ELs.pdf).
+Ecological Landscapes were lumped together in some cases to improve the
+parsimony of the overall model and simplify calibration. Lumping was guided by
+visualizing similarity of hydgraphs of nearby USGS gage sites. Specifically, the North
+Central Forest and Forest Transition landscape boundaries (referred to
+hereafter as the Northern Forest), and the Central Sand Plains and Central Sand
+Hills (referred to hereafter as the Central Sands) regions were aggregated
+for a total of 4 discrete zones within which all parameter adjustments would be
+equal with the exception of two additional splits on A/B and C/D hydgrologic
+soil groups (HSG) in the Northern Forest and Central Sands regions. In these two
+regions, the Western half of the region is dominated by C/D type soils and the
+Eastern half of the region is dominated by A/B type soils, which provided an
+effective method for explaining differences in the hydrographs of USGS gage
+sites on either side of the HSG divide.
+
+Calibration of a SWAT model is rarely executed using all model data
+simultaneously with all calibration data sets nor is done linearly from start
+to finish. Rather, it is done iteratively and piecemeal as new information
+is gained about the model's response to individual or multiple simultaneous
+parameter adjustment. However, general workflow was followed for
+calibrating the WRB SWAT model that follows guidance in SWAT literature. First,
+daily streamflow was calibrated within each Ecological Landscape where the
+effects of parameters adjustments to subbasins within neighboring Ecological
+Landscapes would be minimized to isolate the effects of parameter adjustments
+within the Ecological Landscape being calibrated.
+
+\begin{itemize}
+    \item Streamflow
+    \begin{itemize}
+        \item First,
+    \end{itemize}
+    \item Sediment
+    \item
+\end{itemize}
+
 \pagebreak
