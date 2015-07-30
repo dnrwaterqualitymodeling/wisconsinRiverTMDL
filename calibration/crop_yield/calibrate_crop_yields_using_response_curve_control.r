@@ -3,13 +3,21 @@ dir_out = "D:/bio_e_calibration"
 td = "Y:/"
 r = '"C:\\Program Files\\R\\R-3.1.2\\bin\\x64\\Rscript.exe"'
 cal_script = "D:/wisconsinRiverTMDL/calibration/crop_yield/calibrate_crop_yields_using_response_curve.r"
+is_bio_e = FALSE
+
+if (is_bio_e){
+	iter_eq = seq(10,90,15)
+} else {
+	iter_eq = seq(0.1,1,0.1)
+}
 
 for (crop in c("CORN", "SOYB", "ALFA")) {
-	for (bio_e in seq(10,90,15)) {
+
+	for (bio_e in iter_seq) {
 		bat = tempfile(fileext=".bat")
 		cmd = paste(
 			'START "',
-			crop, "_", bio_e,
+			crop, "_", gsub(".", "", bio_e, fixed=T),
 			'" ', r, " ",
 			cal_script, " ",
 			txtinout, " ",
@@ -17,6 +25,7 @@ for (crop in c("CORN", "SOYB", "ALFA")) {
 			td, " ",
 			crop, " ",
 			bio_e,
+			is_bio_e,
 			sep=""
 		)
 		writeLines(cmd, bat)
@@ -26,8 +35,13 @@ for (crop in c("CORN", "SOYB", "ALFA")) {
 }
 
 running = T
+if (is_bio_e)  {
+	pat = "(CORN|SOYB|ALFA)_[1-9]+"
+} else {
+	pat = "(CORN|SOYB|ALFA)_[0]?[1-9]+"
+}
 while (running == T) {
-	ps = grep("(CORN|SOYB|ALFA)_[1-9]+",system('tasklist /v',intern=TRUE),value=TRUE)
+	ps = grep(pat, system('tasklist /v',intern=TRUE),value=TRUE)
 	if (length(ps) > 0) {
 		Sys.sleep(1)
 	} else {
@@ -36,12 +50,17 @@ while (running == T) {
 }
 
 all_d = NULL
-for (f in list.files(dir_out, pattern="^(CORN|SOYB|ALFA)_[1-9]+", full.names=T)) {
+for (f in list.files(dir_out, pattern=pat, full.names=T)) {
 	d = read.csv(f)
 	all_d = rbind(all_d, d)
 }
-write.csv(all_d, paste(dir_out, "bio_e_calibration.csv", sep="/"), row.names=F)
+if (is_bio_e) {
+	outName = "bio_e_calibration.csv"
+} else {
+	outName = "blai_calibration.csv"
+}
+write.csv(all_d, paste(dir_out, outName, sep="/"), row.names=F)
 
-unlink(list.files(dir_out, pattern="^(CORN|SOYB|ALFA)_[1-9]+", full.names=T))
+unlink(list.files(dir_out, pattern=pat, full.names=T))
 
 # source("C:/Users/evansdm/Documents/Code/calibration/crop_yield/calibrate_crop_yields_using_response_curve_plotting.r")

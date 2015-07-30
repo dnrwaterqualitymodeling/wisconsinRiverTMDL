@@ -12,6 +12,7 @@ dir_out = arguments[2]
 td = arguments[3]
 crop = arguments[4]
 bio_e = arguments[5]
+is_bio_e = arguments[6]
 
 source("https://raw.githubusercontent.com/dnrwaterqualitymodeling/wisconsinRiverTMDL/master/calibration/functions_query_output.r")
 
@@ -39,14 +40,25 @@ writeLines(file.cio, paste(txtinout, "file.cio", sep = "\\"))
 setwd(txtinout)
 
 file.copy("C:/SWAT/ArcSWAT/SWAT_64rel.exe", paste(txtinout, "SWAT_64rel.exe", sep="\\"))
-
-
-print(paste("Running SWAT with",crop,"and a Bio E of", bio_e))
 plant.dat = readLines(paste(txtinout, "plant.dat", sep="\\"))
-plant.dat.ind = which(substr(plant.dat, 7, 10) == crop)
-if (bio_e == 10) {
+
+if (is_bio_e) {
+	msg = paste("Running SWAT with",crop,"and a Bio E of", bio_e)
+	plant.dat.ind = which(substr(plant.dat, 7, 10) == crop)
+} else {
+	msg = paste("Running SWAT with",crop,"and a BLAI of", bio_e)
+##### THIS MAY BE WRONG CHECK WHERE VALUE OCCURS IN PLANT.DAT #####
+	plant.dat.ind = which(substr(plant.dat, 15, 18) == crop)
+}
+
+
+print(msg)
+
+
+if (bio_e == 10 | bio_e == 0.1) {
 	original_bio_e = substr(plant.dat[plant.dat.ind + 1], 3, 7)
 }
+
 substr(plant.dat[plant.dat.ind + 1], 3, 7) = format(bio_e, digits=2, nsmall=2)
 writeLines(plant.dat, paste(txtinout, "plant.dat", sep="\\"))
 bat = tempfile(pattern="runswat_", fileext=".bat")
