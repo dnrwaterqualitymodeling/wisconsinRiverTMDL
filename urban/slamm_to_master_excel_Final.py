@@ -65,7 +65,7 @@ overlayFOIs = [
 
 precipFOIs_clean = [
 "Runoff Volume (cf)",
-"Total Solids (lbs)",
+"Suspended Solids Mass (lbs)",
 'Particulate Phosphorus (lbs)',
 'Filterable Phosphorus (lbs)',
 "Rain Start Date",
@@ -123,7 +123,7 @@ def noNull(inVal):
 def calcDailyReachLoads():
 	#get muni, subbasin, and area from each reachshed polygon
 	f = open(out_master_table, "w")
-	headers = ["date", "subbasin", "flow_m3", "TSS_tons", "P_filt_kg", "P_part_kg", "muni"]
+	headers = ["date", "subbasin", "flow_m3", "TSS_tons", "P_filt_kg", "P_part_kg", "muni", "soil_type"]
 	f.write("\t".join(headers) + "\n")
 	
 	with arcpy.da.SearchCursor('FinalOverlayForReal', overlayFOIs) as cursor:
@@ -144,11 +144,12 @@ def calcDailyReachLoads():
 						d_load = (
 							row2[4],
 							subbasin,
-							noNull(row2[0]) * acreage * 0.0283168,		#cubic feet to cubic meters
+							noNull(row2[0]) * acreage * 0.0283168 * 1000,		#cubic feet to cubic meters
 							noNull(row2[1]) * acreage * 0.00045359237,	#pounds to metric tonnes
 							noNull(row2[3]) * acreage * 0.453592,		#pounds to kilograms
 							noNull(row2[2]) * acreage * 0.453592,		#pounds to kilograms
-							muni
+							muni,
+							row[1]
 							)
 						all_loads.append(d_load)
 
