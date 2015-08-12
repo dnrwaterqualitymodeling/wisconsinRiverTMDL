@@ -1,4 +1,4 @@
-f = "C:/TEMP/subbasin_muni_loads.txt"
+f = "C:/TEMP/subbasin_muni_loads2.txt"
 d = read.table(f, sep="\t", header=T)
 
 by_muni_sub = aggregate(cbind(flow_m3,TSS_tons,P_filt_kg,P_part_kg) ~ muni + subbasin + date, data=d, FUN=sum)

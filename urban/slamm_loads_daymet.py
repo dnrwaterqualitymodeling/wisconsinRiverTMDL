@@ -1,7 +1,4 @@
-#-------------------------------------#
-# SLAMM output to SWAT input script   #
-# Created by Guy Hydrick Feb-Mar 2015 #
-#-------------------------------------#
+# SLAMM output to SWAT input script   
 
 import arcpy, os, subprocess
 
@@ -15,26 +12,25 @@ soils = "T:/Projects/Wisconsin_River/GIS_Datasets/Urban/SLAMM Model Area/SLAMM_S
 UABs = "T:/Projects/Wisconsin_River/GIS_Datasets/Urban/Urban Area Boundaries/SWAT_Urban_Areas.gdb/SWAT_Urban_Areas7"
 subbasins = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/subbasins.shp"
 FinalMunis = "T:/Projects/Wisconsin_River/GIS_Datasets/Urban/Urban Area Boundaries/SWAT_Urban_Areas.gdb/FinalMunis"
-pcpLookup = "T:/Projects/Wisconsin_River/GIS_Datasets/Urban/SLAMM Model Area/MS4_Subbasins/PCP_export.xlsx/'Guy Lookup$'"
 out_master_table = "T:/Projects/Wisconsin_River/Model_Inputs/WinSLAMM_Inputs/subbasin_muni_loads.txt"
 
 #temporary local workspace
-TempGDB = "C:/TEMP/temp.gdb"
+TempGDB = "C:/Users/hydrig/Documents/Projects/Wisconsin_TMDL_Local_Files/Daymet_SLAMM_1.gdb"
 arcpy.env.workspace = TempGDB
 
 #the folder which all SLAMM output .csv files should be in
 SLAMM_folder = "T:/Projects/Wisconsin_River/Model_Inputs/WinSLAMM_Inputs/WinSLAMM_Daymet"
 
 #folder for cleaned up CSV files
-cleanCSV = "C:/Users/ruesca/Documents/wisconsinRiverTMDL/urban/clean_csv.r"
-#Location of R -- You'll want to check your version here, you're maybe 3.3.1
-rscript = os.path.expanduser("~") + "\\Documents\\R\\R-3.1.2\\bin\\Rscript.exe"
+cleanCSV = "C:/Users/hydrig/Documents/Projects/wisconsinRiverTMDL/urban/clean_csv_daymet.r"
+#Location of R -- You’ll want to check your version here, you’re maybe 3.3.1…
+rscript = os.path.expanduser("~")+"\\Documents\\R\\R-3.1.3\\bin\\Rscript.exe"
 
 #location of permitted sewersheds
 PerMS4_folder = "T:/Projects/Wisconsin_River/GIS_Datasets/Urban/SLAMM Model Area/Urban Subbasins/To Kurt"
 
 #permitted sewersheds
-PerMS4s = [
+PerMS4s = [				#Do we need all UABs, or just permitted???
 'SB_Weston4.shp',
 'SB_Wausau2.shp',
 'SB_Schofield2.shp',
@@ -46,8 +42,11 @@ PerMS4s = [
 'SB_Marshfield.shp',
 'SB_Kronen2.shp',
 'SB_Baraboo.shp',
+'SB_StevensPoint2.shp',
 'SB_Portage.shp',
+'SB_DOT.shp',
 'SB_Stettin.shp'
+#marathon county
 ]
 
 #Soil type from field to .csv file naming convention key
@@ -58,14 +57,13 @@ soil_key = {'CLAY': 'CL', 'SILT': 'SL', 'SAND': 'SA'}
 overlayFOIs = [
 'Shape_Area',
 'LAST_SLA_2',
-# 'Best_PCP2',
 'Subbasin',
 'MCD_NAME'
 ]
 
-precipFOIs_clean = [
+SLAMM_FOIs = [
 "Runoff Volume (cf)",
-"Suspended Solids Mass (lbs)",
+"Total Solids (lbs)",
 'Particulate Phosphorus (lbs)',
 'Filterable Phosphorus (lbs)',
 "Rain Start Date",
@@ -82,7 +80,6 @@ def cleanCSVs():
 	p.wait()
 
 #create sewer/reach sheds by unique muni, subbasin, soil type, and add best precip file
-#****** we are now using Daymet - so how should we go about the precip???***
 def createReachsheds():
 	#create an feature class of all the modified permitted sewersheds
 	arcpy.env.workspace = PerMS4_folder
@@ -105,7 +102,7 @@ def createReachsheds():
 	arcpy.Intersect_analysis([FinalMunis, 'Soil_UAB_DA_Isect'], "AlmostFinalOverlay")
 	arcpy.Dissolve_management("AlmostFinalOverlay", "FinalOverlayForReal", ["Subbasin","MCD_NAME","LAST_SLA_2"])
 	
-
+	
 #replace any nulls with zero to avoid errors with calculations
 def noNull(inVal):
 	if inVal is None:
@@ -125,22 +122,21 @@ def calcDailyReachLoads():
 	with arcpy.da.SearchCursor('FinalOverlayForReal', overlayFOIs) as cursor:
 		for row in cursor:
 			if row[1] in soil_key:
-				pre_file = row[3].replace(" ", "_") + '_' + soil_key[row[1]]
-				print pre_file
-				#acreage = row[0] * 0.0247105381 	#area in sqm converted to 100 acres
+				mcd_file = row[3].replace(" ","_") + '_' + soil_key[row[1]]
+				print mcd_file  + '_' + str(row[2])
 				acreage = row[0] / 404686 	#area in sqm converted to 100 acres
 				subbasin = row[2]
 				muni = row[3]
 				all_loads = []
 				
 				#grab precip events from precip file and calc loads
-				csv_clean = SLAMM_folder + "/cleanedCsvs/" + pre_file + ".csv"
-				with arcpy.da.SearchCursor(csv_clean, precipFOIs_clean) as cursor2:
+				csv_clean = SLAMM_folder + "/cleanedCsvs/" + mcd_file + ".csv"
+				with arcpy.da.SearchCursor(csv_clean, SLAMM_FOIs) as cursor2:
 					for row2 in cursor2:
 						d_load = (
 							row2[4],
 							subbasin,
-							noNull(row2[0]) * acreage * 0.0283168 * 1000,		#cubic feet to cubic meters
+							noNull(row2[0]) * acreage * 0.0283168,		#cubic feet to cubic meters
 							noNull(row2[1]) * acreage * 0.00045359237,	#pounds to metric tonnes
 							noNull(row2[3]) * acreage * 0.453592,		#pounds to kilograms
 							noNull(row2[2]) * acreage * 0.453592,		#pounds to kilograms
