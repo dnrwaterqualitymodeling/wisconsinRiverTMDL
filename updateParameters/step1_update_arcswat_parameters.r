@@ -520,6 +520,28 @@ for (crop in c("CORN", "CSIL", "SOYB", "ALFA")) {
 	stdout = sqlQuery(con_swat2012, query)
 }
 
+#queries = c(
+#	"UPDATE crop SET BLAI = 6.5 WHERE CPNM IN ('CORN','CSIL);",
+#	"UPDATE crop SET BLAI = 6 WHERE CPNM = 'SCRN';",
+#	"UPDATE crop SET BLAI = 5.5 WHERE CPNM = 'SOYB';",
+#	"UPDATE crop SET BLAI = 5 WHERE CPNM IN ('GRBN','POTA');",
+#	"UPDATE crop SET BIO_E = 7.8 WHERE CPNM = 'ALFA';",
+#	"UPDATE crop SET BIO_E = 35 WHERE CPNM IN ('CORN','CSIL);",
+#	"UPDATE crop SET BIO_E = 43 WHERE CPNM = 'SOYB';",
+#	"UPDATE crop SET BIO_E = 50 WHERE CPNM = 'GRBN';",
+#	"UPDATE crop SET BIO_E = 27 WHERE CPNM = 'POTA';",
+#	"UPDATE crop SET BIO_E = 39 WHERE CPNM = 'SCRN';",
+#	"UPDATE crop SET HVSTI = 6.5 WHERE CPNM IN ('GRBN','SCRN');",
+#	"UPDATE crop SET CHTMX = 1 WHERE CPNM = 'GRBN';",
+#	"UPDATE crop SET T_OPT = 25 WHERE CPNM = 'SCRN';",
+#	"UPDATE crop SET T_BASE = 8 WHERE CPNM = 'SCRN';",
+#	"UPDATE crop SET USLE_C = 0.1 WHERE CPNM IN ('ALFA','CORN','CSIL','SCRN','SOYB','GRBN','POTA');"
+#)
+#for (q in queries) {
+#	stdout = sqlQuery(con_swat2012, q)
+#	print(stdout)
+#}
+
 # fixing forest ALAI_MIN parameter PB's suggestion
 
 # stdout = sqlQuery(con_swat2012, "UPDATE crop SET ALAI_MIN = 0 WHERE CPNM = 'FRST';")
