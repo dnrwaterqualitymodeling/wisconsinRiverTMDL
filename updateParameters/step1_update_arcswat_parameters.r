@@ -134,7 +134,9 @@ query = "UPDATE bsn SET IPET = 1;"
 stdout = sqlQuery(con, query)
 close(con)
 
-# UPDATE SWAT RESERVOIR PARAMETERS 
+
+#UPDATE SWAT SOIL PHOSPHORUS PARAMETER
+soil_p = read.table(soil_p_file, header = T)# UPDATE SWAT RESERVOIR PARAMETERS 
 reservoir_parameters = read.csv(reservoir_parameter_file)
 
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
@@ -149,28 +151,38 @@ for (row in 1:nrow(reservoir_parameters)) {
 		"RES_EVOL = ", reservoir_parameters$res_evol[row], ",",
 		"RES_PSA = ", reservoir_parameters$res_psa[row], ",",
 		"RES_PVOL = ", reservoir_parameters$res_pvol[row], ",",
-		"RES_VOL = ", reservoir_parameters$res_pvol[row], " ",
+		"RES_VOL = ", reservoir_parameters$res_pvol[row], ",",
+		"NDTARGR=15, IFLOOD1R=7, IFLOOD2R=2 ",
 		"WHERE SUBBASIN = ", reservoir_parameters$Subbasin[row], ";",
 		sep = ""
 	)
 	stdout = sqlQuery(con, query)
+	for (m in 1:12) {
+		query = paste(
+			"UPDATE res SET STARG",
+			m, "=", reservoir_parameters$res_pvol[row],
+			" WHERE SUBBASIN = ",
+			reservoir_parameters$Subbasin[row], ";",
+			sep="")
+		stdout = sqlQuery(con, query)
+	}
 }
 close(con)
 
-#UPDATE SWAT SOIL PHOSPHORUS PARAMETER
-soil_p = read.table(soil_p_file, header = T)
 
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
 con = odbcConnectAccess(inDb)
 
-for (sb in soil_p$Subbasin){   
+soilp_query = paste("UPDATE chm SET SOL_LABP1 = 5, SOL_ORGP1 = 0")
+stdout = sqlQuery(con, soilp_query)
+for (sb in soil_p$Subbasin){
 	soilp_query = paste(
 		"UPDATE chm",
 		"SET SOL_LABP1 = ", soil_p$SOLP[which(soil_p$Subbasin == sb)], ",",
 		"SOL_ORGP1 =", soil_p$ORGP[which(soil_p$Subbasin == sb)],
 		"WHERE SUBBASIN =", sb, "AND LANDUSE NOT IN",
-		"('BARR','FRSD', 'WATR', 'URML', 'RNGB','RNGE','WETF', 'WETN','HAY');"
-		)   
+		"('BARR','FRSD','FRSE','FRST','PAST','CRRT','WATR','URML','RNGB','RNGE','WETF','WETN','ONIO','HAY');"
+	)   
 	stdout = sqlQuery(con, soilp_query)
 }
 close(con)
@@ -224,7 +236,11 @@ swatDb = paste(projectDir, "SWAT2012.mdb", sep="/")
 crosswalk = read.csv(lu_op_xwalk_file)			 # for defaults:
 												# OpSchedules_fert.mbd
 con_updates = odbcConnectAccess(op_db_file)
+
 opSched = sqlFetch(con_updates, "OpSchedules")
+if (irr_sca == 0) {
+	opSched = subset(opSched, MGT_OP != 10)
+}
 fert = sqlFetch(con_updates, "fert")
 close(con_updates)
 
@@ -404,7 +420,7 @@ irri_query = paste(
 		" WHERE MGT_OP = 10;",
 		sep=''
 )
-stout = sqlQuery(con_mgt2, irri_query)
+
 
 # CNOP
 if (CNOP) {

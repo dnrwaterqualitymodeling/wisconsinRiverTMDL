@@ -16,7 +16,10 @@ file_wetland_geometry = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/we
 file_pond_geometry = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_geometry.csv"
 file_merged_idas = "T:/Projects/Wisconsin_River/GIS_Datasets/ponds/pond_and_wetland_geometry.txt"
 file_fert_dat = "T:/Projects/Wisconsin_River/swat_install_software/SWAT_EXE_and_file_updates/fert.dat"
-manure = F
+file_res_psetl = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/reservoir/reservoir_settling_parameters2.txt"
+manure = T
+idas = "ponds"
+psetl_r_bool = T
 ## UPDATE POINT SOURCE TEXT FILES AND FIG.FIG
 ps_files = list.files(
 	"T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/point_sources",
@@ -127,19 +130,26 @@ for (fl in files_pnds){
 	pnd_pvol = pnd_pvol + wetland_geometry[indx,"WET_NVOL"]
 	pnd_esa = pnd_esa + wetland_geometry[indx,"WET_MXSA"]
 	pnd_evol = pnd_evol + wetland_geometry[indx,"WET_MXVOL"]
-
-	substr(lnes[3], 9, 16) = sprintf("%8.3f", pnd_fr)
-	substr(lnes[4], 9, 16) = sprintf("%8.3f", pnd_psa)
-	substr(lnes[5], 9, 16) = sprintf("%8.3f", pnd_pvol)
-	substr(lnes[6], 9, 16) = sprintf("%8.3f", pnd_esa)
-	substr(lnes[7], 9, 16) = sprintf("%8.3f", pnd_evol)
-	substr(lnes[8], 9, 16) = sprintf("%8.3f", pnd_pvol)
+	
+	if (idas == "ponds") {		
+		substr(lnes[3:8], 9, 16) = sprintf(
+			"%8.3f",
+			c(pnd_fr,pnd_psa,pnd_pvol,pnd_esa,pnd_evol,pnd_pvol)
+		)
+		substr(lnes[29:34], 9, 16) = sprintf("%8.3f", 0)
+	} else if (idas == "wetlands") {
+		substr(lnes[29:34], 9, 16) = sprintf(
+			"%8.3f",
+			c(pnd_fr,pnd_psa,pnd_pvol,pnd_esa,pnd_evol,pnd_pvol)
+		)
+		substr(lnes[3:8], 9, 16) = sprintf("%8.3f", 0)
+	}
 	lnes[12] =
 		"               7    | IFLOD1: Beginning month of non-flood season"
 	lnes[13] =
 		"               2    | IFLOD2: Ending month of non-flood season"
 	lnes[14] =
-		"          15.000    | NDTARG: Number of days needed to reach target storage from current pond storage"
+		"              15    | NDTARG: Number of days needed to reach target storage from current pond storage"
 	
 	writeLines(lnes, paste(txtinout, fl, sep="/"))
 	
@@ -160,8 +170,34 @@ write.table(merge_idas, file_merged_idas, sep="\t", row.names=F)
 if (manure) {
 	file.copy(file_fert_dat, paste(txtinout, "/fert.dat", sep=""), overwrite=T)
 	file_basins_bsn = paste(txtinout, "/basins.bsn", sep="")
-	write("               1    | manp_flag : 1 = use manure P model\n               0    | isolp flag !! if = 1  prints out solp.out\n",
-		file_basins_bsn,
-		append=T
+	basins_bsn = readLines(file_basins_bsn)
+	basins_bsn[125] = "               1    | SOL_P_MODEL: if = 1, use new soil P model"
+	basins_bsn[132] = "               1    | manp_flag : 1 = use manure P model"
+	basins_bsn[133] = "               0    | isolp flag !! if = 1  prints out solp.out"
+	writeLines(basins_bsn, file_basins_bsn)
+#	write("               1    | manp_flag : 1 = use manure P model\n               0    | isolp flag !! if = 1  prints out solp.out\n",
+#		file_basins_bsn,
+#		append=T
+#	)
+}
+
+# Reservoir P settling parameters
+
+res_psetl = read.table(file_res_psetl, sep="\t", header=T)
+for (row in 1:nrow(res_psetl)) {
+	file_lwq = paste(
+		txtinout, "/",
+		paste(sprintf("%05d", res_psetl$subbasin[row]), "0000.lwq", sep=""),
+		sep=""
 	)
+	print(file_lwq)
+	if (!(file.exists(file_lwq))) {print("skip");next}
+	lwq = readLines(file_lwq)
+	if (psetl_r_bool) {
+		v = sprintf("%16.3f",res_psetl[row,"settling_velocity"])
+	} else {
+		v = sprintf("%16.3f", 10)
+	}
+	substr(lwq[5:6], 1, 16) = v
+	writeLines(lwq, file_lwq)
 }

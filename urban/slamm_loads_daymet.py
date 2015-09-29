@@ -12,10 +12,10 @@ soils = "T:/Projects/Wisconsin_River/GIS_Datasets/Urban/SLAMM Model Area/SLAMM_S
 UABs = "T:/Projects/Wisconsin_River/GIS_Datasets/Urban/Urban Area Boundaries/SWAT_Urban_Areas.gdb/SWAT_Urban_Areas7"
 subbasins = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/subbasins.shp"
 FinalMunis = "T:/Projects/Wisconsin_River/GIS_Datasets/Urban/Urban Area Boundaries/SWAT_Urban_Areas.gdb/FinalMunis"
-out_master_table = "T:/Projects/Wisconsin_River/Model_Inputs/WinSLAMM_Inputs/subbasin_muni_loads.txt"
+out_master_table = "C:/TEMP/subbasin_muni_loads_check_anns_changes.txt"
 
 #temporary local workspace
-TempGDB = "C:/Users/hydrig/Documents/Projects/Wisconsin_TMDL_Local_Files/Daymet_SLAMM_1.gdb"
+TempGDB = "C:/TEMP/Daymet_SLAMM_1.gdb"
 arcpy.env.workspace = TempGDB
 
 #the folder which all SLAMM output .csv files should be in
@@ -121,7 +121,7 @@ def calcDailyReachLoads():
 	
 	with arcpy.da.SearchCursor('FinalOverlayForReal', overlayFOIs) as cursor:
 		for row in cursor:
-			if row[1] in soil_key:
+			if row[1] in soil_key: 
 				mcd_file = row[3].replace(" ","_") + '_' + soil_key[row[1]]
 				print mcd_file  + '_' + str(row[2])
 				acreage = row[0] / 404686 	#area in sqm converted to 100 acres

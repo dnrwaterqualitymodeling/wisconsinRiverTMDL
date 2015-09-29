@@ -49,26 +49,26 @@ weight_by_sample_size = F
 #obsDir = "D:/usgs_raw/calibration/JJAS_50_pct_exc_northern"
 
 # 5. Everything
-obsDir = "D:/usgs_raw/calibration/including_reservoirs"
-dir_pol = "D:/usgs_loads/all"
+#obsDir = "D:/usgs_raw/calibration/including_reservoirs"
+#dir_pol = "D:/usgs_loads/all"
 
 # 1. Regional streamflow
-#obsDir = "D:/usgs_raw/calibration/northern_highlands_including_reservoirs"
-#dir_pol = "D:/usgs_loads/all"
+obsDir = "D:/usgs_raw/calibration"
+dir_pol = "D:/usgs_loads/all"
 
 #gage_subbasin_lu =
 #	read.csv("T:/Projects/Wisconsin_River/GIS_Datasets/observed/gauge_basin_lookup.csv",
-gage_subbasin_lu = read.csv("D:/gauge_basin_lookup.csv",
+gage_subbasin_lu = read.csv("D:/gauge_basin_lookup_reservoir.csv",
 	colClasses=c(rep("character", 5), "integer", "integer", "character"))
 setInternet2(TRUE)
 
 ## Best streamflow ranges
 parameterization = rbind(
-	## Miscellaneous
+## Miscellaneous
 	c("v__BLAI{21}.plant.dat",6,6), # Williams, M W et al 2006 HortScience
 	c("v__BLAI{84}.plant.dat",5,5), # Kwambe X M, 2014 IJSRG
 	c("v__BLAI{70}.plant.dat",5,5), # King B A and Stark J C, Univ of Idaho extension
-	## Snowmelt basin
+## Snowmelt basin
 	c("v__SMTMP.bsn",-0.5,0.5),
 	c("v__SFTMP.bsn",-0.5,0.5),
 	c("v__TIMP.bsn",0.18,0.22),
@@ -76,7 +76,7 @@ parameterization = rbind(
 	c("v__SMFMX.bsn",3,3.6),
 	c("v__SNOCOVMX.bsn",30,40),
 	c("v__SNO50COV.bsn",0.4,0.55),
-	## Western Coulees and Ridges
+## Western Coulees and Ridges
 	c("r__CN2.mgt________5-29,32,33,35,40-42,44,48-51,55,57,58,137,138,179-189,192,196,227-233,237,246,274,301,310",-0.13,-0.11),
 	c("v__ESCO.hru________5-29,32,33,35,40-42,44,48-51,55,57,58,137,138,179-189,192,196,227-233,237,246,274,301,310",0.4,0.5),
 	c("r__SURLAG.hru________5-29,32,33,35,40-42,44,48-51,55,57,58,137,138,179-189,192,196,227-233,237,246,274,301,310",-0.6,-0.5),
@@ -92,7 +92,7 @@ parameterization = rbind(
 	c("v__GWQMN.gw________5-29,32,33,35,40-42,44,48-51,55,57,58,137,138,179-189,192,196,227-233,237,246,274,301,310",0,500),
 	c("v__GW_REVAP.gw________5-29,32,33,35,40-42,44,48-51,55,57,58,137,138,179-189,192,196,227-233,237,246,274,301,310",0.02,0.04),
 	c("v__REVAPMN.gw________5-29,32,33,35,40-42,44,48-51,55,57,58,137,138,179-189,192,196,227-233,237,246,274,301,310",0,500),
-	## Forest Transition
+## Forest Transition
 	c("r__CN2.mgt________68-71,78-112,122,136,146,147,149-159,162,166,169,201,207,211-220,225,258,259,261-270,275,276,279,282,286-299,307,308,313,314,317,320-329,331,332",0.02,0.08),
 	c("v__ESCO.hru________68-71,78-112,122,136,146,147,149-159,162,166,169,201,207,211-220,225,258,259,261-270,275,276,279,282,286-299,307,308,313,314,317,320-329,331,332",0.8,0.96),
 	c("r__SURLAG.hru____A,B____68-71,78-112,122,136,146,147,149-159,162,166,169,201,207,211-220,225,258,259,261-270,275,276,279,282,286-299,307,308,313,314,317,320-329,331,332",-0.5,-0.2),
@@ -104,7 +104,7 @@ parameterization = rbind(
 	c("r__ALPHA_BF.gw____C,D____68-71,78-112,122,136,146,147,149-159,162,166,169,201,207,211-220,225,258,259,261-270,275,276,279,282,286-299,307,308,313,314,317,320-329,331,332",2,3.5),
 	c("v__GW_DELAY.gw____A,B____68-71,78-112,122,136,146,147,149-159,162,166,169,201,207,211-220,225,258,259,261-270,275,276,279,282,286-299,307,308,313,314,317,320-329,331,332",90,120),
 	c("v__GW_DELAY.gw____C,D____68-71,78-112,122,136,146,147,149-159,162,166,169,201,207,211-220,225,258,259,261-270,275,276,279,282,286-299,307,308,313,314,317,320-329,331,332",0,2),
-	## Central Sand Plains
+## Central Sand Plains
 	c("r__SURLAG.hru____A,B____1-4,30,31,34,36-39,43,45-47,52-54,56,59-67,72-77,139-145,148,170-178,190,191,193-195,197-200,202-206,208,210,234-236,238-245,247-257,260,302-306,311,312,330,333",-0.9,-0.825),
 	c("r__SURLAG.hru____C,D____1-4,30,31,34,36-39,43,45-47,52-54,56,59-67,72-77,139-145,148,170-178,190,191,193-195,197-200,202-206,208,210,234-236,238-245,247-257,260,302-306,311,312,330,333",-0.85,-0.7),
 	c("v__ESCO.hru____A,B____1-4,30,31,34,36-39,43,45-47,52-54,56,59-67,72-77,139-145,148,170-178,190,191,193-195,197-200,202-206,208,210,234-236,238-245,247-257,260,302-306,311,312,330,333",0.5,0.75),
@@ -120,7 +120,7 @@ parameterization = rbind(
 	c("r__ALPHA_BF.gw____A,B____1-4,30,31,34,36-39,43,45-47,52-54,56,59-67,72-77,139-145,148,170-178,190,191,193-195,197-200,202-206,208,210,234-236,238-245,247-257,260,302-306,311,312,330,333",-0.98,-0.9),
 	c("r__ALPHA_BF.gw____C,D____1-4,30,31,34,36-39,43,45-47,52-54,56,59-67,72-77,139-145,148,170-178,190,191,193-195,197-200,202-206,208,210,234-236,238-245,247-257,260,302-306,311,312,330,333",2,3),
 	c("v__GW_REVAP.gw________1-4,30,31,34,36-39,43,45-47,52-54,56,59-67,72-77,139-145,148,170-178,190,191,193-195,197-200,202-206,208,210,234-236,238-245,247-257,260,302-306,311,312,330,333",0.02,0.05),
-	## Northern Highlands
+## Northern Highlands
 	c("v__REVAPMN.gw________113-121,123-135,160,161,163-165,167,168,209,221-224,226,271-273,277,278,280,281,283-285,300,309,315,316,318,319,334-337",2000,3500),
 	c("v__GW_REVAP.gw________113-121,123-135,160,161,163-165,167,168,209,221-224,226,271-273,277,278,280,281,283-285,300,309,315,316,318,319,334-337",0.03,0.06),
 	c("v__GWQMN.gw________113-121,123-135,160,161,163-165,167,168,209,221-224,226,271-273,277,278,280,281,283-285,300,309,315,316,318,319,334-337",900,1100),
@@ -481,26 +481,18 @@ gage_subbasin_lu = subset(gage_subbasin_lu, Keep == 1)
 gage_subbasin_lu = gage_subbasin_lu[
 	c("USGS_ID", "LOAD_ID", "WRB_SubbasinID", "Notes")
 ]
+
 observed_table = cbind(rep("FLOW_OUT", nrow(gage_subbasin_lu)),
-	rep(7, nrow(gage_subbasin_lu)),
-	gage_subbasin_lu$WRB_SubbasinID,
-	paste(obsDir, "/", gage_subbasin_lu$USGS_ID, ".txt", sep="")
+    rep(7, nrow(gage_subbasin_lu)),
+    gage_subbasin_lu$WRB_SubbasinID,
+    paste(obsDir, "/", gage_subbasin_lu$USGS_ID, ".txt", sep="")
 )
 reservoirs = subset(
 	gage_subbasin_lu,
 	Notes == "Reservoir",
 	select="WRB_SubbasinID")[[1]]
-reservoir_sub_ids = subset(
-	gage_subbasin_lu,
-	Notes == "Reservoir",
-#	select="WRB_SubbasinID")[[1]]
-	select="USGS_ID")[[1]]
-#observed_table[observed_table[,3] %in% as.character(reservoirs),1] = "FLOW_IN"
-#observed_table[observed_table[,3] %in% as.character(reservoirs),2] = "6"
-observed_table[observed_table[,3] %in% as.character(reservoirs),3] = reservoir_sub_ids
-
-gage_subbasin_lu$WRB_SubbasinID[gage_subbasin_lu$Notes == "Reservoir"] = 
-	gage_subbasin_lu$USGS_ID[gage_subbasin_lu$Notes == "Reservoir"]
+observed_table[observed_table[,3] %in% as.character(reservoirs),1] = "FLOW_IN"
+observed_table[observed_table[,3] %in% as.character(reservoirs),2] = "6"
 
 if (pollutants) {
 	observed_table = rbind(
@@ -531,63 +523,63 @@ if (nrow(observed_table) > 1) {
 			observed_table[,2],
 			as.integer(observed_table[,3])
 		)
-		,]
+	,]
 	observed_table = observed_table[
 		observed_table[,4] %in% obs_files,
 	]
 }
 flow_subs = observed_table[observed_table[,1] %in% c("FLOW_IN", "FLOW_OUT"), 3]
 observed_table = observed_table[observed_table[,3] %in% flow_subs,]
-#observed_table = observed_table[
-#	observed_table[,3] != "221" | observed_table[,1] != "TOT_P",]
+observed_table = observed_table[
+	observed_table[,3] != "221" | observed_table[,1] != "TOT_P",]
 observed_table = observed_table[
 	observed_table[,3] != "138" | observed_table[,1] != "SED_OUT",]
 
 inDir = paste(projectDir,
-	"/",
-	toupper(strsplit(basename(projectDir), "\\.")[[1]][2]),
-	".IN",
-	sep="")
+    "/",
+    toupper(strsplit(basename(projectDir), "\\.")[[1]][2]),
+    ".IN",
+    sep="")
 file.cio = paste(projectDir,
-	"/file.cio",
-	sep="")
+    "/file.cio",
+    sep="")
 Par_inf_file = paste(inDir,
-	"/par_inf.txt",
-	sep="")
+    "/par_inf.txt",
+    sep="")
 swEdit_file = paste(projectDir,
-	"/",
-	toupper(strsplit(basename(projectDir), "\\.")[[1]][2]),
-	"_swEdit.def",
-	sep="")
+    "/",
+    toupper(strsplit(basename(projectDir), "\\.")[[1]][2]),
+    "_swEdit.def",
+    sep="")
 observed_rch_file = paste(inDir,
-	"/observed_rch.txt",
-	sep="")
+    "/observed_rch.txt",
+    sep="")
 extract_rch_file = paste(projectDir,
-	"/",
-	toupper(strsplit(basename(projectDir), "\\.")[[1]][2]),
-	"_extract_rch.def",
-	sep="")
+     "/",
+     toupper(strsplit(basename(projectDir), "\\.")[[1]][2]),
+     "_extract_rch.def",
+     sep="")
 observed_file = paste(inDir,
-	"/Observed.txt",
-	sep="")
+    "/Observed.txt",
+    sep="")
 var_file_name = paste(inDir,
-	"/Var_file_name.txt",
-	sep="")
+    "/Var_file_name.txt",
+    sep="")
 var_file_rch = paste(inDir,
-	"/Var_file_rch.txt",
-	sep="")
+    "/Var_file_rch.txt",
+    sep="")
 if (monthly) {
-	time_series = data.frame(DATE = seq(
-			as.Date(paste(startYr, "-01-01", sep="")),
-			as.Date(paste(endYr, "-12-31", sep="")),
-			"1 months"))
-	time_series = cbind(data.frame(i = 1:nrow(time_series)), time_series)
+    time_series = data.frame(DATE = seq(
+        as.Date(paste(startYr, "-01-01", sep="")),
+        as.Date(paste(endYr, "-12-31", sep="")),
+        "1 months"))
+    time_series = cbind(data.frame(i = 1:nrow(time_series)), time_series)
 } else {
-	time_series = data.frame(DATE = seq(
-			as.Date(paste(startYr, "-01-01", sep="")),
-			as.Date(paste(endYr, "-12-31", sep="")),
-			1))
-	time_series = cbind(data.frame(i = 1:nrow(time_series)), time_series)
+    time_series = data.frame(DATE = seq(
+        as.Date(paste(startYr, "-01-01", sep="")),
+        as.Date(paste(endYr, "-12-31", sep="")),
+        1))
+    time_series = cbind(data.frame(i = 1:nrow(time_series)), time_series)
 }
 
 # Write file.cio
@@ -621,7 +613,7 @@ write(l1, observed_rch_file)
 # write('\n', observed_rch_file, append=T)
 write(paste(nrow(observed_table), ": number of observed variables", sep="\t"), observed_file)
 write(paste(objFuncCode, ": Objective function type, 1=mult,2=sum,3=r2,4=chi2,5=NS,6=br2,7=ssqr,8=PBIAS,9=RSR", sep="\t"),
-	observed_file, append=T)
+      observed_file, append=T)
 write(
 	paste(thresh,
 		": min value of objective function threshold for the behavioral solutions",
@@ -634,42 +626,42 @@ write("\n", observed_file, append=T)
 
 for (obs_i in 1:nrow(observed_table)) {
 	if (observed_table[obs_i,1] %in% c("FLOW_IN", "FLOW_OUT")) {	
-		obsData = read.table(observed_table[obs_i,4], skip=2, sep="\t", header=T)
-		obsData = obsData[-1,]
-		obsData = obsData[obsData[,5] == "A",]
-		obsData = data.frame(DATE = as.Date(as.character(obsData[,3])),
-			FLOW_OBSERVED=as.numeric(as.character(obsData[,4])))
-		if (monthly) {
-			months = as.POSIXlt(obsData$DATE)$mo + 1
-			years = as.POSIXlt(obsData$DATE)$year + 1900
-			date = paste(years, months, "01", sep="-")
-			obsMonthly = aggregate(FLOW_OBSERVED ~ date, data=obsData, mean)
+	    obsData = read.table(observed_table[obs_i,4], skip=2, sep="\t", header=T)
+	    obsData = obsData[-1,]
+	    obsData = obsData[obsData[,5] == "A",]
+	    obsData = data.frame(DATE = as.Date(as.character(obsData[,3])),
+	        FLOW_OBSERVED=as.numeric(as.character(obsData[,4])))
+	    if (monthly) {
+	        months = as.POSIXlt(obsData$DATE)$mo + 1
+	        years = as.POSIXlt(obsData$DATE)$year + 1900
+	        date = paste(years, months, "01", sep="-")
+	        obsMonthly = aggregate(FLOW_OBSERVED ~ date, data=obsData, mean)
 			dayCount = aggregate(FLOW_OBSERVED ~ date, data=obsData, length)
 			obsMonthly = obsMonthly[dayCount$FLOW_OBSERVED > 15,]
-			obsData = data.frame(DATE=as.Date(obsMonthly[,1]),
-				FLOW_OBSERVED=obsMonthly[,2])
-			obsData = merge(time_series, obsData, all.y=T, all.x=F)
-			obsData = obsData[order(obsData$i),]
-			obsData$VARNAME_DATE = paste(
-				observed_table[obs_i, 1],
-				format(obsData$DATE, "%m"),
-				format(obsData$DATE, "%Y"),
-				sep="_")
-		} else {
-			obsData = data.frame(DATE=as.Date(obsData[,1]),
-				FLOW_OBSERVED=obsData[,2])
-			obsData = merge(time_series, obsData, all.y=T, all.x=F)
-			obsData = obsData[order(obsData$i),]
-			obsData$VARNAME_DATE = paste(
-				observed_table[obs_i, 1],
-				format(obsData$DATE, "%m"),
-				format(obsData$DATE, "%d"),
-				format(obsData$DATE, "%Y"),
-				sep="_")
-		}
-		obsData = obsData[c("i","VARNAME_DATE", "FLOW_OBSERVED")]
-		#converting from cf/s to cm/s
-		obsData$FLOW_OBSERVED <- obsData$FLOW_OBSERVED * 0.0283168466
+	        obsData = data.frame(DATE=as.Date(obsMonthly[,1]),
+	            FLOW_OBSERVED=obsMonthly[,2])
+	        obsData = merge(time_series, obsData, all.y=T, all.x=F)
+	        obsData = obsData[order(obsData$i),]
+	        obsData$VARNAME_DATE = paste(
+	            observed_table[obs_i, 1],
+	            format(obsData$DATE, "%m"),
+	            format(obsData$DATE, "%Y"),
+	            sep="_")
+	    } else {
+	        obsData = data.frame(DATE=as.Date(obsData[,1]),
+	            FLOW_OBSERVED=obsData[,2])
+	        obsData = merge(time_series, obsData, all.y=T, all.x=F)
+	        obsData = obsData[order(obsData$i),]
+	        obsData$VARNAME_DATE = paste(
+	            observed_table[obs_i, 1],
+	            format(obsData$DATE, "%m"),
+	            format(obsData$DATE, "%d"),
+	            format(obsData$DATE, "%Y"),
+	            sep="_")
+	    }
+	    obsData = obsData[c("i","VARNAME_DATE", "FLOW_OBSERVED")]
+	    #converting from cf/s to cm/s
+	    obsData$FLOW_OBSERVED <- obsData$FLOW_OBSERVED * 0.0283168466
 	} else if (observed_table[obs_i,1] %in% c("SED_OUT", "TOT_P")) {
 		
 		obsData = read.table(observed_table[obs_i,4], sep="\t", header=T)
@@ -691,94 +683,94 @@ for (obs_i in 1:nrow(observed_table)) {
 			obsData$SS_KG = obsData$SS_KG / 1000
 		}
 	}
-	
+		
 	l1 = paste(observed_table[obs_i,1], "_", observed_table[obs_i,3],
-		"   : this is the name of the variable and the subbasin number to be included in the objective function",
-		sep="")
-	l2 = paste(nrow(obsData), "   : number of data points for this variable as it follows below. First column is a sequential number from beginning", sep="")
-	l3 = "      : of the simulation, second column is variable name and date (format arbitrary), third column is variable value."
-	
-	write("\n", observed_rch_file, append=T)
-	write(l1, observed_rch_file, append=T)
-	write(l2, observed_rch_file, append=T)
-	write(l3, observed_rch_file, append=T)
-	write("\n", observed_rch_file, append=T)
-	
-	write.table(obsData, observed_rch_file, sep="\t", row.names=F, col.names=F, append=T, quote=F)
-	# Observed.txt
-	write(paste(observed_table[obs_i,1], "_", observed_table[obs_i,3],
-			"\t: this is the name of the variable and the subbasin number to be included in the objective function",
-			sep=""),
-		observed_file, append=T)
+        "   : this is the name of the variable and the subbasin number to be included in the objective function",
+        sep="")
+    l2 = paste(nrow(obsData), "   : number of data points for this variable as it follows below. First column is a sequential number from beginning", sep="")
+    l3 = "      : of the simulation, second column is variable name and date (format arbitrary), third column is variable value."
+    
+    write("\n", observed_rch_file, append=T)
+    write(l1, observed_rch_file, append=T)
+    write(l2, observed_rch_file, append=T)
+    write(l3, observed_rch_file, append=T)
+    write("\n", observed_rch_file, append=T)
+    
+    write.table(obsData, observed_rch_file, sep="\t", row.names=F, col.names=F, append=T, quote=F)
+    # Observed.txt
+    write(paste(observed_table[obs_i,1], "_", observed_table[obs_i,3],
+                "\t: this is the name of the variable and the subbasin number to be included in the objective function",
+                sep=""),
+          observed_file, append=T)
 	if (weight_by_sample_size) {
 		wt = 1/nrow(obsData)
 	} else {
 		wt = 1
 	}
-	write(
+    write(
 		paste(
 			wt,
 			"\t: weight of the variable in the objective function\n-1    : Dynamic flow separation. Not considered if -1. If 1, then values should be added in the forth column below after observations\n-1    : constant flow separation, threshold value. (not considered if -1)\n1     : if separation of signal is considered, this is weight of the smaller values in the objective function\n1     : if separation of signal is considered, this is weight of the larger values in the objective function\n10    : percentage of measurement error",
-			sep=""
+          	sep=""
 		),
 		observed_file, append=T)
-	write(paste(nrow(obsData), ": number of data points for this variable as it follows below. First column is a sequential number from beginning",
-			sep="\t"),
-		observed_file, append=T)
-	write("      : of the simulation, second column is variable name and date (format arbitrary), third column is variable value.",
-		observed_file, append=T)
-	write("\n", observed_file, append=T)
-	write.table(obsData, observed_file, sep="\t", row.names=F, col.names=F, append=T, quote=F)
-	write("\n", observed_file, append=T)   
+    write(paste(nrow(obsData), ": number of data points for this variable as it follows below. First column is a sequential number from beginning",
+        sep="\t"),
+        observed_file, append=T)
+    write("      : of the simulation, second column is variable name and date (format arbitrary), third column is variable value.",
+        observed_file, append=T)
+    write("\n", observed_file, append=T)
+    write.table(obsData, observed_file, sep="\t", row.names=F, col.names=F, append=T, quote=F)
+    write("\n", observed_file, append=T)   
 }
 # write extract_rch table
 write("output.rch     : swat output file name", extract_rch_file)
 write(paste(length(unique(observed_table[,1])), ": number of variables to get", sep="\t"),
-	extract_rch_file,
-	append=T)
+      extract_rch_file,
+      append=T)
 write(
-	paste(
-		paste(unique(observed_table[,2]), collapse=" "),
-		": variable column number(s) in the swat output file (as many as the above number)"
-		, sep="\t"),
-	extract_rch_file,
-	append=T
+    paste(
+        paste(unique(observed_table[,2]), collapse=" "),
+        ": variable column number(s) in the swat output file (as many as the above number)"
+        , sep="\t"),
+    extract_rch_file,
+    append=T
 )
 write("", extract_rch_file, append=T)
 write(paste(subbasinCount, ": total number of reaches (subbasins) in the project", sep="\t"),
-	extract_rch_file,
-	append=T)
+      extract_rch_file,
+      append=T)
 write("", extract_rch_file, append=T)
 for (variable in unique(observed_table[,2])) {
-	reaches = unique(observed_table[observed_table[,2] == variable, 3]) 
-	write(paste(
-			length(reaches),
-			": number of reaches (subbasins) to get for variable"
-			, sep="\t"),
-		extract_rch_file,
-		append=T)
-	write(paste(paste(reaches, collapse=" "),
-			": reach (subbasin) numbers for variable (ordered)",
-			sep="\t"),
-		extract_rch_file,
-		append=T)
+    reaches = unique(observed_table[observed_table[,2] == variable, 3]) 
+    write(paste(
+        length(reaches),
+        ": number of reaches (subbasins) to get for variable"
+        , sep="\t"),
+        extract_rch_file,
+        append=T)
+    write(paste(paste(reaches, collapse=" "),
+        ": reach (subbasin) numbers for variable (ordered)",
+        sep="\t"),
+        extract_rch_file,
+        append=T)
 }
 write("", extract_rch_file, append=T)
 write(paste(startYr, ": beginning year of simulation not including the warm up period", sep="\t"),
-	extract_rch_file,
-	append=T)
+      extract_rch_file,
+      append=T)
 write(paste(endYr, ": end year of simulation", sep="\t"),
-	extract_rch_file,
-	append=T)
+      extract_rch_file,
+      append=T)
 write("", extract_rch_file, append=T)
 if (monthly) {
-	write(paste(2, ": time step (1=daily, 2=monthly, 3=yearly)", sep="\t"),
-		extract_rch_file,
-		append=T)
+    write(paste(2, ": time step (1=daily, 2=monthly, 3=yearly)", sep="\t"),
+          extract_rch_file,
+          append=T)
 } else {
-	write(paste(1, ": time step (1=daily, 2=monthly, 3=yearly)", sep="\t"),
-		extract_rch_file,
-		append=T)
+    write(paste(1, ": time step (1=daily, 2=monthly, 3=yearly)", sep="\t"),
+          extract_rch_file,
+          append=T)
 }
 filenames = paste(observed_table[,1], "_", observed_table[,3], ".txt", sep="")
 write(filenames, var_file_name)

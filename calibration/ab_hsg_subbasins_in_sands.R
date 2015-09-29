@@ -1,5 +1,8 @@
 library(RODBC)
 
+ecos = "Forest Transition"
+out_table = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/ab_hsg_subbasins_in_forest_transition.txt"
+
 con = odbcConnectAccess("C:/Users/ruesca/Desktop/WRB/WRB.mdb")
 hru = sqlQuery(
 	con,
@@ -16,7 +19,7 @@ eco_sub = read.table(
 )
 
 d = merge(hru, eco_sub, by.x="SUBBASIN", by.y="subbasin")
-d = subset(d, eco_land %in% c("Central Sand Plains", "Forest Transition"))
+d = subset(d, eco_land %in% ecos)
 maj_hsg = NULL
 for (s in unique(d$SUBBASIN, sort=T)) {
 	d_s = subset(d, SUBBASIN==s)
@@ -29,5 +32,5 @@ for (s in unique(d$SUBBASIN, sort=T)) {
 
 write.table(
 	maj_hsg,
-	"T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/ab_hsg_subbasins_in_sands.txt",
+	out_table,
 	row.names=F)
