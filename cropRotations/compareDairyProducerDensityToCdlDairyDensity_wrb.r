@@ -20,6 +20,7 @@ adjust = 0.1
 dairyProdPt = readOGR("T:/GIS/Statewide_Coverages/DATCP_Dairy_Producers", "DATCP_MILK_PROD")
 #dairyProdFile = paste(dir, "DairyProducerDensity_Statewide.tif", sep="/")
 dairyRastFile = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/Rotations/CDLrotationsByCLU_Statewide.tif"
+dairyRastFile = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/Rotations/CDL_rotationsByCLU_buffer.tif"
 #dairyRastFile = paste(dir, "DairyPixelPoints_Density.img", sep="/")
 #nondairyRastFile = paste(dir, "NonDairyPixelPoints_Density.img", sep="/")
 
