@@ -27,7 +27,9 @@ writeLines(output.sub, paste(dir_out, "output.sub", sep="/"))
 all_sub = data.frame()
 for (sub_code in sub_codes) {
 	print(sub_code)
-	sub_output.sub = output.sub[grep(sub_code, substr(output.sub, 7, 10))]
+	sub_output.sub = output.sub[grep(
+		paste("\\s", sub_code, sep=""),
+		substr(output.sub, 7, 10))]
 	area = as.numeric(substr(sub_output.sub[1], 25, 34))
 	sub_output.sub = read.table(
 		text=paste(
@@ -53,7 +55,10 @@ for (sub_code in sub_codes) {
 all_rch = data.frame()
 for (rch_code in rch_codes) {
 	print(rch_code)
-	rch_output.rch = output.rch[grep(rch_code, substr(output.rch, 6, 10))]
+	rch_output.rch = output.rch[
+		grep(
+			paste("\\s", rch_code, sep=""),
+			substr(output.rch, 6, 10))]
 	rch_output.rch = read.table(
 		text=paste(rch_output.rch, collapse="\n")
 	)
