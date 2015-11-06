@@ -4,7 +4,7 @@ library(Hmisc)
 
 # exclde = c("CHD_rte", "CHW2_rte", "HRU_SLP_hru", "SLSOIL_hru", "ADJ_PKR_bsn", "FFCB_bsn", "SLSUBBSN_hru")
 
-dir_proj = "H:/output_Data"
+dir_proj = "T:/Projects/Wisconsin_River/GIS_Datasets/Sensitivity_Analysis/sensitivity_output_data"
 dir_sens = "T:/Projects/Wisconsin_River/GIS_Datasets/Sensitivity_Analysis"
 file_reg_sens = paste(dir_proj, "all_pars_regional_output.txt", sep="/")
 
@@ -53,7 +53,13 @@ for (var in unique(sub.dat$var_type)){
 }
 
 ### For route parameters
-png("~/sensitivity_figs/sensitivity_fig_rte.png",res=900,units='in',height=11,width=8)
+png(
+	paste(dir_sens, "/sensitivity_fig_rte.png", sep=""),
+	res=900,
+	units='in',
+	height=11,
+	width=8
+)
 # ggplt = ggplot(rch.dat, aes(x=reorder(parameter, value), y=value, fill = variable))
 ggplt = ggplot(rch.dat, aes(x=reorder(parameter, relative_rank), y=relative_rank, fill = var_type))
 ggplt = ggplt + geom_bar(stat="identity", position = "dodge") + coord_flip() + theme_bw()
