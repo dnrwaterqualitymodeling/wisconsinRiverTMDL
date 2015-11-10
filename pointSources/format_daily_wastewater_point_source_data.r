@@ -66,7 +66,8 @@ for (sb_id in 1:337) {
 			cbind(mean_flow, sed_load, p_load) ~ YEAR + DAY, 
 			data=sub_of_data, 
 			FUN=sum,
-			na.rm=T)
+			na.rm=T
+		)
 		aggregated_of = merge(dates, aggregated_of, all.x=T, all.y=F)
 		# Seperate P into 58% organic and 42% mineral
 		aggregated_of$p_org_load = aggregated_of$p_load * 0.58
