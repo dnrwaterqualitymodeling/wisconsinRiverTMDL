@@ -1,5 +1,5 @@
-library(tidyr)
 library(rgdal)
+library(RODBC)
 
 dir_swat_prj = "C:/TEMP/WRB.Sufi2.SwatCup"
 file_swat_db = "K:/WRB/WRB.mdb"
@@ -10,7 +10,7 @@ file_muni_shp = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/SWAT
 out_main_table = "T:/Projects/Wisconsin_River/Model_Outputs/tables/runoff_load_breakdown.txt"
 
 of_data = read.delim(file_of)
-muni_data = read.delim(file_muni)
+muni_data = read.table(file_muni, header=T, sep="\t")
 
 file_output.hru = paste(dir_swat_prj, "/output.hru", sep="")
 
@@ -18,7 +18,7 @@ w = c(4,5,10,5,5,5,rep(10,67))
 col.names = read.fwf(file_output.hru, widths=w, skip=8, n=1, as.is=T, strip.white=T)
 output.hru = read.fwf(file_output.hru, widths=w, skip=9)
 names(output.hru) = col.names[1,]
-hru_ann_ave = subset(output.hru, MON == 12)
+#hru_ann_ave = subset(output.hru, MON == 12)
 
 dates = seq(as.Date("2002-01-01"), as.Date("2013-12-31"), by="1 day")
 dates = data.frame(
@@ -108,9 +108,14 @@ out_table = rbind(out_table, ps_table)
 muni_data$flow_ha_m = muni_data$flow_m3 / 10000
 muni_data$tss_kg = muni_data$TSS_tons * 1000
 muni_data$tp_kg = muni_data$P_filt_kg + muni_data$P_part_kg
+muni_data$date = as.Date(muni_data$date)
 
-muni_summ = colSums(muni_data[c("flow_ha_m", "tp_kg", "tss_kg")], na.rm=T)
-muni_summ = as.data.frame(t(muni_summ)) / 12
+muni_summ = aggregate(
+	cbind(flow_ha_m, tp_kg, tss_kg) ~ format(date, "%Y"),
+	data=muni_data,
+	sum
+)
+muni_summ = colMeans(muni_summ[c("flow_ha_m", "tp_kg", "tss_kg")], na.rm=T)
 
 muni_shp = readOGR(
 	dirname(file_muni_shp),
@@ -142,6 +147,7 @@ ag_dt = subset(
 	output.hru, GIS %in% gis & MON != 12,
 	select=c(
 		"GIS",
+		"MON",
 		"AREAkm2",
 		"SURQ_GENmm",
 		"SYLDt/ha",
