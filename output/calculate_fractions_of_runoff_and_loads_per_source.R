@@ -1,3 +1,5 @@
+library(dplyr)
+library(tidyr)
 library(rgdal)
 library(RODBC)
 
@@ -9,16 +11,17 @@ file_muni = "T:/Projects/Wisconsin_River/Model_Inputs/WinSLAMM_Inputs/subbasin_m
 file_muni_shp = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/SWAT_Urban_Areas7.shp"
 out_main_table = "T:/Projects/Wisconsin_River/Model_Outputs/tables/runoff_load_breakdown.txt"
 
-of_data = read.delim(file_of)
+of_data = read.delim(file_of)[
+	c(
+		"SAMPLE_ID",
+		"YEAR_",
+		"MONTH_",
+		"STORET_PARM_DESC",
+		"PARM_UNIT_TYPE",
+		"MODEL_VALUE"
+	)
+]
 muni_data = read.table(file_muni, header=T, sep="\t")
-
-file_output.hru = paste(dir_swat_prj, "/output.hru", sep="")
-
-w = c(4,5,10,5,5,5,rep(10,67))
-col.names = read.fwf(file_output.hru, widths=w, skip=8, n=1, as.is=T, strip.white=T)
-output.hru = read.fwf(file_output.hru, widths=w, skip=9)
-names(output.hru) = col.names[1,]
-#hru_ann_ave = subset(output.hru, MON == 12)
 
 dates = seq(as.Date("2002-01-01"), as.Date("2013-12-31"), by="1 day")
 dates = data.frame(
@@ -26,232 +29,230 @@ dates = data.frame(
 	MON = as.integer(format(dates, "%m")),
 	DAY = as.integer(format(dates, "%j"))
 )
-days_per_mo = ts(
-	diff(seq(as.Date("2002-01-01"), as.Date("2014-01-01"), by="month")),
-	start = c(2002, 01),
-	freq = 12
-)
-days_per_mo = as.integer(days_per_mo)
-year = as.integer(format(
-	seq(as.Date("2002-01-01"), as.Date("2013-12-01"), by="month"),
-	"%Y"
-))
-mo = as.integer(format(
-	seq(as.Date("2002-01-01"), as.Date("2013-12-01"), by="month"),
-	"%m"
-))
-days_per_mo = data.frame(
-	year=year,
-	mo=mo,
-	days_per_mo=days_per_mo
-)
 
 out_table = data.frame()
+
+#of_q_data = subset(of_data, STORET_PARM_DESC == "Flow Rate")
+#of_tp_data = subset(of_data, STORET_PARM_DESC == "Phosphorus, Total")
+#of_tss_data = subset(of_data, STORET_PARM_DESC == "Suspended Solids, Total")
+#
+#of_wide_data = merge(of_q_data, of_tp_data, by=c("SAMPLE_ID", "YEAR_", "MONTH_"))
+#names(of_wide_data) = sub("\\.x", ".Q", names(of_wide_data))
+#names(of_wide_data) = sub("\\.y", ".TP", names(of_wide_data))
+#of_wide_data = merge(of_wide_data, of_tss_data, by=c("SAMPLE_ID", "YEAR_", "MONTH_"))
+#names(of_wide_data) = sub("STORET_PARM_DESC", "STORET_PARM_DESC.TSS", names(of_wide_data))
+#names(of_wide_data) = sub("STORET_PARM_DESC", "STORET_PARM_DESC.TSS", names(of_wide_data))
 
 ###################
 # Point sources
 ###################
 ofs = unique(of_data$SAMPLE_ID)
-sub_of_data = data.frame()
+of_loads = data.frame()
 for (of in ofs) {
 	print(of)
 	pt_data = subset(of_data, SAMPLE_ID == of)
 	flow_data = subset(pt_data, STORET_PARM_DESC == "Flow Rate")
 	# Convert million gallons per day to cubic meters per day
-	mean_flow = flow_data$MODEL_VALUE * 3785.41
+	mean_flow = flow_data$MODEL_VALUE
 	# calculate average daily phosphorous and sediment loads
 	p_data = subset(pt_data, STORET_PARM_DESC == "Phosphorus, Total")
 	p_conc = p_data$MODEL_VALUE
-	# mg/L * m3/day * (1000 L / 1 m3) * (1 kg / 1e6 mg)
-	p_load = p_conc * mean_flow * 0.001
+	# x MG/day * y mg/L * 3785412 L/MG * 1e-6 kg/mg
+	p_load = p_conc * mean_flow * 3.785412
 	
 	sed_data = subset(pt_data, STORET_PARM_DESC == "Suspended Solids, Total")
 	units = sed_data$PARM_UNIT_TYPE[1]
 	if (tolower(units) == "mg/l" | units == "MGD") { # MGD was a mistake in the database---actually mg/L
 		sed_conc = sed_data$MODEL_VALUE
-		# mg/L * m3/day * (1000 L / 1 m3) * (1 kg / 1e6 mg)
-		sed_load = sed_conc * mean_flow * 0.001
+		# x MG/day * y mg/L * 3785412 L/MG * 1e-9 metric tons/mg
+		sed_load = sed_conc * mean_flow * .003785412
 	} else if (units == "lbs/day") {
-		sed_conc = sed_data$MODEL_VALUE
-		sed_load = sed_conc * 0.454
+		sed_load = sed_data$MODEL_VALUE * 0.000453592
 	} else if (units == "kg/day") {
-		sed_conc = sed_data$MODEL_VALUE
-		sed_load = sed_conc
+		sed_load = sed_data$MODEL_VALUE  * 0.001
 	} 
-	out_mon = cbind(p_data["YEAR_"], p_data["MONTH_"], mean_flow, sed_load, p_load)
-	names(out_mon)[1:2] = c("YEAR", "MON")
+	out_mon = cbind(
+		sample_id=of,
+		p_data["YEAR_"],
+		p_data["MONTH_"],
+		mean_flow=mean_flow * 0.3785412,
+		sed_load,
+		p_load
+	)
+	
+	names(out_mon)[2:3] = c("YEAR", "MON")
 	out_day = merge(dates, out_mon, all.x=T, all.y=F)
-	sub_of_data = rbind(sub_of_data, out_day)
+	of_loads = rbind(of_loads, out_day)
 }
-# convert flow from m3 to hectare meters
-sub_of_data$mean_flow = sub_of_data$mean_flow / 10000
 
 # Add all loads over the whole simulation period
-of_summ = colSums(sub_of_data[c("mean_flow", "sed_load", "p_load")], na.rm=T)
-# Divide simulation total by 12 years to calculate the annual average load (kg / yr)
-of_summ = of_summ / 12 
-of_summ = as.data.frame(t(of_summ))
+of_summ = of_loads %>%
+	group_by(YEAR) %>%
+	summarise(
+		area_km2=NA,
+		Q=sum(mean_flow),
+		TP=sum(p_load, na.rm=T),
+		TSS=sum(sed_load)
+	)
+of_summ = of_summ %>%
+	group_by(source="point_sources") %>%
+	summarise(
+		area_km2=mean(area_km2),
+		Q_ha_m=mean(Q),
+		TP_kg=mean(TP),
+		TSS_mt=mean(TSS)
+	)
+out_table = rbind(out_table, of_summ)
 
-ps_table = data.frame(
-	source = "point sources",
-	area_km2 = NA,
-	variable = c("Q", "TP", "TSS"),
-	load = c(of_summ$mean_flow, of_summ$p_load, of_summ$sed_load),
-	unit = c("hectare-meters", "kg", "kg")
-)
-out_table = rbind(out_table, ps_table)
+
+# Add all loads over the whole simulation period
+of_summ = of_loads %>%
+	group_by(sample_id, YEAR) %>%
+	summarise(
+		area_km2=NA,
+		Q=sum(mean_flow),
+		TP=sum(p_load, na.rm=T),
+		TSS=sum(sed_load)
+	)
+of_summ = of_loads %>%
+	group_by()
+
+of_summ = of_summ %>%
+	group_by(source="point_sources") %>%
+	summarise(
+		area_km2=mean(area_km2),
+		Q_ha_m=mean(Q),
+		TP_kg=mean(TP),
+		TSS_mt=mean(TSS)
+	)
 
 ###################
 # Municipalities
 ###################
 
 muni_data$flow_ha_m = muni_data$flow_m3 / 10000
-muni_data$tss_kg = muni_data$TSS_tons * 1000
+#muni_data$tss_kg = muni_data$TSS_tons
 muni_data$tp_kg = muni_data$P_filt_kg + muni_data$P_part_kg
 muni_data$date = as.Date(muni_data$date)
-
-muni_summ = aggregate(
-	cbind(flow_ha_m, tp_kg, tss_kg) ~ format(date, "%Y"),
-	data=muni_data,
-	sum
-)
-muni_summ = colMeans(muni_summ[c("flow_ha_m", "tp_kg", "tss_kg")], na.rm=T)
 
 muni_shp = readOGR(
 	dirname(file_muni_shp),
 	strsplit(basename(file_muni_shp), "\\.")[[1]][1]
 )
-	
-ms4_table = data.frame(
-	source = "Urban areas",
-	area_km2 = sum(muni_shp@data$Shape_Area) / 1000^2,
-	variable = c("Q", "TP", "TSS"),
-	load = c(muni_summ$flow_ha_m, muni_summ$tp_kg, muni_summ$tss_kg),
-	unit = c("hectare-meters", "kg", "kg")
-)
 
-out_table = rbind(out_table, ms4_table)
+muni_summ = muni_data %>%
+	group_by(
+		source="ms4",
+		area_km2 = sum(muni_shp@data$Shape_Area) / 1000^2,
+		year=format(muni_data$date, "%Y")
+	) %>%
+	summarise(
+		Q_ha_m=sum(flow_ha_m),
+		TP_kg=sum(tp_kg),
+		TSS_mt=sum(TSS_tons)
+	)
+muni_summ = muni_summ %>%
+	group_by(source) %>%
+	summarise(
+		area_km2=mean(area_km2),
+		Q_ha_m=mean(Q_ha_m),
+		TP_kg=mean(TP_kg),
+		TSS_mt=mean(TSS_mt)
+	)
+
+out_table = rbind(out_table, muni_summ)
 
 ###################
 # Ag
 ###################
 
+###################################################################
+## Much of the credit for the code below belongs to Jim Almendinger.
+# Select the variables you actually are interested in
+myVars <- c(
+	'GIS',
+	'MON',
+	'AREA',
+	'SURQ_GEN',
+	'SYLD',
+	'ORGP',
+	'SEDP',
+	'SOLP',
+	'P_GW'
+)
+
+# -----Read in output.hru-----
+# format of the .hru file (SWAT 2012)
+hru_fmt <- list(vars = c('LULC','HRU','GIS','SUB','MGT','MON','AREA','PRECIP',
+		'SNOMELT','IRR','PET','ET','SW_INIT','SW_END','PERC','GW_RCHG',
+		'SNOFALL','DA_RCHG','REVAP','SA_IRR','DA_IRR','SA_ST','DA_ST',
+		'SURQ_GEN','SURQ_CNT','TLOSS','LATQ','GW_Q','WYLD','DAILYCN',
+		'TMP_AV','TMP_MX','TMP_MN','SOL_TMP','SOLAR','SYLD','USLE',
+		'N_APP','P_APP','NAUTO','PAUTO','NGRZ','PGRZ','NCFRT','PCFRT',
+		'NRAIN','NFIX','F-MN','A-MN','A-SN','F-MP','AO-LP','L-AP','A-SP',
+		'DNIT','NUP','PUP','ORGN','ORGP','SEDP','NSURQ','NLATQ','NO3L',
+		'NO3GW','SOLP','P_GW','W_STRS','TMP_STRS','N_STRS','P_STRS',
+		'BIOM','LAI','YLD','BACTP','BACTLP','WTAB','WTABELO','SNO_HRU',
+		'CMUP_KGH','CMTOT_KGH','QTILE','TNO3','LNO3','GW_Q_D',
+		'LATQ_CNT'),
+	col_wds = c(4,5,10,5,5,5,rep(10,67),rep(11,2),rep(10,10)))
+
+# select columns to actually read in, to conserve computer memory
+# do this by making column widths for data to ignore negative (* -1)
+
+hru_fmt$col_wds[!(hru_fmt$vars %in% myVars)] =
+	hru_fmt$col_wds[!(hru_fmt$vars %in% myVars)] * -1
+
+# read file into dataframe df; ignore SWAT's header line because it doesn't line up well
+file_output.hru = paste(dir_swat_prj, "/output.hru", sep="")
+output.hru <- read.fwf(
+	file=file_output.hru,
+	widths=hru_fmt$col_wds,
+	head=F,
+	skip=9,
+	strip.white=TRUE,
+	buffersize=20000
+)
+
+# set column names to this ordered list of variables
+colnames(output.hru) <- myVars
+# get rid of rows with HRU-average values over model runs... where MON = # of runYears, << years
+output.hru <- output.hru[output.hru$MON >= 1950, ]
+
+# -----Calculate TP and TN yields, and loads for important variables-----
+output.hru$SURQ_GEN_ha_m  <- output.hru$SURQ_GEN * output.hru$AREA * 0.1 # mm * km2 * 100 ha/km2 * 0.001 m/mm
+output.hru$SED_t  <- output.hru$SYLD * output.hru$AREA * 100    # t/ha * km2 * ha/km2
+output.hru$TP     <- output.hru$SOLP + output.hru$SEDP + output.hru$ORGP # + output.hru$P_GW
+output.hru$TP_kg  <- output.hru$TP * output.hru$AREA * 100
+
 con = odbcConnectAccess(file_swat_db)
-hru_lkp = sqlQuery(con, "select landuse,hru_gis from hrus")
+hru_lkp = sqlQuery(con, "select LANDUSE,HRU_GIS as GIS from hrus")
 close(con) 
 
-lu_lkp = read.csv(file_lu_lkp)
-ag = lu_lkp$LANDUSE[!(lu_lkp$TYPE %in% c("Non-Ag", "Cranberry"))]
-gis = hru_lkp$hru_gis[hru_lkp$landuse %in% ag]
-ag_dt = subset(
-	output.hru, GIS %in% gis & MON != 12,
-	select=c(
-		"GIS",
-		"MON",
-		"AREAkm2",
-		"SURQ_GENmm",
-		"SYLDt/ha",
-		"ORGPkg/ha",
-		"SEDPkg/ha",
-		"SOLPkg/ha"
-	)
-)
-ag_dt$flow_ha_m =
-	(ag_dt$AREAkm2 * 100) * (ag_dt$SURQ_GENmm / 1000)
-ag_dt$tss_kg = (ag_dt$AREAkm2 * 100) * ag_dt[["SYLDt/ha"]] * 1000
-ag_dt$tp_kg = 
-	(ag_dt$AREAkm2 * 100) *
-		rowSums(cbind(
-			ag_dt[["ORGPkg/ha"]],
-			ag_dt[["SEDPkg/ha"]],
-			ag_dt[["SOLPkg/ha"]]
-		))
-ag_dt = aggregate(
-	cbind(AREAkm2, flow_ha_m, tss_kg, tp_kg) ~ GIS,
-	ag_dt,
-	FUN=mean
-)
-ag_summ = colSums(ag_dt[c("flow_ha_m", "tp_kg", "tss_kg")])
-ag_summ = as.data.frame(t(ag_summ))
+lu_lkp = read.csv(file_lu_lkp)[c("LANDUSE", "TYPE")]
+lu_lkp$TYPE[lu_lkp$TYPE == "Cranberries"] = "Wetland"
 
-ag_table = data.frame(
-	source = "Agriculture",
-	area_km2 = sum(ag_dt$AREAkm2),
-	variable = c("Q", "TP", "TSS"),
-	load = c(ag_summ$flow_ha_m, ag_summ$tp_kg, ag_summ$tss_kg),
-	unit = c("hectare-meters", "kg", "kg")
-)
+hru_lkp = merge(hru_lkp, lu_lkp, all.x=T, all.y=F)[c("GIS", "TYPE")]
+output.hru = merge(output.hru, hru_lkp)
 
-out_table = rbind(out_table, ag_table)
+non_pt_summ <- output.hru %>%
+	group_by(TYPE, MON) %>%
+	summarise(
+		area_km2=sum(AREA),
+		Q=sum(SURQ_GEN_ha_m),
+		TP=sum(TP_kg),
+		TSS=sum(SED_t)
+	)
+non_pt_summ <- non_pt_summ %>%
+	group_by(source=TYPE) %>%
+	summarise(
+		area_km2=mean(area_km2),
+		Q_ha_m=mean(Q),
+		TP_kg=mean(TP),
+		TSS_mt=mean(TSS)
+	)
 
-###################
-# Other land uses
-###################
-
-source_names = data.frame(
-	lu_code = c("URML", "PAST", "WETN", "FRST"),
-	desc = c(
-		"Non-point developed",
-		"Grassland",
-		"Wetland",
-		"Forest"
-	)
-)
-
-for (lu_code in c("URML", "PAST", "WETN", "FRST")) {
-	if (lu_code == "FRST") {
-		lu_code = c("FRSD", "FRSE", "FRST")
-	}
-	gis = hru_lkp$hru_gis[hru_lkp$landuse %in% lu_code]
-	non_pt_dt = subset(
-		output.hru, GIS %in% gis & MON != 12,
-		select=c(
-			"GIS",
-			"AREAkm2",
-			"SURQ_GENmm",
-			"SYLDt/ha",
-			"ORGPkg/ha",
-			"SEDPkg/ha",
-			"SOLPkg/ha"
-		)
-	)
-	non_pt_dt$flow_ha_m =
-		(non_pt_dt$AREAkm2 * 100) * (non_pt_dt$SURQ_GENmm / 1000)
-	non_pt_dt$tss_kg = (non_pt_dt$AREAkm2 * 100) * non_pt_dt[["SYLDt/ha"]] * 1000
-	non_pt_dt$tp_kg = 
-		(non_pt_dt$AREAkm2 * 100) *
-		rowSums(cbind(
-				non_pt_dt[["ORGPkg/ha"]],
-				non_pt_dt[["SEDPkg/ha"]],
-				non_pt_dt[["SOLPkg/ha"]]
-			))
-	non_pt_dt = aggregate(
-		cbind(AREAkm2, flow_ha_m, tss_kg, tp_kg) ~ GIS,
-		non_pt_dt,
-		FUN=mean
-	)
-	non_pt_summ = colSums(non_pt_dt[c("flow_ha_m", "tp_kg", "tss_kg")])
-	non_pt_summ = as.data.frame(t(non_pt_summ))
-	
-	non_pt_table = data.frame(
-		source = source_names$desc[source_names$lu_code %in% lu_code],
-		area_km2 = sum(non_pt_dt$AREAkm2),
-		variable = c("Q", "TP", "TSS"),
-		load = c(non_pt_summ$flow_ha_m, non_pt_summ$tp_kg, non_pt_summ$tss_kg),
-		unit = c("hectare-meters", "kg", "kg")
-	)
-	
-	out_table = rbind(out_table, non_pt_table)
-}
-#
-#out_table = data.frame(
-#	source = out_table$source,
-#	area_km2 = out_table$area_km2,
-#	variable = out_table$variable,
-#	load = out_table$load
-#)
-#
-#out_tabl
+out_table = rbind(out_table, non_pt_summ)
 
 write.table(out_table, file=out_main_table, sep="\t", row.names=F)
 

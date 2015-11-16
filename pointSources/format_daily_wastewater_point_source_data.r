@@ -76,7 +76,9 @@ for (sb_id in 1:337) {
 		if (sum(aggregated_of[,4:7], na.rm=T) == 0) {
 			ofs_issues = paste(ofs, collapse=",")
 			writeLines(paste(ofs_issues, "SAMPLE_PTs have all zero data"), log_file)
+			of_bool = F
 		}
+		aggregated_of[is.na(aggregated_of)] = 0
 	} else {
 		of_bool = F
 	}	
@@ -105,6 +107,7 @@ for (sb_id in 1:337) {
 			all.x=T,
 			all.y=F
 		)
+		muni_sub_agg[is.na(muni_sub_agg)] = 0
 	} else {
 		muni_bool = F
 	}
@@ -118,14 +121,14 @@ for (sb_id in 1:337) {
 		all_point_sources = muni_sub_agg
 		COIs = c("mean_flow", "sed_load", "p_org_load", "p_min_load")
 		muni_sub_agg = muni_sub_agg[order(muni_sub_agg$YEAR, muni_sub_agg$DAY), ]
-		aggregated_of = aggregated_of[order(aggregated_of$YEAR, aggregated_of$DAY), ]
+		aggregated_of = aggregated_of[order(aggregated_of$YEAR, aggregated_of$DAY),]
 		all_point_sources[COIs] = muni_sub_agg[COIs] + aggregated_of[COIs]
 	}
 	# Append the dailies to a master data.frame with subbasin ID associated
 	all_point_sources$sb_id = sb_id
 	output_holder = rbind(output_holder, all_point_sources)
 }
-output_holder[is.na(output_holder)] = 0
+#output_holder[is.na(output_holder)] = 0
 
 arcswat_hdr = c(
 	"DATE",

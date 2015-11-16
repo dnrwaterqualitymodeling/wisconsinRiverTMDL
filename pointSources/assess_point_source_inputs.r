@@ -2,7 +2,7 @@ library(foreign)
 options(stringsAsFactors=F)
 
 # define inputs
-of_file = "T:/Projects/Wisconsin_River/GIS_Datasets/Outfalls/WRB_Permitted_Outfall_Data_DRAFT_Jan2015.txt"
+of_file ="T:/Projects/Wisconsin_River/Model_Documents/Point_Source_Info/FINAL_WASTEWATER_DATASET/WRB_Permitted_Outfall_Data_FINAL_May2015.txt"
 muni_file = "T:/Projects/Wisconsin_River/Model_Inputs/WinSLAMM_Inputs/subbasin_muni_loads.txt"
 lu_file = "T:/Projects/Wisconsin_River/Model_Documents/Point_Source_Info/DRAFT WASTEWATER DATASET FILES/WRB_Outfalls_DRAFT_JAN2015.dbf"
 out_dir = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/point_sources"
