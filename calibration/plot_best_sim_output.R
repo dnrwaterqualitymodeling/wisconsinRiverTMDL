@@ -1,4 +1,4 @@
-dir_prj = "C:/Users/ruesca/Desktop/wrb_swat_model_draft_release/WRB.Sufi2.SwatCup"
+dir_prj = "C:/TEMP/WRB.Sufi2.SwatCup"
 dir_out = "C:/Users/ruesca/Desktop/Plots"
 
 gage_subbasin_lu =
@@ -77,7 +77,8 @@ all_date = subset(all_date, predicted > 0)
 combos = unique(all[,1:2])
 combos = subset(
 	combos,
-	!(variable %in% exclude[,1]) | !(subbasin %in% exclude[,2]) 
+	!(paste(variable, subbasin) %in% paste(exclude[,1], exclude[,1]))
+#	!(variable %in% exclude[,1]) | !(subbasin %in% exclude[,2]) 
 )
 
 
