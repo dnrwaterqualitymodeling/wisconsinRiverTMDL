@@ -1,6 +1,7 @@
 library(RODBC)
 
-txtinout = "C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut"
+#txtinout = "C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut"
+txtinout = "C:/Users/ruesca/Desktop/grass_mgt_files"
 db_prj = "C:/Users/ruesca/Desktop/WRB/WRB.mdb"
 temp_dir = tempdir()
 p = "CNOP"
