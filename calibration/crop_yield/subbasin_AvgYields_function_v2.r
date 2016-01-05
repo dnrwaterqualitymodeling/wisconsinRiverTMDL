@@ -1,4 +1,4 @@
-yldCalib = function(crop, scenario='Default', projectDir='H:/WRB', basinWide=T, monthly=F){
+yldCalib = function(crop, scenario='Default', projectDir='C:/TEMP/WRB.Sufi2.SwatCup', basinWide=T, monthly=F){
 #######################################    
 # This script produces simulated vs observed plots 
 # for crop yields at the county and basinwide level.
@@ -36,7 +36,7 @@ yldCalib = function(crop, scenario='Default', projectDir='H:/WRB', basinWide=T, 
     cropKeyNASS = cropTab[which(cropTab$CropName == crop),'CropKeyNASS'] 
     
     # set equal to your scenario of choice 
-    output.hru = paste(projectDir,"/Scenarios/",scenario,"/TxtInOut/output.hru",sep='')
+    output.hru = paste(projectDir,"/output.hru",sep='')
     widths = c(4,5,10,5,5,5, rep(10,67), 11, 11, rep(10, 10))
     print('Importing simulated data...')
     dat = readLines(output.hru)
