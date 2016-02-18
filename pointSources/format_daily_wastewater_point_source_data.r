@@ -2,7 +2,7 @@ library(foreign)
 options(stringsAsFactors=F)
 
 # define inputs
-of_file = "T:/Projects/Wisconsin_River/Model_Documents/Point_Source_Info/FINAL_WASTEWATER_DATASET/WRB_Permitted_Outfall_Data_FINAL_May2015.txt"
+of_file = "T:/Projects/Wisconsin_River/Model_Documents/Point_Source_Info/FINAL_WASTEWATER_DATASET/WRB_Permitted_Outfall_Data_FINAL_NOV2015.txt"
 muni_file = "T:/Projects/Wisconsin_River/Model_Inputs/WinSLAMM_Inputs/subbasin_muni_loads.txt"
 #lu_file = "T:/Projects/Wisconsin_River/Model_Documents/Point_Source_Info/DRAFT WASTEWATER DATASET FILES/WRB_Outfalls_DRAFT_JAN2015.dbf"
 lu_file = "T:/Projects/Wisconsin_River/Model_Documents/Point_Source_Info/FINAL_WASTEWATER_DATASET/WRB_Outfalls_FINAL_MAY2015.dbf"
@@ -55,7 +55,8 @@ for (sb_id in 1:337) {
 			} else if(units == "kg/day"){
 				sed_conc = (sed_data$MODEL_VALUE)
 				sed_load = sed_conc*.001
-			} 
+			}
+			mean_flow = mean_flow * !flow_data$Flow.Thru
 			out_mon = cbind(p_data["YEAR_"], p_data["MONTH_"], mean_flow, sed_load, p_load)
 			names(out_mon)[1:2] = c("YEAR", "MON")
 			out_day = merge(dates, out_mon, all.x=T, all.y=F)

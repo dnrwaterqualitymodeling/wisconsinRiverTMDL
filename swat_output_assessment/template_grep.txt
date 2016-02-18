@@ -16,11 +16,11 @@ do
 	fi
 	echo "	extracting from output.hru"
 	mkdir $SCEN/output_hru
-	egrep $ZROES$SB[0-9]{4} H:/WRB/Scenarios/Default/TxtInOut/output.hru > $SCEN/output_hru/$SB.txt
+	egrep $ZROES$SB[0-9]{4} C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut/output.hru > $SCEN/output_hru/$SB.txt
 	echo "	extracting from output.rch"
 	mkdir $SCEN/output_rch
-	egrep REACH[[:space:]]{$SPCNUM}$SB H:/WRB/Scenarios/Default/TxtInOut/output.rch > $SCEN/output_rch/$SB.txt
+	egrep REACH[[:space:]]{$SPCNUM}$SB C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut/output.rch > $SCEN/output_rch/$SB.txt
 	echo "	extracting from output.wtr"
 	mkdir $SCEN/output_wtr
-	egrep $ZROES$SB[0-9]{4} H:/WRB/Scenarios/Default/TxtInOut/output.wtr > $SCEN/output_wtr/$SB.txt
+	egrep $ZROES$SB[0-9]{4} C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut/output.wtr > $SCEN/output_wtr/$SB.txt
 done

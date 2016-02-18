@@ -1,6 +1,7 @@
 dirs = c(
-	"C:/TEMP/WRB.Sufi2.SwatCup",
-	"C:/TEMP/WRB.Sufi2.SwatCup/Backup"
+	"C:/Users/ruesca/Desktop/CNOP_adjust"
+#	"C:/TEMP/WRB.Sufi2.SwatCup",
+#	"C:/TEMP/WRB.Sufi2.SwatCup/Backup"
 )
 nat_lc = c("WATR","URML","PAST","WETN","ONIO","FRSD","FRSE","FRST","CRRT")
 for (dir in dirs) {

@@ -6,7 +6,7 @@ extr_subs_fun <- function(
 	hru=T,
 	rch=T,
 	wtr=F,
-	git_bin="C:\\Users\\evansdm\\AppData\\Local\\Programs\\Git\\bin"){
+	git_bin="C:\\Users\\ruesca\\AppData\\Local\\Programs\\Git\\bin"){
 
 	### Function to extract specific subbassins from output.hru and output.rch
 	### This function requires GIT
@@ -14,8 +14,8 @@ extr_subs_fun <- function(
 	### src_folder is where output.hru is found					#
 	### dst_folder is where subbasin files are output			#
 	### FULL PATH NAMES!! I'm not sure it will work with relative paths...
-	tmplt = readLines("~/Code/swat_output_assessment/template_grep.txt")
-	dflt = "H:/WRB/Scenarios/Default/TxtInOut"
+	tmplt = readLines("T:/Projects/Wisconsin_River/Code/swat_output_assessment/template_grep.txt")
+	dflt = "C:/Users/ruesch/Desktop/WRB/Scenarios/Default/TxtInOut"
 	tmpfiles = NULL
 	for (sb in subbasins){
 		print(sb)

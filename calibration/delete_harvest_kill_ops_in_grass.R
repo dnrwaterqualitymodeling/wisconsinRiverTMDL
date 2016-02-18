@@ -1,4 +1,4 @@
-setwd("C:/TEMP/WRB.Sufi2.SwatCup/Backup")
+setwd("C:/Users/ruesca/Desktop/CNOP_adjust/")
 
 fs = list.files(pattern="\\.mgt$")
 for (f in fs) {
@@ -7,9 +7,10 @@ for (f in fs) {
 	hru_info = hru_info[hru_info != ""]
 	lc = hru_info[11]
 	if (!(lc %in% c("PAST", "CRRT"))) { next }
-	print(f)
 	mgt = readLines(f)
-	substr(mgt[4], 16, 16) = "0"
-	substr(mgt[5], 15, 16) = " 0"
+#	break
+	mgt = mgt[-33]
+	print(f)
 	writeLines(mgt, f)
 }
+

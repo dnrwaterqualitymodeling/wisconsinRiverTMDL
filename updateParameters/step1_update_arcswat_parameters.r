@@ -10,6 +10,7 @@ library(stringr)
 library(foreign)
 library(rgeos)
 library(rgdal)
+library(dplyr)
 options(stringsAsFactors=F)
 options(warn=1)
 # CHANGE THESE ACCORDING TO SWAT PROJECT
@@ -31,6 +32,18 @@ lulc_manN_lu = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/lulc_manN_lu.
 SWAT_manID_lu = "T:/Projects/Wisconsin_River/GIS_Datasets/Landcover/SWAT_manID_lu.csv"
 
 inDb = paste(projectDir, "/", basename(projectDir), ".mdb", sep="")
+
+natural_lu = c(
+	"WATR",
+	"URML",
+	"PAST",
+	"WETN",
+	"ONIO",
+	"FRSD",
+	"FRSE",
+	"FRST",
+	"CRRT"
+)
 
 # UPDATE IRRIGATION
 # 0 is off, 1 from reach, 3 from shallow aquifer
@@ -181,7 +194,7 @@ for (sb in soil_p$Subbasin){
 		"SET SOL_LABP1 = ", soil_p$SOLP[which(soil_p$Subbasin == sb)], ",",
 		"SOL_ORGP1 =", soil_p$ORGP[which(soil_p$Subbasin == sb)],
 		"WHERE SUBBASIN =", sb, "AND LANDUSE NOT IN",
-		"('BARR','FRSD','FRSE','FRST','PAST','CRRT','WATR','URML','RNGB','RNGE','WETF','WETN','ONIO','HAY');"
+		paste("('", paste(natural_lu, collapse="','"), "');", sep=""),
 	)   
 	stdout = sqlQuery(con, soilp_query)
 }
@@ -276,18 +289,20 @@ write(paste("import arcpy; arcpy.Compact_management('", inDb, "')", sep=""), py_
 con_mgt2 = odbcConnectAccess(prjDb)
 con_swat2012 = odbcConnectAccess(swatDb)
 
-sol = sqlQuery(con_mgt2, "SELECT SUBBASIN, HRU, SLOPE_CD, SNAM FROM sol")
+sol = sqlQuery(con_mgt2, "SELECT SUBBASIN, HRU, LANDUSE, SLOPE_CD, SNAM FROM sol")
 sol_drained = subset(
 	sol,
-	SLOPE_CD %in% c("0-0.5","0.5-1.5") & grepl("^E", SNAM)
+	SLOPE_CD %in% c("0-0.5","0.5-1.5") &
+		grepl("^E", SNAM) &
+		!(LANDUSE %in% natural_lu)
 )
 
-oidStart = 1
 for (row in 1:nrow(mgt1)) {
     row_data = mgt1[row,]
 	sb = as.character(row_data$SUBBASIN)
 	hru = as.character(row_data$HRU)
 	lu = as.character(row_data$LANDUSE)
+#	if (lu == "CRRT") {break} else {next}
     print(paste('Subbasin:',sb,'hru:',hru,'lu:',lu))
     opCode = unique(as.character(crosswalk$OPCODE[crosswalk$LANDUSE == lu]))
     if (substr(opCode, 1, 1) == "3" & substr(opCode, 4, 4) == "c") {
@@ -301,9 +316,17 @@ for (row in 1:nrow(mgt1)) {
         sqlQuery(con_mgt2, igro_query)
     }
 	# UPDATE TILE DRAIN PARAMETERS
-	if (sb %in% sol_drained$SUBBASIN & hru %in% sol_drained$HRU) {
+#	if (sb %in% sol_drained$SUBBASIN & hru %in% sol_drained$HRU) {
+	if (paste(sb, hru) %in% paste(sol_drained$SUBBASIN, sol_drained$HRU)) {
 		tile_query = paste(
 			"UPDATE mgt1 SET DDRAIN = 900, TDRAIN = 48, GDRAIN = 20 WHERE ",
+			"SUBBASIN = ", sb, " AND HRU = ", hru, ";",
+			sep=""
+		)
+		stdout = sqlQuery(con_mgt2, tile_query)
+	} else {
+		tile_query = paste(			
+			"UPDATE mgt1 SET DDRAIN = 0, TDRAIN = 0, GDRAIN = 0 WHERE ",
 			"SUBBASIN = ", sb, " AND HRU = ", hru, ";",
 			sep=""
 		)
@@ -341,7 +364,11 @@ for (row in 1:nrow(mgt1)) {
 	if (row_data$LANDUSE %in% pot_veggie_landuses){
 		operation$IRR_NOA = as.character(row_data$SUBBASIN)
 	}
-	
+	if (!(lu %in% natural_lu)) {
+		operation = operation %>%
+			arrange(YEAR, MONTH, DAY, MGT_OP)
+		operation$OP_NUM = 1:nrow(operation)
+	}
 	formatTempFile = tempfile()
 	write.csv(operation[,2:ncol(operation)], formatTempFile, row.names=F, quote=T)
 	colNames = readLines(formatTempFile, 1)
@@ -360,8 +387,20 @@ for (row in 1:nrow(mgt1)) {
 		)
 		sqlQuery(con_mgt2, insertQuery)
 	}
-	if (!(opCode %in% c('BARR','FRSD', 'FRSE', 'FRST', 'WATR', 'URML', 'RNGB','RNGE','PAST','WETF', 'WETN','HAY'))){ 
-		husc_query = paste("UPDATE mgt1 SET HUSC = 1, NROT = 6, ISCROP = 1 WHERE SUBBASIN = ",
+	if (!(opCode %in% natural_lu)){ 
+#		if (opCode == "CRRT") {
+#			nrot = 1
+#			iscrop = 0
+#		} else {
+			nrot = 6
+			iscrop = 1
+#		}
+		husc_query = paste(
+			"UPDATE mgt1 SET HUSC = 1, NROT = ",
+			nrot,
+			", ISCROP = ",
+			iscrop,
+			" WHERE SUBBASIN = ",
 			as.character(row_data$SUBBASIN),
 			" AND HRU = ",
 			as.character(row_data$HRU),
@@ -379,7 +418,6 @@ for (row in 1:nrow(mgt1)) {
 		)
 		sqlQuery(con_mgt2, husc_query)
 	}
-
 	if (row %% 1000 == 0) {
 		close(con_mgt2)
 		print("Compacting database. Please wait...")
@@ -488,7 +526,7 @@ if (CNOP) {
 	for (hydgrp in LETTERS[1:4]) {
 		soils = hydgrp_lu[hydgrp_lu$HYDGRP == hydgrp, "SOIL"]
 		soils = paste("('", paste(soils, collapse="','"), "')", sep="")
-		for (lc in c("WATR", "URML", "FRSD", "FRSE", "FRST", "WETN", "RNGE", "PAST", "ONIO", "CRRT")) {
+		for (lc in natural_lu) {
 			query = paste(
 				"SELECT CN2 FROM mgt1 WHERE LANDUSE = '",
 				lc, 

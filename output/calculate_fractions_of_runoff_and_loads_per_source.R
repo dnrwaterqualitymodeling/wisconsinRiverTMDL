@@ -2,14 +2,16 @@ library(dplyr)
 library(tidyr)
 library(rgdal)
 library(RODBC)
+library(xlsx)
 
 dir_swat_prj = "C:/TEMP/WRB.Sufi2.SwatCup"
 file_swat_db = "K:/WRB/WRB.mdb"
 file_lu_lkp = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/LandCoverLandManagement/Landuse_Lookup_Update.csv"
-file_of = "T:/Projects/Wisconsin_River/Model_Documents/Point_Source_Info/FINAL_WASTEWATER_DATASET/WRB_Permitted_Outfall_Data_FINAL_May2015.txt"
+file_of = "T:/Projects/Wisconsin_River/Model_Documents/Point_Source_Info/FINAL_WASTEWATER_DATASET/WRB_Permitted_Outfall_Data_FINAL_NOV2015.txt"
 file_muni = "T:/Projects/Wisconsin_River/Model_Inputs/WinSLAMM_Inputs/subbasin_muni_loads.txt"
 file_muni_shp = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/SWAT_Urban_Areas7.shp"
 out_main_table = "T:/Projects/Wisconsin_River/Model_Outputs/tables/runoff_load_breakdown.txt"
+out_ag_table = "T:/Projects/Wisconsin_River/Model_Outputs/tables/runoff_load_breakdown_ag.txt"
 
 of_data = read.delim(file_of)[
 	c(
@@ -18,7 +20,8 @@ of_data = read.delim(file_of)[
 		"MONTH_",
 		"STORET_PARM_DESC",
 		"PARM_UNIT_TYPE",
-		"MODEL_VALUE"
+		"MODEL_VALUE",
+		"Flow.Thru"
 	)
 ]
 muni_data = read.table(file_muni, header=T, sep="\t")
@@ -71,6 +74,7 @@ for (of in ofs) {
 	} else if (units == "kg/day") {
 		sed_load = sed_data$MODEL_VALUE  * 0.001
 	} 
+	mean_flow = mean_flow * !flow_data$Flow.Thru
 	out_mon = cbind(
 		sample_id=of,
 		p_data["YEAR_"],
@@ -103,28 +107,6 @@ of_summ = of_summ %>%
 		TSS_mt=mean(TSS)
 	)
 out_table = rbind(out_table, of_summ)
-
-
-# Add all loads over the whole simulation period
-of_summ = of_loads %>%
-	group_by(sample_id, YEAR) %>%
-	summarise(
-		area_km2=NA,
-		Q=sum(mean_flow),
-		TP=sum(p_load, na.rm=T),
-		TSS=sum(sed_load)
-	)
-of_summ = of_loads %>%
-	group_by()
-
-of_summ = of_summ %>%
-	group_by(source="point_sources") %>%
-	summarise(
-		area_km2=mean(area_km2),
-		Q_ha_m=mean(Q),
-		TP_kg=mean(TP),
-		TSS_mt=mean(TSS)
-	)
 
 ###################
 # Municipalities
@@ -175,6 +157,7 @@ myVars <- c(
 	'AREA',
 	'SURQ_GEN',
 	'SYLD',
+	'USLE',
 	'ORGP',
 	'SEDP',
 	'SOLP',
@@ -222,7 +205,8 @@ output.hru <- output.hru[output.hru$MON >= 1950, ]
 # -----Calculate TP and TN yields, and loads for important variables-----
 output.hru$SURQ_GEN_ha_m  <- output.hru$SURQ_GEN * output.hru$AREA * 0.1 # mm * km2 * 100 ha/km2 * 0.001 m/mm
 output.hru$SED_t  <- output.hru$SYLD * output.hru$AREA * 100    # t/ha * km2 * ha/km2
-output.hru$TP     <- output.hru$SOLP + output.hru$SEDP + output.hru$ORGP # + output.hru$P_GW
+#output.hru$SED_t  <- output.hru$USLE * output.hru$AREA * 100    # t/ha * km2 * ha/km2
+output.hru$TP     <- output.hru$SOLP + output.hru$SEDP + output.hru$ORGP + output.hru$P_GW
 output.hru$TP_kg  <- output.hru$TP * output.hru$AREA * 100
 
 con = odbcConnectAccess(file_swat_db)
@@ -253,6 +237,90 @@ non_pt_summ <- non_pt_summ %>%
 	)
 
 out_table = rbind(out_table, non_pt_summ)
+out_table = out_table[!(out_table$source == "Water"),]
 
-write.table(out_table, file=out_main_table, sep="\t", row.names=F)
+############################
+# Summarize all sources
+
+out_table = out_table %>%
+	mutate(
+		area_percent = (area_km2 / sum(area_km2, na.rm=T)) * 100,
+		Q_mm = (Q_ha_m / area_km2) * 10,
+		Q_percent = (Q_ha_m / sum(Q_ha_m, na.rm=T)) * 100,
+		TP_kg_ha = (TP_kg / area_km2) * 0.01,
+		TP_percent = (TP_kg / sum(TP_kg, na.rm=T)) * 100,
+		TSS_mt_ha = (TSS_mt / area_km2) * 0.01,
+		TSS_percent = (TSS_mt / sum(TSS_mt, na.rm=T)) * 100
+	) %>% select(
+		source,
+		area_km2,
+		area_percent,
+		Q_ha_m,Q_mm,
+		Q_percent,TP_kg,
+		TP_kg_ha,
+		TP_percent,
+		TSS_mt,
+		TSS_mt_ha,
+		TSS_percent
+	)
+write.table(out_table, file=out_main_table, sep="\t", row.names=F, na="")
+
+#############################
+# Summarize ag sources
+
+# read file into dataframe df; ignore SWAT's header line because it doesn't line up well
+file_output.hru = paste(dir_swat_prj, "/output.hru", sep="")
+output.hru <- read.fwf(
+	file=file_output.hru,
+	widths=hru_fmt$col_wds,
+	head=F,
+	skip=9,
+	strip.white=TRUE,
+	buffersize=20000
+)
+
+# set column names to this ordered list of variables
+colnames(output.hru) <- myVars
+# get rid of rows with HRU-average values over model runs... where MON = # of runYears, << years
+output.hru <- output.hru[output.hru$MON >= 1950, ]
+
+# -----Calculate TP and TN yields, and loads for important variables-----
+output.hru$SURQ_GEN_ha_m  <- output.hru$SURQ_GEN * output.hru$AREA * 0.1 # mm * km2 * 100 ha/km2 * 0.001 m/mm
+output.hru$SED_t  <- output.hru$SYLD * output.hru$AREA * 100    # t/ha * km2 * ha/km2
+#output.hru$SED_t  <- output.hru$USLE * output.hru$AREA * 100    # t/ha * km2 * ha/km2
+output.hru$TP     <- output.hru$SOLP + output.hru$SEDP + output.hru$ORGP + output.hru$P_GW
+output.hru$TP_kg  <- output.hru$TP * output.hru$AREA * 100
+
+con = odbcConnectAccess(file_swat_db)
+hru_lkp = sqlQuery(con, "select LANDUSE,HRU_GIS as GIS from hrus")
+close(con) 
+
+lu_lkp = read.csv(file_lu_lkp)[c("VALUE", "LANDUSE", "GEN_DEF")]
+lu_lkp = subset(
+	lu_lkp,
+	grepl("Dairy|Cash|Potato", GEN_DEF),
+	select=c(LANDUSE, GEN_DEF) 
+)
+
+hru_lkp = merge(hru_lkp, lu_lkp, all.x=F, all.y=F)[c("GIS", "GEN_DEF")]
+output.hru = merge(output.hru, hru_lkp)
+
+ag_summ <- output.hru %>%
+	group_by(GEN_DEF, MON) %>%
+	summarise(
+		area_km2=sum(AREA),
+		Q=sum(SURQ_GEN_ha_m),
+		TP=sum(TP_kg),
+		TSS=sum(SED_t)
+	)
+ag_summ <- ag_summ %>%
+	group_by(source=GEN_DEF) %>%
+	summarise(
+		area_km2=mean(area_km2),
+		Q_ha_m=mean(Q),
+		TP_kg=mean(TP),
+		TSS_mt=mean(TSS)
+	)
+
+write.table(ag_summ, file=out_ag_table, sep="\t", row.names=F, na="")
 

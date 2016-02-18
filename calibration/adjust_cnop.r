@@ -1,7 +1,7 @@
 library(RODBC)
 
 #txtinout = "C:/Users/ruesca/Desktop/WRB/Scenarios/Default/TxtInOut"
-txtinout = "C:/Users/ruesca/Desktop/grass_mgt_files"
+txtinout = "C:/Users/ruesca/Desktop/mgt_files"
 db_prj = "C:/Users/ruesca/Desktop/WRB/WRB.mdb"
 temp_dir = tempdir()
 p = "CNOP"
@@ -86,24 +86,38 @@ adjust_cnop = function(
 		print("Grabbing defaults")
 		dflts = lapply(p.file.list,
 			FUN=function(x, opnum){
+				ln1 = strsplit(x[1], "\\s+|:")[[1]]
+				ln1 = ln1[ln1 != ""]
+				lu = ln1[11]
+#				print(lu)
+				if (lu == "WATR") {
+					adj = "no_adj"
+				} else {
+					adj = "adj"
+				}
 				indx = which(substr(x, 17, 18) == opnum)
 				vals = substr(x[indx], pstion[1], pstion[2])
-				return(vals)
+				return(list(vals=vals, adj=adj))
 			}, opnum=opnum
 		)
 		print("Applying scalar")
 		p.mat.list = lapply(dflts,
 			FUN=function(x){
-				x = as.numeric(x)
-				p.adj = x * (1 + scalar)
-				p.mat = t(p.adj)
+				if (x$adj == "adj") {
+					x = as.numeric(x$vals)
+					p.adj = x * (1 + scalar)
+					p.mat = t(p.adj)
+				} else {
+					p.mat = t(as.numeric(x$vals))
+				}
+				return(p.mat)
 			}
 		)
 		print("format output")
 		for (fl in 1:length(p.file.list)){
 			p.mat = p.mat.list[[fl]]
 			new.vals = p.mat
-			new.vals[new.vals>100] = 100
+			new.vals[new.vals > 95] = 95
 			new.vals = formatC(new.vals, digits=dgts, width=pstion[2]-pstion[1],format="f")
 			indices = which(substr(p.file.list[[fl]], 17, 18) == opnum)
 			for (indx in 1:length(indices)){
