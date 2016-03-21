@@ -2,6 +2,7 @@ library(dplyr)
 
 file_db = "C:/TEMP/WRB.Sufi2.SwatCup/wrb_swat_db.sqlite3"
 db_con = src_sqlite(file_db)
+df_cal = tbl(db_con, "calibration_data") %>% collect()
 
 pdf(
 	"T:/Projects/Wisconsin_River/Model_Outputs/plots/time_series/obs_sim_streamflow.pdf",
@@ -21,6 +22,7 @@ for (rch_i in rchs) {
 	rch_tbl = rchs_tbl %>%
 		filter(rch == rch_i)
 	print(rch_tbl$station_name[1])
+	rch_tbl = mutate(rch_tbl, flow_obs = as.numeric(flow_obs))
 	ylim = with(rch_tbl, range(c(flow_obs, flow_sim), na.rm=T))
 	ylim[1] = 0
 	plot(
@@ -30,14 +32,29 @@ for (rch_i in rchs) {
 		ylim=ylim,
 		main=rch_tbl$station_name[1],
 		ylab="Streamflow (cms)",
-		xlab="Month"
+		xlab="Month",
+		col="#377eb8"
 	)
-	lines(flow_obs ~ date, data=rch_tbl, col="blue")
+	lines(flow_obs ~ date, data=rch_tbl, col="#e41a1c")
+	if (rch_i %in% df_cal$rch) {
+		cal_yrs = df_cal %>%
+			filter(
+				rch == rch_i,
+				variable %in% c("RES_FLOW_OUT", "FLOW_OUT")) %>%
+			select(calibration_years)
+		rch_tbl[!(rch_tbl$yr %in% cal_yrs$calibration_years), "flow_obs"] = NA
+		lines(flow_obs ~ date, data=rch_tbl, col="#4daf4a")
+		legend_nms = c("observed (cal.)", "observed (val.)", "simulated")
+		legend_col = c("#4daf4a", "#e41a1c", "#377eb8")
+	} else {
+		legend_nms = c("observed (not used in calibration)", "simulated")
+		legend_col =c("#e41a1c", "#377eb8")
+	}
 	legend(
 		"topright",
-		legend=c("simulated", "observed"),
+		legend=legend_nms,
 		lwd=1,
-		col=c("black", "blue"))
+		col=legend_col)
 }
 dev.off()
 
@@ -72,14 +89,29 @@ for (rch_i in rchs) {
 		ylim=ylim,
 		main=rch_tbl$station_name[1],
 		ylab="Total Suspended Solids (metric tons)",
-		xlab="Month"
+		xlab="Month",
+		col="#377eb8"
 	)
-	lines(sed_obs ~ date, data=rch_tbl, col="blue")
+	lines(sed_obs ~ date, data=rch_tbl, col="#e41a1c")
+	if (rch_i %in% df_cal$rch) {
+		cal_yrs = df_cal %>%
+			filter(
+				rch == rch_i,
+				variable == "SED_OUT") %>%
+			select(calibration_years)
+		rch_tbl[!(rch_tbl$yr %in% cal_yrs$calibration_years), "sed_obs"] = NA
+		lines(sed_obs ~ date, data=rch_tbl, col="#4daf4a")
+		legend_nms = c("observed (cal.)", "observed (val.)", "simulated")
+		legend_col = c("#4daf4a", "#e41a1c", "#377eb8")
+	} else {
+		legend_nms = c("observed (not used in calibration)", "simulated")
+		legend_col =c("#e41a1c", "#377eb8")
+	}
 	legend(
 		"topright",
-		legend=c("simulated", "observed"),
+		legend=legend_nms,
 		lwd=1,
-		col=c("black", "blue"))
+		col=legend_col)
 }
 dev.off()
 
@@ -114,16 +146,32 @@ for (rch_i in rchs) {
 		ylim=ylim,
 		main=rch_tbl$station_name[1],
 		ylab="Total Phosphorus (kilograms)",
-		xlab="Month"
+		xlab="Month",
+		col="#377eb8"
 	)
-	lines(tp_obs ~ date, data=rch_tbl, col="blue")
+	lines(tp_obs ~ date, data=rch_tbl, col="#e41a1c")
+	if (rch_i %in% df_cal$rch) {
+		cal_yrs = df_cal %>%
+			filter(
+				rch == rch_i,
+				variable == "TOT_P") %>%
+			select(calibration_years)
+		rch_tbl[!(rch_tbl$yr %in% cal_yrs$calibration_years), "tp_obs"] = NA
+		lines(tp_obs ~ date, data=rch_tbl, col="#4daf4a")
+		legend_nms = c("observed (cal.)", "observed (val.)", "simulated")
+		legend_col = c("#4daf4a", "#e41a1c", "#377eb8")
+	} else {
+		legend_nms = c("observed (not used in calibration)", "simulated")
+		legend_col =c("#e41a1c", "#377eb8")
+	}
 	legend(
 		"topright",
-		legend=c("simulated", "observed"),
+		legend=legend_nms,
 		lwd=1,
-		col=c("black", "blue"))
+		col=legend_col)
 }
 dev.off()
+
 
 pdf(
 	"T:/Projects/Wisconsin_River/Model_Outputs/plots/time_series/obs_sim_tp_fwmc.pdf",
@@ -158,6 +206,48 @@ for (rch_i in rchs) {
 		xlab="Month"
 	)
 	lines(tp_fwmc_obs ~ date, data=rch_tbl, col="blue")
+	legend(
+		"topright",
+		legend=c("simulated", "observed"),
+		lwd=1,
+		col=c("black", "blue"))
+}
+dev.off()
+
+
+pdf(
+	"T:/Projects/Wisconsin_River/Model_Outputs/plots/time_series/obs_sim_dop.pdf",
+	width=8.5,
+	height=11
+)
+
+rchs_tbl = tbl(db_con, "observed_vs_simulated") %>%
+	select(rch, station_name, mon, yr, dop_sim, dop_obs) %>%
+	arrange(yr,mon) %>%
+	collect() %>%
+	mutate(
+		date = as.Date(paste(yr,mon,1,sep="-")),
+		dop_obs = as.numeric(dop_obs)
+	)
+rchs = unique(rchs_tbl$rch)
+
+par(mfrow=c(3,1))
+for (rch_i in rchs) {
+	rch_tbl = rchs_tbl %>%
+		filter(rch == rch_i)
+	print(rch_tbl$station_name[1])
+	ylim = with(rch_tbl, range(c(dop_obs, dop_sim), na.rm=T))
+	ylim[1] = 0
+	plot(
+		dop_sim ~ date,
+		rch_tbl,
+		type="l",
+		ylim=ylim,
+		main=rch_tbl$station_name[1],
+		ylab="Dissolve Orthophosphate (kilograms)",
+		xlab="Month"
+	)
+	lines(dop_obs ~ date, data=rch_tbl, col="blue")
 	legend(
 		"topright",
 		legend=c("simulated", "observed"),

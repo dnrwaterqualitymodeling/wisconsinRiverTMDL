@@ -130,6 +130,7 @@ d = d[
 		"NO3CONC","WTMP")
 ]
 con = src_sqlite(file_db)
-stdout = copy_to(con, d, "output_rch_monthly", temporary=F)
+stdout = copy_to(con, d, "output_rch_monthly", temporary=F,
+	indexes = list(c("RCH", "MON", "YR")))
 
 rm(con)

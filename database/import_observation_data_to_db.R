@@ -5,7 +5,6 @@ file_db = "C:/TEMP/WRB.Sufi2.SwatCup/wrb_swat_db.sqlite3"
 dir_obs = "T:/Projects/Wisconsin_River/GIS_Datasets/Water_Chemistry/USGS_pollutant_load_estimates/Final Daily Loads"
 file_wq_summ = "T:/Projects/Wisconsin_River/GIS_Datasets/Water_Chemistry/USGS_pollutant_load_estimates/Summary_All_4_30_15_clean.xls"
 
-db_con = src_sqlite(file_db)
 par_dirs = list.files(dir_obs)
 d = NULL
 for (par_dir in par_dirs) {
@@ -51,7 +50,9 @@ for (par_dir in par_dirs) {
 		d = rbind(d, d_stn)
 	}
 }
-par_tbl = copy_to(db_con, d, "load_estimates", temporary=FALSE)
+db_con = src_sqlite(file_db)
+par_tbl = copy_to(db_con, d, "load_estimates", temporary=FALSE,
+	indexes=list(c("station_id","parameter","mon","day","yr")))
 rm(db_con)
 
 
