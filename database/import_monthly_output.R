@@ -134,3 +134,45 @@ stdout = copy_to(con, d, "output_rch_monthly", temporary=F,
 	indexes = list(c("RCH", "MON", "YR")))
 
 rm(con)
+
+
+############   output.rsv
+
+colnames=c(
+	"RES","MON","VOLUME","FLOW_IN","FLOW_OUT","PRECIP","EVAP","SEEPAGE",
+	"SED_IN","SED_OUT","RES_SED","ORGN_IN","ORGN_OUT","RES_ORGN","ORGP_IN",
+	"ORGP_OUT","RES_ORGP","NO3_IN","NO3_OUT","RES_NO3","NO2_IN","NO2_OUT",
+	"RES_NO2","NH3_IN","NH3_OUT","RES_NH3","MINP_IN","MINP_OUT","RES_MINP",
+	"CHLA_IN","CHLA_OUT","SECCHIDEPTH","PEST_IN","REACTPST","VOLPST","SETTLPST",
+	"RESUSP_PST","DIFFUSEPST","REACBEDPST","BURYPST","PEST_OUT","PSTCNCW",
+	"PSTCNCB")
+colclasses=c("character","integer","integer",rep("numeric", 41))
+d = read.table(
+	"output.rsv",
+	skip=9,
+	colClasses=colclasses
+)
+d = d[,-1]
+names(d) = colnames
+d = d %>%
+	filter(MON <= 12)
+yrs = NULL
+for (y in 2002:2013) {
+	yrs = c(yrs, rep(y, dim(d)[1] / 12))
+}
+d = mutate(d, YR=yrs)
+d = d[
+	c(
+	"RES","MON","YR","VOLUME","FLOW_IN","FLOW_OUT","PRECIP","EVAP","SEEPAGE",
+	"SED_IN","SED_OUT","RES_SED","ORGN_IN","ORGN_OUT","RES_ORGN","ORGP_IN",
+	"ORGP_OUT","RES_ORGP","NO3_IN","NO3_OUT","RES_NO3","NO2_IN","NO2_OUT",
+	"RES_NO2","NH3_IN","NH3_OUT","RES_NH3","MINP_IN","MINP_OUT","RES_MINP",
+	"CHLA_IN","CHLA_OUT","SECCHIDEPTH","PEST_IN","REACTPST","VOLPST","SETTLPST",
+	"RESUSP_PST","DIFFUSEPST","REACBEDPST","BURYPST","PEST_OUT","PSTCNCW",
+	"PSTCNCB")
+]
+con = src_sqlite(file_db)
+stdout = copy_to(con, d, "output_rsv_monthly", temporary=F,
+	indexes = list(c("RES", "MON", "YR")))
+
+rm(con)

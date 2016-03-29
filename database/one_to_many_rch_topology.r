@@ -21,8 +21,8 @@ for (s in 1:337) {
 		if (st_l == end_l) { break }
 	}
 	out_rows = data.frame(
-		to = s,
-		from = sort(up)
+		to_rch = s,
+		from_rch = sort(up)
 	)
 	out = rbind(out, out_rows)
 }

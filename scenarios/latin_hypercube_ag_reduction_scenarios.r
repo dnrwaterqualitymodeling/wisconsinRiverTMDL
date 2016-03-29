@@ -33,10 +33,10 @@ for (fn in hru$fns) {
 }
 
 adjs = data.frame(
-	usle_p = c(-1,-0.5),
-	filterw = c(0.5, 1.5),
-	manure = c(-1,-0.5),
-	cnop = c(-0.5,0)
+	usle_p = c(0,-0.5),
+	filterw = c(0,0.5),
+	manure = c(-0.5,0),
+	cnop = c(-0.2,0)
 )
 lh = as.data.frame(optimumLHS(n=n_iter, k=length(adjs)))
 i = 0
@@ -56,6 +56,7 @@ results = parLapply(
 	lh,
 	function(lh) {
 		library(dplyr)
+		library(stringr)
 		source(file_funs)
 		td = tempdir()
 		file.copy(list.files(dir_swat, full.names=T), td)
@@ -64,6 +65,22 @@ results = parLapply(
 		dir.create("mgt_bkp")
 		file.copy(list.files(pattern="\\.mgt", full.names=T), "mgt_bkp")
 		output_scens = NULL
+		# remove point sources
+		files_ps = list.files(pattern="^[0-9]{1,3}p\\.dat")
+		files_ps = file.info(files_ps)
+		files_ps$fname = row.names(files_ps)
+		reccnst = files_ps %>%
+			filter(size < 1e3) %>%
+			slice(1)
+		reccnst = readLines(reccnst$fname)
+		files_ps = files_ps %>%
+			filter(size > 1e3)
+		for (file_ps in files_ps$fname) {
+			writeLines(reccnst, file_ps)
+		}
+		fig.fig = readLines("fig.fig")
+		fig.fig = str_replace(fig.fig, "recday        10", "reccnst       11")
+		writeLines(fig.fig, "fig.fig")
 		for (r in 1:nrow(lh)) {
 			print(r)
 			mgt_adj = adj_usle_p(mgt_list, lh[r, "usle_p"])
@@ -77,10 +94,11 @@ results = parLapply(
 			file.copy(list.files("mgt_bkp", full.names=T), ".", overwrite=T)
 			d = read_output.rch("output.rch")
 			con = src_sqlite("wrb_swat_db.sqlite3")
-			d = copy_to(con, d, "output_rch_monthly_ag_scen", temporary=FALSE,
+			d = copy_to(con, d, "output_rch_monthly_ag_scen",
 				indexes = list(c("RCH", "MON", "YR")))
 			
-			output_scen = tbl(con, "output_rch_monthly_ag_scen_no_point_src_ms4") %>%
+#			output_scen = tbl(con, "output_rch_monthly_ag_scen_no_point_src_ms4") %>%
+			output_scen = d %>%
 				left_join(tbl(con, "days_in_mo")) %>%
 				mutate(FLOW_VOL_L = FLOW_OUT * 8.64e7 * N_DAYS) %>%
 				group_by(RCH) %>%
