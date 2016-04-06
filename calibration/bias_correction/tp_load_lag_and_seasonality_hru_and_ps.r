@@ -20,16 +20,7 @@ lag = function (x, ovs, optim) {
 	ovs$tp_hru_urb_kg[1:7] = fill_vals$tp_mean
 	ovs$tp_adj = NA
 	for (i in 8:nrow(ovs)) {
-		ovs$tp_adj[i] = sum(
-			ovs$tp_hru_urb_kg[i] * exp(x[1] + x[2]*1),
-			ovs$tp_hru_urb_kg[i-1] * exp(x[1] + x[2]*2),
-			ovs$tp_hru_urb_kg[i-2] * exp(x[1] + x[2]*3),
-			ovs$tp_hru_urb_kg[i-3] * exp(x[1] + x[2]*4),
-			ovs$tp_hru_urb_kg[i-4] * exp(x[1] + x[2]*5),
-			ovs$tp_hru_urb_kg[i-5] * exp(x[1] + x[2]*6),
-			ovs$tp_hru_urb_kg[i-6] * exp(x[1] + x[2]*7),
-			ovs$tp_hru_urb_kg[i-7] * exp(x[1] + x[2]*8)
-		)
+		ovs$tp_adj[i] = sum(ovs$tp_hru_urb_kg[i:(i-7)] * exp(x[1] + x[2]*1:8))
 	}
 	ovs = ovs %>%
 		mutate(
@@ -67,8 +58,7 @@ adjust_rch = function(ovs_rch, priors) {
 	ovs_adj_rows = out_ovs_adj %>%
 		left_join(
 			ovs_rch %>%
-				select(rch, station_name, mon, yr, tp_obs),
-			by=c("rch", "mon", "yr")
+				select(rch, mon, yr)
 		) %>%
 		filter(!is.na(tp_hru_urb_kg), !is.na(tp_obs))
 	resid = cbind(
@@ -135,7 +125,7 @@ tp_hru_urb = tbl(db, "tp_hru_urb") %>%
 	mutate(tp_hru_kg_adj = as.numeric(NA)) %>%
 	arrange(sub, yr, mon)
 for (rch1 in rchs1) {
-	up_subs = tbl(db, "rch_topology") %>%
+	up_subs = tbl(db, "gage_topology") %>%
 		filter(to_rch == rch1) %>%
 		select(from_rch) %>%
 		collect()
@@ -159,64 +149,131 @@ for (rch1 in rchs1) {
 			)
 	}
 }
-
-# Deal with BEP by applying coefficients fitted at Stratford to all subbasins
-# that drain to the reservoir below Stratford (except for Fenwood and Freeman)
-
-subs_above_bep = unlist(tbl(db, "rch_topology") %>%
-	filter(to_rch == 87) %>%
-	select(from_rch) %>%
-	collect())
-for (up_sub in subs_above_bep) {
+################################################################################
+# Optimize at BEP and Spirit Reservoirs given upstream adjusted loads
+################################################################################
+tp_hru_urb$tp_rsv_kg_adj = as.numeric(NA)
+tp_hru_urb$use_rsv = as.logical(0)
+rchs2 = c(87, 111)
+for (rch_i in rchs2) {
+	ovs_rch = ovs %>%
+		filter(rch == rch_i) %>%
+		arrange(yr, mon)
 	adj_vals = tp_hru_urb %>%
-		filter(sub == up_sub) %>%
-		select(tp_hru_kg_adj)
-	if (any(!is.na(adj_vals))) { next }
-	print(up_sub)
-	tp_adj = lag(
-		coef,
-		filter(tp_hru_urb, sub==up_sub),
-		optim=F
-	)$tp_adj
+		left_join(
+			tbl(db, "rch_topology") %>% collect(),
+			c("sub"="from_rch")
+		) %>%
+		filter(to_rch == rch_i) %>%
+		group_by(yr, mon) %>%
+		summarise(tp_hru_urb_kg = sum(tp_hru_kg_adj, na.rm=T)) %>%
+		ungroup() %>%
+		select(tp_hru_urb_kg) 
+	ovs_rch = ovs_rch %>%
+		mutate(tp_hru_urb_kg = adj_vals[[1]])
+	ovs_rch$tp_hru_urb_kg[ovs_rch$tp_hru_urb_kg == 0] = 1
+	ovs_adj_rows = adjust_rch(ovs_rch, priors)	
+	adj_vals = ovs_adj_rows[[1]]$tp_adj
 	tp_hru_urb = tp_hru_urb %>%
 		mutate(
-			tp_hru_kg_adj = replace(
-				tp_hru_kg_adj,
-				sub == up_sub,
-				tp_adj
+			tp_rsv_kg_adj = replace(
+				tp_rsv_kg_adj,
+				sub == rch_i,
+				adj_vals
 			)
 		)
+	use_rsv_subs = tbl(db, "rch_topology") %>%
+		filter(to_rch == rch_i, to_rch != from_rch) %>%
+		select(from_rch) %>%
+		collect()
+	use_rsv_subs = use_rsv_subs[[1]]
+	tp_hru_urb = tp_hru_urb %>%
+		mutate(
+			use_rsv = replace(
+				use_rsv,
+				sub %in% use_rsv_subs,
+				1
+			)
+		)
+	ovs_adj = rbind(ovs_adj, ovs_adj_rows[[1]])
+	diagnostics = rbind(diagnostics, ovs_adj_rows[[2]])
+}
+################################################################################
+# Optimize at all other gage sites in order moving downstream
+################################################################################
+rchs3 = c(137,199,158,154,81,148,145,203,74,59,191,1)
+for (rch_i in rchs3) {
+	ovs_rch = ovs %>%
+		filter(rch == rch_i) %>%
+		arrange(yr, mon)
+	subtract_vals = tp_hru_urb %>%
+		left_join(
+			tbl(db, "rch_topology") %>% collect(),
+			c("sub"="from_rch")
+		) %>%
+		filter(
+			to_rch == rch_i,
+			!is.na(tp_hru_kg_adj),
+			!use_rsv==1
+		) %>%
+		mutate(
+			tp_hru_kg_adj = tp_hru_kg_adj * is.na(tp_rsv_kg_adj)
+		) %>%
+		group_by(yr, mon) %>%
+		summarise(tp_hru_urb_kg = sum(tp_hru_kg_adj, na.rm=T))
+	add_vals = tp_hru_urb %>%
+		left_join(
+			tbl(db, "rch_topology") %>% collect(),
+			c("sub"="from_rch")
+		) %>%
+		filter(
+			to_rch == rch_i,
+			is.na(tp_hru_kg_adj)
+		) %>%
+		group_by(yr, mon) %>%
+		summarise(tp_hru_urb_kg = sum(tp_hru_urb_kg, na.rm=T))
+	ovs_rch = ovs_rch %>%
+		mutate(
+			tp_obs = tp_obs - subtract_vals$tp_hru_urb_kg,
+			tp_hru_urb_kg = as.numeric(add_vals$tp_hru_urb_kg)
+	)
+	ovs_rch$tp_hru_urb_kg[ovs_rch$tp_hru_urb_kg <= 0] = 1
+	ovs_rch$tp_obs[ovs_rch$tp_obs <= 0] = 1
+	ovs_adj_rows = adjust_rch(ovs_rch, priors)
+	ovs_adj = rbind(ovs_adj, ovs_adj_rows[[1]])
+	diagnostics = rbind(diagnostics, ovs_adj_rows[[2]])
+	up_subs = tbl(db, "gage_topology") %>%
+		filter(to_rch == rch_i) %>%
+		select(from_rch) %>%
+		collect()
+	coef = unlist(ovs_adj_rows[[2]] %>%
+			filter(rch == rch_i) %>%
+			select(p1:p6))
+	for (up_sub in up_subs$from_rch) {
+		print(up_sub)
+		tp_adj = lag(
+			coef,
+			filter(tp_hru_urb, sub==up_sub),
+			optim=F
+		)$tp_adj
+		tp_hru_urb = tp_hru_urb %>%
+			mutate(
+				tp_hru_kg_adj = replace(
+					tp_hru_kg_adj,
+					sub == up_sub,
+					tp_adj
+				)
+			)
+	}
 }
 
-ovs_rch = ovs %>%
-	filter(rch == 87) %>%
-	left_join(
-		tp_hru_urb %>%
-			filter(sub %in% subs_above_bep) %>%
-			group_by(yr, mon) %>%
-			summarise(tp_hru_kg_adj = sum(tp_hru_kg_adj))
-	) %>%
-	arrange(yr, mon) %>%
-	mutate(tp_hru_urb_kg = tp_hru_kg_adj) %>%
-	select(rch, station_name, mon, yr, tp_obs, tp_hru_urb_kg)
-ovs_rch$tp_hru_urb_kg[ovs_rch$tp_hru_urb_kg == 0] = 1
-ovs_adj_rows = adjust_rch(ovs_rch, priors)
-
-
-ovs_adj = rbind(ovs_adj, ovs_adj_rows[[1]])
-diagnostics = rbind(diagnostics, ovs_adj_rows[[2]])
-
-
-
-
-
-
-
-
-
-
-
-
+library(rgdal)
+subs = readOGR("T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro", "subbasins")
+tbl_out = tp_hru_urb %>%
+	group_by(sub) %>%
+	summarise(tp_adj = sum(tp_hru_kg_adj) / 12)
+subs@data$tp_adj = tbl_out$tp_adj
+writeOGR(subs, "C:/TEMP", "tp_adj", "ESRI Shapefile")
 
 ovs_adj = copy_to(
 	db,
