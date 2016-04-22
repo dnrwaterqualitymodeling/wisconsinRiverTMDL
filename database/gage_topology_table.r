@@ -10,7 +10,8 @@ gage_tpl = tbl(db, "rch_topology") %>%
 	left_join(n_up)
 
 gages = tbl(db, sql("SELECT DISTINCT rch FROM observed_vs_simulated")) %>%
-	collect()
+	collect() %>%
+	filter(!(rch %in% c(138, 167)))
 
 gage_tpl = gage_tpl %>%
 	filter(to_rch %in% gages$rch)

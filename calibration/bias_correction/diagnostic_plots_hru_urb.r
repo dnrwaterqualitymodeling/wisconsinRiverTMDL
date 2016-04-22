@@ -4,7 +4,7 @@ db = src_sqlite("C:/TEMP/WRB.Sufi2.SwatCup/wrb_swat_db.sqlite3")
 #file_hydro = "T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro/hydro.shp"
 file_plots = "T:/Projects/Wisconsin_River/Model_Outputs/plots/bias_correction/diagnostics_plots_hru_urb.pdf"
 
-ovs_adj = tbl(db, "bias_corr_tp_observed_vs_simulated_hru_urb") %>%
+ovs_adj = tbl(db, "bias_corr_tp_observed_vs_simulated_sub") %>%
 	collect() %>%
 	mutate(date=as.Date(paste(yr,mon,"1",sep="-")))
 
@@ -13,16 +13,16 @@ for (rch_i in unique(ovs_adj$rch)) {
 	ovs_adj_rch = ovs_adj %>%
 		filter(rch == rch_i) %>%
 		arrange(yr, mon)
-	ovs_adj_rch$tp_hru_urb_kg[ovs_adj_rch$tp_hru_urb_kg == 0] = NA
+	ovs_adj_rch$tp_sub[ovs_adj_rch$tp_sub == 0] = NA
 		
 #	id = ovs_adj_rch$station_name[1]
 	id = ovs_adj_rch$station_name[!is.na(ovs_adj_rch$station_name)][1]
-	ylim = with(ovs_adj_rch, range(c(tp_hru_urb_kg, tp_adj, tp_obs), na.rm=T))
+	ylim = with(ovs_adj_rch, range(c(tp_sub, tp_adj, tp_obs), na.rm=T))
 	# Reporting
 	# temporal plots
 	layout(matrix(c(1,2), nrow=2, byrow=T))	
 	plot(
-		tp_hru_urb_kg ~ date,
+		tp_sub ~ date,
 		data=ovs_adj_rch,
 		type="n",
 		ylab="Total Phosphorus, kg",
@@ -33,7 +33,7 @@ for (rch_i in unique(ovs_adj$rch)) {
 	)
 	grid()
 	lines(
-		tp_hru_urb_kg ~ date,
+		tp_sub ~ date,
 		data=ovs_adj_rch,
 		type="o",
 		pch=15,
@@ -47,7 +47,7 @@ for (rch_i in unique(ovs_adj$rch)) {
 		pch=17
 	)
 	plot(
-		tp_hru_urb_kg ~ date,
+		tp_sub ~ date,
 		data=ovs_adj_rch,
 		type="n",
 		ylab="Total Phosphorus, kg",
@@ -73,10 +73,10 @@ for (rch_i in unique(ovs_adj$rch)) {
 	)
 	# scatterplots and QQ plots
 	ovs_adj_rch = ovs_adj_rch %>%
-		filter(!is.na(tp_hru_urb_kg), !is.na(tp_obs))
+		filter(!is.na(tp_sub), !is.na(tp_obs))
 	layout(matrix(1:4, nrow=2, byrow=T))
 	plot(
-		tp_hru_urb_kg ~ tp_obs,
+		tp_sub ~ tp_obs,
 		data=ovs_adj_rch,
 		type="n",
 		ylab="TP simulated, kg",
@@ -88,12 +88,12 @@ for (rch_i in unique(ovs_adj$rch)) {
 	)
 	grid()
 	points(
-		tp_hru_urb_kg ~ tp_obs,
+		tp_sub ~ tp_obs,
 		data=ovs_adj_rch
 	)
 	abline(0,1)
 	abline(
-		lm(log(tp_hru_urb_kg) ~ log(tp_obs), data=ovs_adj_rch),
+		lm(log(tp_sub) ~ log(tp_obs), data=ovs_adj_rch),
 		lty=2,
 		untf=T
 	)
@@ -123,7 +123,7 @@ for (rch_i in unique(ovs_adj$rch)) {
 	ovs_adj_rch = ovs_adj_rch %>%
 		mutate(			
 			obs_q = rank(tp_obs) / nrow(ovs_adj_rch),
-			sim_q = rank(tp_hru_urb_kg) / nrow(ovs_adj_rch),
+			sim_q = rank(tp_sub) / nrow(ovs_adj_rch),
 			adj_q = rank(tp_adj) / nrow(ovs_adj_rch)
 		)
 	plot(
@@ -142,7 +142,7 @@ for (rch_i in unique(ovs_adj$rch)) {
 		data=ovs_adj_rch
 	)	
 	points(
-		tp_hru_urb_kg ~ sim_q,
+		tp_sub ~ sim_q,
 		data=ovs_adj_rch,
 		pch=2
 	)

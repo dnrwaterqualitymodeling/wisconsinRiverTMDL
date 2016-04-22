@@ -2,9 +2,9 @@ library(dplyr)
 
 db = src_sqlite("C:/TEMP/WRB.Sufi2.SwatCup/wrb_swat_db.sqlite3")
 
-ovs = tbl(db, "tp_hru_urb_cumulative") %>%
+ovs = tbl(db, "tp_sub_cum") %>%
 	left_join(tbl(db, "tp_observed_minus_point_src_and_perm_ms4")) %>%
-	select(rch, station_name, mon, yr, tp_obs, tp_hru_urb_kg) %>%
+	select(rch, station_name, mon, yr, tp_obs, tp_sub) %>%
 	collect() %>%
 	mutate(tp_obs = as.numeric(tp_obs)) %>%
 	mutate(date=as.Date(paste(yr,mon,"1",sep="-")))
@@ -16,11 +16,11 @@ lag = function (x, ovs, optim) {
 	fill_vals = ovs %>%
 		filter(mon %in% 6:12) %>%
 		group_by(mon) %>%
-		summarise(tp_mean = mean(tp_hru_urb_kg))
-	ovs$tp_hru_urb_kg[1:7] = fill_vals$tp_mean
+		summarise(tp_mean = mean(tp_sub))
+	ovs$tp_sub[1:7] = fill_vals$tp_mean
 	ovs$tp_adj = NA
 	for (i in 8:nrow(ovs)) {
-		ovs$tp_adj[i] = sum(ovs$tp_hru_urb_kg[i:(i-7)] * exp(x[1] + x[2]*1:8))
+		ovs$tp_adj[i] = sum(ovs$tp_sub[i:(i-7)] * exp(x[1] + x[2]*1:8))
 	}
 	ovs = ovs %>%
 		mutate(
@@ -60,9 +60,9 @@ adjust_rch = function(ovs_rch, priors) {
 			ovs_rch %>%
 				select(rch, mon, yr)
 		) %>%
-		filter(!is.na(tp_hru_urb_kg), !is.na(tp_obs))
+		filter(!is.na(tp_sub), !is.na(tp_obs))
 	resid = cbind(
-		ovs_adj_rows$tp_hru_urb_kg - ovs_adj_rows$tp_obs,
+		ovs_adj_rows$tp_sub - ovs_adj_rows$tp_obs,
 		ovs_adj_rows$tp_adj - ovs_adj_rows$tp_obs
 	)
 	sse = c(sum(resid[,1]^2), sum(resid[,2]^2))
@@ -83,7 +83,7 @@ adjust_rch = function(ovs_rch, priors) {
 		pbias_adj=sum(resid[,2], na.rm=T) / sum(ovs_adj_rows$tp_obs),
 		r2=summary(
 			lm(
-				ovs_adj_rows$tp_hru_urb_kg ~ ovs_adj_rows$tp_obs,
+				ovs_adj_rows$tp_sub ~ ovs_adj_rows$tp_obs,
 				data=ovs_rch
 			)
 		)$r.squared,
@@ -103,7 +103,25 @@ adjust_rch = function(ovs_rch, priors) {
 rchs = unique(ovs[c("rch", "station_name")])
 rchs = rchs[!is.na(rchs$station_name),]
 
-rchs1 = c(78,140,141,142,149,150,151,152,155,157,159,162,184,195,268,326)
+rchs1 = c(
+#	78,
+	140,
+	141,
+	142,
+	149,
+	150,
+	151,
+	152,
+	155,
+	157,
+	158,
+	159,
+	162,
+	184,
+	195,
+	268,
+	326
+)
 
 priors = c(-0.4, -0.7, 1.0, 0.3, 11, 1)
 ovs_adj = NULL
@@ -112,7 +130,11 @@ for (rch_i in rchs1) {
 	ovs_rch = ovs %>%
 		filter(rch == rch_i) %>%
 		arrange(yr, mon)
-	ovs_rch$tp_hru_urb_kg[ovs_rch$tp_hru_urb_kg == 0] = 1
+	ovs_rch$tp_sub[ovs_rch$tp_sub == 0] = 1
+	neg_ratio = sum(ovs_rch$tp_obs < 0, na.rm=T) / sum(!is.na(ovs_rch$tp_obs))
+	print(neg_ratio)
+	if (neg_ratio > 0.1) {print(paste(rch_i, "skipping")); next} 
+	ovs_rch$tp_obs[ovs_rch$tp_obs <= 0] = NA
 	ovs_adj_rows = adjust_rch(ovs_rch, priors)
 	ovs_adj = rbind(ovs_adj, ovs_adj_rows[[1]])
 	diagnostics = rbind(diagnostics, ovs_adj_rows[[2]])
@@ -120,9 +142,9 @@ for (rch_i in rchs1) {
 ################################################################################
 # Adjust subbasin loads upstream of 1st order gage sites
 ################################################################################
-tp_hru_urb = tbl(db, "tp_hru_urb") %>%
+tp_sub = tbl(db, "tp_sub") %>%
 	collect() %>%
-	mutate(tp_hru_kg_adj = as.numeric(NA)) %>%
+	mutate(tp_sub_adj = as.numeric(NA)) %>%
 	arrange(sub, yr, mon)
 for (rch1 in rchs1) {
 	up_subs = tbl(db, "gage_topology") %>%
@@ -131,18 +153,29 @@ for (rch1 in rchs1) {
 		collect()
 	coef = unlist(diagnostics %>%
 		filter(rch == rch1) %>%
-		select(p1:p6))
+		select(p1:p6) %>%
+		collect())
 	for (up_sub in up_subs$from_rch) {
 		print(up_sub)
+		tp_up_sub = tp_sub %>%
+			filter(sub==up_sub) %>%
+			arrange(yr,mon) %>%
+			mutate(
+				tp_sub = replace(
+					tp_sub,
+					tp_sub == 0,
+					0.001
+				)
+			)
 		tp_adj = lag(
 			coef,
-			filter(tp_hru_urb, sub==up_sub),
+			tp_up_sub,
 			optim=F
 		)$tp_adj
-		tp_hru_urb = tp_hru_urb %>%
+		tp_sub = tp_sub %>%
 			mutate(
-				tp_hru_kg_adj = replace(
-					tp_hru_kg_adj,
+				tp_sub_adj = replace(
+					tp_sub_adj,
 					sub == up_sub,
 					tp_adj
 				)
@@ -152,32 +185,33 @@ for (rch1 in rchs1) {
 ################################################################################
 # Optimize at BEP and Spirit Reservoirs given upstream adjusted loads
 ################################################################################
-tp_hru_urb$tp_rsv_kg_adj = as.numeric(NA)
-tp_hru_urb$use_rsv = as.logical(0)
+tp_sub$tp_rsv_adj = as.numeric(NA)
+tp_sub$use_rsv = as.logical(0)
 rchs2 = c(87, 111)
 for (rch_i in rchs2) {
 	ovs_rch = ovs %>%
 		filter(rch == rch_i) %>%
 		arrange(yr, mon)
-	adj_vals = tp_hru_urb %>%
+	adj_vals = tp_sub %>%
 		left_join(
 			tbl(db, "rch_topology") %>% collect(),
 			c("sub"="from_rch")
 		) %>%
 		filter(to_rch == rch_i) %>%
 		group_by(yr, mon) %>%
-		summarise(tp_hru_urb_kg = sum(tp_hru_kg_adj, na.rm=T)) %>%
+		summarise(tp_sub = sum(tp_sub_adj, na.rm=T)) %>%
 		ungroup() %>%
-		select(tp_hru_urb_kg) 
+		arrange(yr,mon) %>%
+		select(tp_sub) 
 	ovs_rch = ovs_rch %>%
-		mutate(tp_hru_urb_kg = adj_vals[[1]])
-	ovs_rch$tp_hru_urb_kg[ovs_rch$tp_hru_urb_kg == 0] = 1
+		mutate(tp_sub = adj_vals[[1]])
+	ovs_rch$tp_sub[ovs_rch$tp_sub == 0] = 1
 	ovs_adj_rows = adjust_rch(ovs_rch, priors)	
 	adj_vals = ovs_adj_rows[[1]]$tp_adj
-	tp_hru_urb = tp_hru_urb %>%
+	tp_sub = tp_sub %>%
 		mutate(
-			tp_rsv_kg_adj = replace(
-				tp_rsv_kg_adj,
+			tp_rsv_adj = replace(
+				tp_rsv_adj,
 				sub == rch_i,
 				adj_vals
 			)
@@ -187,7 +221,7 @@ for (rch_i in rchs2) {
 		select(from_rch) %>%
 		collect()
 	use_rsv_subs = use_rsv_subs[[1]]
-	tp_hru_urb = tp_hru_urb %>%
+	tp_sub = tp_sub %>%
 		mutate(
 			use_rsv = replace(
 				use_rsv,
@@ -206,39 +240,42 @@ for (rch_i in rchs3) {
 	ovs_rch = ovs %>%
 		filter(rch == rch_i) %>%
 		arrange(yr, mon)
-	subtract_vals = tp_hru_urb %>%
+	subtract_vals = tp_sub %>%
 		left_join(
 			tbl(db, "rch_topology") %>% collect(),
 			c("sub"="from_rch")
 		) %>%
 		filter(
 			to_rch == rch_i,
-			!is.na(tp_hru_kg_adj),
+			!is.na(tp_sub_adj),
 			!use_rsv==1
-		) %>%
-		mutate(
-			tp_hru_kg_adj = tp_hru_kg_adj * is.na(tp_rsv_kg_adj)
-		) %>%
+		)
+	subtract_vals[!is.na(subtract_vals$tp_rsv_adj),"tp_sub_adj"] =
+		subtract_vals[!is.na(subtract_vals$tp_rsv_adj), "tp_rsv_adj"]
+	subtract_vals =	subtract_vals %>%
 		group_by(yr, mon) %>%
-		summarise(tp_hru_urb_kg = sum(tp_hru_kg_adj, na.rm=T))
-	add_vals = tp_hru_urb %>%
+		summarise(tp_sub = sum(tp_sub_adj, na.rm=T))
+	add_vals = tp_sub %>%
 		left_join(
 			tbl(db, "rch_topology") %>% collect(),
 			c("sub"="from_rch")
 		) %>%
 		filter(
 			to_rch == rch_i,
-			is.na(tp_hru_kg_adj)
+			is.na(tp_sub_adj)
 		) %>%
 		group_by(yr, mon) %>%
-		summarise(tp_hru_urb_kg = sum(tp_hru_urb_kg, na.rm=T))
+		summarise(tp_sub = sum(tp_sub, na.rm=T))
 	ovs_rch = ovs_rch %>%
 		mutate(
-			tp_obs = tp_obs - subtract_vals$tp_hru_urb_kg,
-			tp_hru_urb_kg = as.numeric(add_vals$tp_hru_urb_kg)
+			tp_obs = tp_obs - subtract_vals$tp_sub,
+			tp_sub = as.numeric(add_vals$tp_sub)
 	)
-	ovs_rch$tp_hru_urb_kg[ovs_rch$tp_hru_urb_kg <= 0] = 1
-	ovs_rch$tp_obs[ovs_rch$tp_obs <= 0] = 1
+	neg_ratio = sum(ovs_rch$tp_obs < 0, na.rm=T) / sum(!is.na(ovs_rch$tp_obs))
+	print(neg_ratio)
+	if (neg_ratio > 0.1) {print(paste(rch_i, "skipping")); next}
+	ovs_rch$tp_sub[ovs_rch$tp_sub <= 0] = 1
+	ovs_rch$tp_obs[ovs_rch$tp_obs <= 0] = NA
 	ovs_adj_rows = adjust_rch(ovs_rch, priors)
 	ovs_adj = rbind(ovs_adj, ovs_adj_rows[[1]])
 	diagnostics = rbind(diagnostics, ovs_adj_rows[[2]])
@@ -253,13 +290,13 @@ for (rch_i in rchs3) {
 		print(up_sub)
 		tp_adj = lag(
 			coef,
-			filter(tp_hru_urb, sub==up_sub),
+			filter(tp_sub, sub==up_sub),
 			optim=F
 		)$tp_adj
-		tp_hru_urb = tp_hru_urb %>%
+		tp_sub = tp_sub %>%
 			mutate(
-				tp_hru_kg_adj = replace(
-					tp_hru_kg_adj,
+				tp_sub_adj = replace(
+					tp_sub_adj,
 					sub == up_sub,
 					tp_adj
 				)
@@ -269,22 +306,22 @@ for (rch_i in rchs3) {
 
 library(rgdal)
 subs = readOGR("T:/Projects/Wisconsin_River/Model_Inputs/SWAT_Inputs/hydro", "subbasins")
-tbl_out = tp_hru_urb %>%
+tbl_out = tp_sub %>%
 	group_by(sub) %>%
-	summarise(tp_adj = sum(tp_hru_kg_adj) / 12)
+	summarise(tp_adj = sum(tp_sub_adj) / 12)
 subs@data$tp_adj = tbl_out$tp_adj
 writeOGR(subs, "C:/TEMP", "tp_adj", "ESRI Shapefile")
 
 ovs_adj = copy_to(
 	db,
 	ovs_adj,
-	"bias_corr_tp_observed_vs_simulated_hru_urb",
+	"bias_corr_tp_observed_vs_simulated_sub",
 	temporary=F
 )
 diagnostics = copy_to(
 	db,
 	diagnostics,
-	"bias_corr_tp_diagnostics_hru_urb",
+	"bias_corr_tp_diagnostics_sub",
 	temporary=F
 )
 

@@ -1,8 +1,10 @@
 library(dplyr)
 
 dir_output = "C:/TEMP/WRB.Sufi2.SwatCup/output_monthly"
-file_db = "C:/TEMP/WRB.Sufi2.SwatCup/wrb_swat_db.sqlite3"
+file_db = "C:/TEMP/WRB.Sufi2.SwatCup/wrb_swat_spatial_db.sqlite"
 setwd(dir_output)
+
+############# output.hru
 
 colnames=c("LULC","HRU","GIS","SUB","MGT","AREA","PRECIP","SNOFALL",
 	"SNOMELT","IRR","PET","ET","SW_INIT","SW_END","PERC","GW_RCHG",
