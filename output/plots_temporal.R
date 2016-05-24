@@ -1,13 +1,13 @@
 library(dplyr)
 
-file_db = "C:/TEMP/WRB.Sufi2.SwatCup/wrb_swat_db.sqlite3"
+file_db = "C:/TEMP/WRB.Sufi2.SwatCup/wrb_swat_spatial_db.sqlite"
 db_con = src_sqlite(file_db)
 df_cal = tbl(db_con, "calibration_data") %>% collect()
 
 pdf(
 	"T:/Projects/Wisconsin_River/Model_Outputs/plots/time_series/obs_sim_streamflow.pdf",
-	width=8.5,
-	height=11
+	width=6.5,
+	height=9
 )
 
 rchs_tbl = tbl(db_con, "observed_vs_simulated") %>%
@@ -28,14 +28,20 @@ for (rch_i in rchs) {
 	plot(
 		flow_sim ~ date,
 		rch_tbl,
-		type="l",
+		type="n",
 		ylim=ylim,
 		main=rch_tbl$station_name[1],
 		ylab="Streamflow (cms)",
-		xlab="Month",
+		xlab="Month"
+	)
+	grid()
+	lines(
+		flow_sim ~ date,
+		rch_tbl,
+		lwd=2,
 		col="#377eb8"
 	)
-	lines(flow_obs ~ date, data=rch_tbl, col="#e41a1c")
+	lines(flow_obs ~ date, data=rch_tbl, col="#e41a1c", lwd=2)
 	if (rch_i %in% df_cal$rch) {
 		cal_yrs = df_cal %>%
 			filter(
@@ -43,7 +49,7 @@ for (rch_i in rchs) {
 				variable %in% c("RES_FLOW_OUT", "FLOW_OUT")) %>%
 			select(calibration_years)
 		rch_tbl[!(rch_tbl$yr %in% cal_yrs$calibration_years), "flow_obs"] = NA
-		lines(flow_obs ~ date, data=rch_tbl, col="#4daf4a")
+		lines(flow_obs ~ date, data=rch_tbl, col="#4daf4a", lwd=2)
 		legend_nms = c("observed (cal.)", "observed (val.)", "simulated")
 		legend_col = c("#4daf4a", "#e41a1c", "#377eb8")
 	} else {
@@ -61,8 +67,8 @@ dev.off()
 
 pdf(
 	"T:/Projects/Wisconsin_River/Model_Outputs/plots/time_series/obs_sim_tss.pdf",
-	width=8.5,
-	height=11
+	width=6.5,
+	height=9
 )
 
 rchs_tbl = tbl(db_con, "observed_vs_simulated") %>%
@@ -85,14 +91,20 @@ for (rch_i in rchs) {
 	plot(
 		sed_sim ~ date,
 		rch_tbl,
-		type="l",
+		type="n",
 		ylim=ylim,
 		main=rch_tbl$station_name[1],
 		ylab="Total Suspended Solids (metric tons)",
-		xlab="Month",
+		xlab="Month"
+	)
+	grid()
+	lines(
+		sed_sim ~ date,
+		rch_tbl,
+		lwd=2,
 		col="#377eb8"
 	)
-	lines(sed_obs ~ date, data=rch_tbl, col="#e41a1c")
+	lines(sed_obs ~ date, data=rch_tbl, col="#e41a1c", lwd=2)
 	if (rch_i %in% df_cal$rch) {
 		cal_yrs = df_cal %>%
 			filter(
@@ -100,7 +112,7 @@ for (rch_i in rchs) {
 				variable == "SED_OUT") %>%
 			select(calibration_years)
 		rch_tbl[!(rch_tbl$yr %in% cal_yrs$calibration_years), "sed_obs"] = NA
-		lines(sed_obs ~ date, data=rch_tbl, col="#4daf4a")
+		lines(sed_obs ~ date, data=rch_tbl, col="#4daf4a", lwd=2)
 		legend_nms = c("observed (cal.)", "observed (val.)", "simulated")
 		legend_col = c("#4daf4a", "#e41a1c", "#377eb8")
 	} else {
@@ -118,8 +130,8 @@ dev.off()
 
 pdf(
 	"T:/Projects/Wisconsin_River/Model_Outputs/plots/time_series/obs_sim_tp.pdf",
-	width=8.5,
-	height=11
+	width=6.5,
+	height=9
 )
 
 rchs_tbl = tbl(db_con, "observed_vs_simulated") %>%
@@ -142,14 +154,18 @@ for (rch_i in rchs) {
 	plot(
 		tp_sim ~ date,
 		rch_tbl,
-		type="l",
+		type="n",
 		ylim=ylim,
 		main=rch_tbl$station_name[1],
 		ylab="Total Phosphorus (kilograms)",
-		xlab="Month",
-		col="#377eb8"
+		xlab="Month"
 	)
-	lines(tp_obs ~ date, data=rch_tbl, col="#e41a1c")
+	lines(
+		tp_sim ~ date,
+		rch_tbl,
+		lwd=2
+	)
+	lines(tp_obs ~ date, data=rch_tbl, col="#e41a1c", lwd=2)
 	if (rch_i %in% df_cal$rch) {
 		cal_yrs = df_cal %>%
 			filter(
@@ -157,7 +173,7 @@ for (rch_i in rchs) {
 				variable == "TOT_P") %>%
 			select(calibration_years)
 		rch_tbl[!(rch_tbl$yr %in% cal_yrs$calibration_years), "tp_obs"] = NA
-		lines(tp_obs ~ date, data=rch_tbl, col="#4daf4a")
+		lines(tp_obs ~ date, data=rch_tbl, col="#4daf4a", lwd=2)
 		legend_nms = c("observed (cal.)", "observed (val.)", "simulated")
 		legend_col = c("#4daf4a", "#e41a1c", "#377eb8")
 	} else {
@@ -175,8 +191,8 @@ dev.off()
 
 pdf(
 	"T:/Projects/Wisconsin_River/Model_Outputs/plots/time_series/obs_sim_tp_fwmc.pdf",
-	width=8.5,
-	height=11
+	width=6.5,
+	height=9
 )
 
 rchs_tbl = tbl(db_con, "observed_vs_simulated") %>%
@@ -199,13 +215,19 @@ for (rch_i in rchs) {
 	plot(
 		tp_fwmc_sim ~ date,
 		rch_tbl,
-		type="l",
+		type="n",
 		ylim=ylim,
 		main=rch_tbl$station_name[1],
 		ylab="TP Flow-Weighted Mean Concentration (ug/L)",
 		xlab="Month"
 	)
-	lines(tp_fwmc_obs ~ date, data=rch_tbl, col="blue")
+	grid()
+	lines(
+		tp_fwmc_sim ~ date,
+		rch_tbl,
+		lwd=2
+	)
+	lines(tp_fwmc_obs ~ date, data=rch_tbl, col="blue", lwd=2)
 	legend(
 		"topright",
 		legend=c("simulated", "observed"),
@@ -217,8 +239,8 @@ dev.off()
 
 pdf(
 	"T:/Projects/Wisconsin_River/Model_Outputs/plots/time_series/obs_sim_dop.pdf",
-	width=8.5,
-	height=11
+	width=6.5,
+	height=9
 )
 
 rchs_tbl = tbl(db_con, "observed_vs_simulated") %>%
@@ -241,13 +263,19 @@ for (rch_i in rchs) {
 	plot(
 		dop_sim ~ date,
 		rch_tbl,
-		type="l",
+		type="n",
 		ylim=ylim,
 		main=rch_tbl$station_name[1],
 		ylab="Dissolve Orthophosphate (kilograms)",
 		xlab="Month"
 	)
-	lines(dop_obs ~ date, data=rch_tbl, col="blue")
+	grid()
+	lines(
+		dop_sim ~ date,
+		rch_tbl,
+		lwd=2
+	)
+	lines(dop_obs ~ date, data=rch_tbl, col="blue", lwd=2)
 	legend(
 		"topright",
 		legend=c("simulated", "observed"),
