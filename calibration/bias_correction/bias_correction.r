@@ -85,7 +85,7 @@ adjust_rch = function(
 		season=F
 	} else if (var == "sed") {
 		lag=T
-		season=F
+		season=T
 	} else if (var == "tp") {
 		lag=T
 		season=T
@@ -167,8 +167,8 @@ rchs1 = c(
 	155,
 	157,
 	158,
-	159,
-	162,
+#	159,
+#	162,
 #	184,
 	195,
 	268,
@@ -181,7 +181,7 @@ var_l = list(
 		priors=c(-0.4, -0.7)),
 	sed=list(
 		fields=c("sed_obs", "sed"),
-		priors=c(-0.4, -0.7)),
+		priors=c(-0.4, -0.7, 1.0, 0.3, 11, 1)),
 	tp=list(
 		fields=c("tp_obs", "tp"),
 		priors=c(-0.4, -0.7, 1.0, 0.3, 11, 1))
@@ -450,27 +450,22 @@ out = copy_to(db, out_df, "bias_corr_hru", temporary=F)
 
 ## Correct non-permitted MS4
 
-urb = collect(tbl(db, "urban_monthly")) # %>%
-#	select(HRU, SUB, MON, YR, WYLD, SYLD, ORGP, SEDP, SOLP, P_GW) %>%
-#	mutate(TP = ORGP + SEDP + SOLP + P_GW) %>%
-#	select(HRU, SUB, MON, YR, WYLD, SYLD, TP) %>%
-#	rename(hru=HRU,sub=SUB,mon=MON,yr=YR,flow=WYLD,sed=SYLD,tp=TP) %>%
-#	collect()
+urb = collect(tbl(db, "non_perm_urb")) # %>%
 routing_coefficients = collect(tbl(db, "routing_coefficients"))
 gage_association = collect(tbl(db, "gage_association"))
 
 d = urb %>%
 	union(
 		urb %>%
-			group_by(muni, rch, mo) %>%
+			group_by(rch, mo) %>%
 			summarize(
 				yr = as.integer(start_yr - 1),
 				flow = mean(flow),
 				sed = mean(sed),
 				tp = mean(tp)
 			) %>%
-			select(muni, rch, mo, yr, flow, sed, tp) %>%
-			arrange(muni, yr, mo)
+			select(rch, mo, yr, flow, sed, tp) %>%
+			arrange(yr, mo)
 	) %>%
 	left_join(
 		gage_association,
@@ -486,7 +481,6 @@ d = urb %>%
 		p2_flow = p2
 	) %>%
 	select(
-		muni,
 		rch,
 		gageid_man,
 		mo,
@@ -506,7 +500,6 @@ d = urb %>%
 		p2_sed = p2
 	) %>%
 	select(
-		muni,
 		rch,
 		gageid_man,
 		mo,
@@ -532,7 +525,6 @@ d = urb %>%
 		p6_tp = p6
 	) %>%
 	select(
-		muni,
 		rch,
 		mo,
 		yr,
@@ -550,11 +542,10 @@ d = urb %>%
 		p5_tp,
 		p6_tp
 	) %>%
-	arrange(muni,rch,yr,mo)
+	arrange(rch,yr,mo)
 
 d = d %>%
-	mutate(hru = paste(muni, rch, sep=".")) %>%
-	rename(mon=mo, sub=rch)
+	rename(mon=mo)
 
 routing_coefficients = collect(tbl(db, "routing_coefficients"))
 gage_association = collect(tbl(db, "gage_association"))
@@ -572,21 +563,21 @@ clusterExport(
 )
 out = parLapply(
 	cl,
-	unique(d$hru),
-	function (x, hru, var_l, gage_association, routing_coefficients) {
+	unique(d$rch),
+	function (x, d, var_l, gage_association, routing_coefficients) {
 		library(dplyr)
 		print(x)
-		d_hru = hru %>%
-			filter(hru == x) %>%
+		d_rch = d %>%
+			filter(rch == x) %>%
 			mutate(obs = NA)
-		sub = d_hru$sub[1]
+		sub = d_rch$rch[1]
 		gage = gage_association %>%
-			filter(Subbasin == d_hru$sub[1]) %>%
+			filter(Subbasin == sub) %>%
 			select(gageid_man)
 		out_adj = data.frame()
 		for (v in names(var_l)) {
-			d_hru_v = d_hru[c("hru", "mon", "yr", "obs", v)]
-			names(d_hru_v)[c(1,5)] = c("rch", "sim")
+			d_rch_v = d_rch[c("rch", "mon", "yr", "obs", v)]
+			names(d_rch_v)[5] = "sim"
 			priors = routing_coefficients %>%
 				filter(variable == v, rch == gage[[1]]) %>%
 				select(p1:p6)
@@ -595,28 +586,27 @@ out = parLapply(
 				season=F
 			} else if (v == "sed") {
 				lag=T
-				season=F
+				season=T
 			} else if (v == "tp") {
 				lag=T
 				season=T
 			}
 			out_v = routing_adjust(
 				as.matrix(priors)[1,],
-				d_hru_v,
+				d_rch_v,
 				optim=F,
 				lag=lag,
 				season=season,
 				start_yr=start_yr
 			)
 			out_v = out_v %>%
-				mutate(sub=sub, variable = v, yr = as.integer(yr)) %>%
-				select(rch, sub, variable, mon, yr, adj) %>%
-				rename(hru = rch)
+				mutate(variable = v, yr = as.integer(yr)) %>%
+				select(rch, variable, mon, yr, adj)
 			out_adj = rbind(out_adj, out_v)
 		}
 		return(out_adj)
 	},
-	hru=d,
+	d=d,
 	var_l=var_l,
 	gage_association=gage_association,
 	routing_coefficients=routing_coefficients
@@ -626,15 +616,13 @@ stopCluster(cl)
 out_df = ldply(out, data.frame)
 out_df = spread(out_df, variable, adj)
 out_df = out_df %>%
-	mutate(muni=str_extract(hru, "^[a-zA-Z]+")) %>%
-	select(muni, sub, mon, yr, flow, sed, tp) %>%
-	group_by(sub, mon, yr) %>%
+	select(rch, mon, yr, flow, sed, tp) %>%
+	group_by(rch, mon, yr) %>%
 	summarize(
 		flow = sum(flow, na.rm=T),
 		sed = sum(sed, na.rm=T),
 		tp = sum(tp, na.rm=T)
-	) %>%
-	rename(rch=sub)
+	)
 
 out = copy_to(db, out_df, "bias_corr_urb", temporary=F)
 
