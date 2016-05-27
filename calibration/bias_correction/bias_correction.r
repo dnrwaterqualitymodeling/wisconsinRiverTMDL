@@ -413,7 +413,7 @@ out = parLapply(
 				season=F
 			} else if (v == "sed") {
 				lag=T
-				season=F
+				season=T
 			} else if (v == "tp") {
 				lag=T
 				season=T

@@ -1,7 +1,8 @@
 library(dplyr)
+library(tidyr)
 
 db = src_sqlite("~/Documents/tmdl_db/wrb_swat_spatial_db.sqlite")
-dir_plots = "T:/Projects/Wisconsin_River/Model_Outputs/plots/bias_correction"
+dir_plots = "T:/Projects/Wisconsin_River/Model_Outputs/plots/bias_correction/external_draft"
 
 ovs_adj = tbl(db, "bias_corr_observed_vs_simulated") %>%
 	rename(flow_adj=flow_sim, sed_adj=sed_sim, tp_adj=tp_sim) %>%
@@ -24,7 +25,8 @@ ovs_adj = tbl(db, "bias_corr_observed_vs_simulated") %>%
 		obs = as.numeric(obs),
 		sim = as.numeric(sim),
 		adj = as.numeric(adj)
-	)
+	) %>%
+	filter(rch %in% c(137,140:142,149:152,155,157,158,195,268,326))
 
 labs = list(
 	flow = list(
@@ -84,6 +86,13 @@ for (v in c("flow", "sed", "tp")) {
 			pch=17,
 			col="#4daf4a"
 		)
+		legend(
+			"topleft",
+			c("LOADEST", "Bias-corr. SWAT"),
+			col=c("#4daf4a", "#377eb8"),
+			lty=c(2,1),
+			pch=c(17,15)
+		)
 		plot(
 			sim ~ date,
 			data=ovs_adj_rch,
@@ -110,6 +119,13 @@ for (v in c("flow", "sed", "tp")) {
 			pch=17,
 			col="#4daf4a"
 		)
+		legend(
+			"topleft",
+			c("LOADEST", "Bias-corr. SWAT"),
+			col=c("#4daf4a", "#377eb8"),
+			lty=c(2,1),
+			pch=c(17,15)
+		)
 		# scatterplots and QQ plots
 		ovs_adj_rch = ovs_adj_rch %>%
 			filter(!is.na(sim), !is.na(obs))
@@ -117,6 +133,10 @@ for (v in c("flow", "sed", "tp")) {
 		layout(matrix(1:4, nrow=2, byrow=T))
 		ylab = paste(labs[[v]]$name, " simulated, ", labs[[v]]$units, sep="")
 		xlab = paste(labs[[v]]$name, " observed, ", labs[[v]]$units, sep="")
+		ylim = with(
+			filter(ovs_adj_rch, !is.na(obs)),
+			range(c(sim, adj, obs), na.rm=T)
+		)
 		plot(
 			sim ~ obs,
 			data=ovs_adj_rch,
@@ -134,11 +154,14 @@ for (v in c("flow", "sed", "tp")) {
 			data=ovs_adj_rch
 		)
 		abline(0,1)
-		abline(
-			lm(log(sim) ~ log(obs), data=ovs_adj_rch),
-			lty=2,
-			untf=T
-		)
+		fit = lm(log(sim) ~ log(obs), data=ovs_adj_rch)
+		x = with(ovs_adj_rch, seq(
+			min(obs),
+			max(obs),
+			length.out=nrow(ovs_adj_rch)
+		))
+		y = exp(predict(fit, newdata=data.frame(obs=x)))
+		lines(y ~ x, col="blue")
 		plot(
 			adj ~ obs,
 			data=ovs_adj_rch,
@@ -156,11 +179,14 @@ for (v in c("flow", "sed", "tp")) {
 			data=ovs_adj_rch
 		)
 		abline(0,1)
-		abline(
-			lm(log(adj) ~ log(obs), data=ovs_adj_rch),
-			lty=2,
-			untf=T
-		)
+		fit = lm(log(adj) ~ log(obs), data=ovs_adj_rch)
+		x = with(ovs_adj_rch, seq(
+				min(obs),
+				max(obs),
+				length.out=nrow(ovs_adj_rch)
+			))
+		y = exp(predict(fit, newdata=data.frame(obs=x)))
+		lines(y ~ x, col="blue")
 		# QQ plots
 		ylab = paste(labs[[v]]$name, labs[[v]]$units, sep=", ")
 		ovs_adj_rch = ovs_adj_rch %>%
@@ -183,14 +209,20 @@ for (v in c("flow", "sed", "tp")) {
 		points(
 			obs ~ obs_q,
 			data=ovs_adj_rch,
-			pch=21,
-			bg="#4daf4a"
+			pch=17,
+			col="#4daf4a"
 		)	
 		points(
 			sim ~ sim_q,
 			data=ovs_adj_rch,
-			pch=24,
-			bg="#377eb8"
+			pch=15,
+			col="#377eb8"
+		)
+		legend(
+			"topleft",
+			c("LOADEST", "Bias-corr. SWAT"),
+			col=c("#4daf4a", "#377eb8"),
+			pch=c(17,15)
 		)
 		plot(
 			obs ~ obs_q,
@@ -206,14 +238,20 @@ for (v in c("flow", "sed", "tp")) {
 		points(
 			obs ~ obs_q,
 			data=ovs_adj_rch,
-			pch=21,
-			bg="#4daf4a"
+			pch=17,
+			col="#4daf4a"
 		)	
 		points(
 			adj ~ adj_q,
 			data=ovs_adj_rch,
-			pch=24,
-			bg="#377eb8"
+			pch=15,
+			col="#377eb8"
+		)
+		legend(
+			"topleft",
+			c("LOADEST", "Bias-corr. SWAT"),
+			col=c("#4daf4a", "#377eb8"),
+			pch=c(17,15)
 		)
 	#	{next}
 		o_par = tbl(db, "routing_coefficients") %>%
@@ -225,11 +263,27 @@ for (v in c("flow", "sed", "tp")) {
 		layout(matrix(c(1,2,0,0), nrow=2, byrow=T))
 		x = 1:8
 		lag_fact = exp(o_par$p1 + o_par$p2*x)
-		plot(x,lag_fact,type="l",ylab="Lag factor",xlab="Months Prior")
+		plot(
+			x,
+			lag_fact,
+			type="l",
+			ylab="Lag factor",
+			xlab="Months Prior",
+			main="Shape of lag function"
+		)
 		x = 1:12
 		seas_fact = o_par$p3 + o_par$p4 * sin(((2*pi)/o_par$p5)*x + o_par$p6)
 		if (all(is.na(seas_fact))) {next}
-		plot(x,seas_fact,type="l",ylab="Season factor",xlab="Month",ylim=c(0,max(seas_fact)), xlim=c(1,12))
+		plot(
+			x,
+			seas_fact,
+			type="l",
+			ylab="Season factor",
+			xlab="Month",
+			ylim=c(0,max(seas_fact)),
+			xlim=c(1,12),
+			main="Shape of seasonality function"
+		)
 		o_par = NULL
 	}
 	dev.off()
