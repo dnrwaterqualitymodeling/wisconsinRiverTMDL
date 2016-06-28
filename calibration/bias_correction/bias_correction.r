@@ -4,7 +4,7 @@ library(tidyr)
 library(stringr)
 library(parallel)
 
-db = src_sqlite("C:/Users/ruesca/Documents/tmdl_db/wrb_swat_spatial_db.sqlite")
+db = src_sqlite("C:/Users/ruesca/Documents/WRB.Sufi2.SwatCup/wrb_swat_spatial_db.sqlite")
 n_cores = 8
 start_yr = 2002
 
@@ -232,30 +232,30 @@ for (i in 1:length(out)) {
 	ovs_adj = rbind(ovs_adj, out[[i]]$ovs_adj)
 	diagnostics = rbind(diagnostics, out[[i]]$diagnostics)
 }
-
-ave_pars = diagnostics %>%
-	group_by(variable) %>%
-	summarize(
-		p1 = mean(p1),
-		p2 = mean(p2),
-		p3 = mean(p3),
-		p4 = mean(p4),
-		p5 = mean(p5),
-		p6 = mean(p6)) %>%
-	mutate(
-		rch=as.integer(0),
-		station_name = "Basin",
-		sample_size = NA,
-		df = NA,
-		rmse = NA,
-		rmse_adj = NA,
-		pbias = NA,
-		pbias_adj = NA,
-		r2 = NA,
-		r2_adj = NA
-	) %>%
-	select(rch, station_name, variable, sample_size, df, p1:p6, rmse:r2_adj)
-diagnostics = rbind(diagnostics, ave_pars)	
+#
+#ave_pars = diagnostics %>%
+#	group_by(variable) %>%
+#	summarize(
+#		p1 = mean(p1),
+#		p2 = mean(p2),
+#		p3 = mean(p3),
+#		p4 = mean(p4),
+#		p5 = mean(p5),
+#		p6 = mean(p6)) %>%
+#	mutate(
+#		rch=as.integer(0),
+#		station_name = "Basin",
+#		sample_size = NA,
+#		df = NA,
+#		rmse = NA,
+#		rmse_adj = NA,
+#		pbias = NA,
+#		pbias_adj = NA,
+#		r2 = NA,
+#		r2_adj = NA
+#	) %>%
+#	select(rch, station_name, variable, sample_size, df, p1:p6, rmse:r2_adj)
+#diagnostics = rbind(diagnostics, ave_pars)	
 
 copy_to(db, diagnostics, "routing_coefficients", temporary=F)
 
@@ -404,10 +404,17 @@ out = parLapply(
 		out_adj = data.frame()
 		for (v in names(var_l)) {
 			d_hru_v = d_hru[c("hru", "mon", "yr", "obs", v)]
-			names(d_hru_v)[c(1,5)] = c("rch", "sim")
 			priors = routing_coefficients %>%
 				filter(variable == v, rch == gage[[1]]) %>%
 				select(p1:p6)
+			if (nrow(priors) == 0) {
+				names(d_hru_v)[5] = 'adj'
+				out_v = d_hru_v %>%
+					mutate(sub = sub, variable = v) %>%
+					select(hru, sub, variable, mon, yr, adj)
+				out_adj = rbind(out_adj, out_v)
+				next
+			}
 			if (v == "flow") {
 				lag=T
 				season=F
@@ -418,6 +425,7 @@ out = parLapply(
 				lag=T
 				season=T
 			}
+			names(d_hru_v)[c(1,5)] = c("rch", "sim")
 			out_v = routing_adjust(
 				as.matrix(priors)[1,],
 				d_hru_v,
@@ -577,10 +585,17 @@ out = parLapply(
 		out_adj = data.frame()
 		for (v in names(var_l)) {
 			d_rch_v = d_rch[c("rch", "mon", "yr", "obs", v)]
-			names(d_rch_v)[5] = "sim"
 			priors = routing_coefficients %>%
 				filter(variable == v, rch == gage[[1]]) %>%
 				select(p1:p6)
+			if (nrow(priors) == 0) {
+				names(d_rch_v)[5] = 'adj'
+				out_v = d_rch_v %>%
+					mutate(rch = sub, variable = v) %>%
+					select(rch, variable, mon, yr, adj)
+				out_adj = rbind(out_adj, out_v)
+				next
+			}
 			if (v == "flow") {
 				lag=T
 				season=F
@@ -591,6 +606,7 @@ out = parLapply(
 				lag=T
 				season=T
 			}
+			names(d_rch_v)[5] = "sim"
 			out_v = routing_adjust(
 				as.matrix(priors)[1,],
 				d_rch_v,

@@ -5,7 +5,16 @@ library(RODBC)
 
 db = src_sqlite("C:/Users/ruesca/Documents/tmdl_db/wrb_swat_spatial_db.sqlite")
 
-bc = collect(tbl(db, "bias_corr_observed_vs_simulated")) %>%
+bc = collect(
+		tbl(db, "bias_corr_cum") %>%
+		select(-sed) %>%
+		rename(flow_sim = flow, tp_sim = tp)
+	) %>%
+	left_join(
+		collect(
+			tbl(db, "bias_corr_observed_vs_simulated")) %>%
+			select(rch, station_name, mon, yr, tp_obs)
+	) %>%
 	left_join(collect(tbl(db, "days_in_mo")), by = c("mon"="MON", "yr"="YR")) %>%
 	mutate(
 		date = as.Date(paste(yr, mon, "1", sep="-")),
@@ -231,6 +240,8 @@ bc_res = bc %>%
 	rename(sim=tp_sim, obs=tp_obs) %>%
 	select(rch, station_name, mon, yr, sim, obs)
 
+rchs = unlist(lapply(lks, function(x) {x$rch_id}))
+
 priors=c(-0.4, -0.7, 1.0, 0.3, 11, 1)
 diagnostics = NULL
 ovs_adj = NULL
@@ -297,12 +308,13 @@ for (lk in lks) {
 	diagnostics = rbind(diagnostics, diagnostics_row)
 }
 
-copy_to(db, ovs_adj, "bias_corr_reservoir_observed_vs_simulated", temporary=F)
+#copy_to(db, ovs_adj, "bias_corr_reservoir_observed_vs_simulated", temporary=F)
 copy_to(db, diagnostics, "routing_coefficients_reservoir", temporary=F)
 
 bc$tp_rd = bc_res$sim
-
-rchs = unlist(lapply(lks, function(x) {x$rch_id}))
+bc_db = bc %>%
+	select(rch, mon, yr, tp_cb1, tp_cb2, tp_vol, tp_rd)
+copy_to(db, bc_db, "bias_corr_reservoir", temporary=F)
 
 pdf("test.pdf", width = 11, height = 8.5)
 for (rch_i in rchs) {

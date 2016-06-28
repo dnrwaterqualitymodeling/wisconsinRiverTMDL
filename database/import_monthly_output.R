@@ -1,7 +1,7 @@
 library(dplyr)
 
-dir_output = "C:/TEMP/WRB.Sufi2.SwatCup/output_monthly"
-file_db = "C:/TEMP/WRB.Sufi2.SwatCup/wrb_swat_spatial_db.sqlite"
+dir_output = "C:/Users/ruesca/Documents/WRB.Sufi2.SwatCup/output_monthly"
+file_db = "C:/Users/ruesca/Documents/WRB.Sufi2.SwatCup/wrb_swat_spatial_db.sqlite"
 setwd(dir_output)
 
 ############# output.hru
