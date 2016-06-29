@@ -1,7 +1,7 @@
 library(dplyr)
 library(tidyr)
 
-db = src_sqlite("~/Documents/WRB.Sufi2.SwatCup/wrb_swat_spatial_db.sqlite")
+db = src_sqlite("~/Documents/tmdl_db/wrb_swat_spatial_db_SE_till_plains.sqlite")
 
 ovs = tbl(db, "bias_corr_observed_vs_simulated") %>%
 	select(rch, station_name, mon, yr, flow_sim, flow_obs, sed_sim, sed_obs, tp_sim, tp_obs) %>%
