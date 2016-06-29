@@ -4,7 +4,7 @@ library(tidyr)
 library(stringr)
 library(parallel)
 
-db = src_sqlite("C:/Users/ruesca/Documents/WRB.Sufi2.SwatCup/wrb_swat_spatial_db.sqlite")
+db = src_sqlite("C:/Users/ruesca/Documents/tmdl_db/wrb_swat_spatial_db_SE_till_plains.sqlite")
 n_cores = 8
 start_yr = 2002
 
